@@ -18,6 +18,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tasks', function () {
         return Inertia::render('task/index');
     })->name('tasks');
+
+    Route::get('mytasks', function () {
+        return Inertia::render('mytask/index');
+    })->name('mytasks');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

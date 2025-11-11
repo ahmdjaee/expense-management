@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\TaskController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -15,15 +16,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('tasks', function () {
-        return Inertia::render('task/index');
-    })->name('tasks');
-
-    Route::get('tasks/create', function () {
-        return Inertia::render('task/create');
-    })->name('tasks.create');
-
-    // My Tasks Routes
+    Route::get('tasks' , [TaskController::class, 'index'])->name('tasks');
+    Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
+    Route::post('tasks/store', [TaskController::class, 'store'])->name('task.store');
+  
     Route::get('mytasks', function () {
         return Inertia::render('mytask/index');
     })->name('mytasks');

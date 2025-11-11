@@ -22,6 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tasks/create', function () {
         return Inertia::render('task/create');
     })->name('tasks.create');
+  
+    Route::get('mytasks', function () {
+        return Inertia::render('mytask/index');
+    })->name('mytasks');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

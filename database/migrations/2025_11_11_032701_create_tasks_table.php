@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('status', ['todo', 'in_progress', 'review', 'done'])->default('todo');
+            $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
             $table->date('deadline')->nullable();
             $table->dateTime('completed_at')->nullable();

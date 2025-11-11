@@ -23,7 +23,7 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Tasks',
+        title: 'All Tasks',
         href: tasks(),
         icon: LayoutGrid,
     },

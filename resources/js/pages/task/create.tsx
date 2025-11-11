@@ -154,11 +154,11 @@ export default function TaskForm({ users, divisions }: TaskFormProps) {
                                         <Input
                                             id="dueDate"
                                             type="date"
-                                            name="due_date"
+                                            name="deadline"
                                             required
                                             className="border-muted bg-muted/50"
                                         />
-                                        <InputError message={errors.due_date} />
+                                        <InputError message={errors.deadline} />
                                     </div>
                                 </div>
 
@@ -167,7 +167,7 @@ export default function TaskForm({ users, divisions }: TaskFormProps) {
                                     <Label htmlFor="status" className="font-medium text-foreground">
                                         Initial Status
                                     </Label>
-                                    <Select name="status" defaultValue='pending'>
+                                    <Select name="status" defaultValue="pending">
                                         <SelectTrigger id="status" className="border-muted bg-muted/50">
                                             <SelectValue />
                                         </SelectTrigger>

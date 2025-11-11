@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function TaskManagementDashboard() {
+export default function TaskManagementDashboard({tasks}: {tasks: any[]}) {
     const [selectedDivision, setSelectedDivision] = useState<string>('all');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedPriority, setSelectedPriority] = useState<string>('all');
@@ -161,8 +161,8 @@ export default function TaskManagementDashboard() {
                             viewMode === 'grid' ? 'grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'
                         }
                     >
-                        {filteredTasks.length > 0 ? (
-                            filteredTasks.map((task) => <TaskCard key={task.id} task={task} />)
+                        {tasks.length > 0 ? (
+                            tasks.map((task) => <TaskCard key={task.id} task={task} />)
                         ) : (
                             <div className="col-span-full flex items-center justify-center py-12 text-muted-foreground">
                                 <div className="text-center">

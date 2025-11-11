@@ -16,8 +16,11 @@ class TaskController extends Controller
      */
     public function index()
     {
+        $tasks = Task::with(['division', 'assignedTo'])->get();
 
-        return Inertia::render('task/index');
+        return Inertia::render('task/index', [
+            'tasks' => $tasks,
+        ]);
     }
 
     /**

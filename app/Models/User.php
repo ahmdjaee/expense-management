@@ -26,7 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'division_id',
+        'division_id', // Keep this for backward compatibility
     ];
 
     /**
@@ -55,10 +55,14 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    /*
+      |--------------------------------------------------------------------------
+      | RELATIONSHIPS
+      |--------------------------------------------------------------------------
+      */
+
     /**
-     * The divisions that belong to the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * The divisions that belong to the User (many-to-many)
      */
     public function divisions(): BelongsToMany
     {
@@ -67,11 +71,13 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 
-    /*
-      |--------------------------------------------------------------------------
-      | RELATIONSHIPS
-      |--------------------------------------------------------------------------
-      */
+    /**
+     * User's primary division (one-to-many for backward compatibility)
+     */
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class, 'division_id');
+    }
 
     /**
      * Tasks assigned to this user
@@ -87,5 +93,37 @@ class User extends Authenticatable implements MustVerifyEmail
     public function createdTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'created_by');
+    }
+
+    /**
+     * Get user's division name (primary division or first from many-to-many)
+     */
+    public function getDivisionNameAttribute(): string
+    {
+        if ($this->division) {
+            return $this->division->name;
+        }
+
+        if ($this->divisions->isNotEmpty()) {
+            return $this->divisions->first()->name;
+        }
+
+        return 'No Division';
+    }
+
+    /**
+     * Get all division names for user
+     */
+    public function getAllDivisionNamesAttribute(): string
+    {
+        if ($this->divisions->isNotEmpty()) {
+            return $this->divisions->pluck('name')->implode(', ');
+        }
+
+        if ($this->division) {
+            return $this->division->name;
+        }
+
+        return 'No Division';
     }
 }

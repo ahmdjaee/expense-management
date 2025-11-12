@@ -1,81 +1,116 @@
-import { TASKS, USERS } from "@/pages/mockdata"
-import { Card } from "./ui/card"
-import { AlertCircle, Clock } from "lucide-react"
-import { Badge } from "./ui/badge"
-import { cn } from "@/lib/utils"
-import { useMemo } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export function UpcomingDeadlines() {
-  const upcomingTasks = useMemo(() => {
-    return TASKS.filter((t) => t.status !== "completed")
-      .map((task) => {
-        const daysUntilDue = Math.ceil((task.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        return { ...task, daysUntilDue }
-      })
-      .sort((a, b) => a.daysUntilDue - b.daysUntilDue)
-      .slice(0, 6)
-  }, [])
+interface UpcomingDeadline {
+    id: number;
+    title: string;
+    deadline: string;
+    priority: 'low' | 'medium' | 'high';
+    status: string;
+    assigned_to: string;
+    division: string;
+    days_remaining: number;
+}
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      low: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    }
-    return colors[priority as keyof typeof colors] || colors.low
-  }
+interface UpcomingDeadlinesProps {
+    data: UpcomingDeadline[];
+}
 
-  return (
-    <Card className="p-6">
-      <h3 className="font-semibold text-foreground mb-4">Upcoming Deadlines</h3>
-      <div className="space-y-3">
-        {upcomingTasks.map((task) => {
-          const assignee = USERS.find((u) => u.id === task.assignedTo)
-          const isOverdue = task.daysUntilDue < 0
-          const isWeekAway = task.daysUntilDue > 0 && task.daysUntilDue <= 7
+export function UpcomingDeadlines({ data }: UpcomingDeadlinesProps) {
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case 'high':
+                return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/50';
+            case 'medium':
+                return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/50';
+            case 'low':
+                return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/50';
+            default:
+                return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/50';
+        }
+    };
 
-          return (
-            <div
-              key={task.id}
-              className={cn(
-                "flex items-center gap-3 p-3 rounded-lg border transition-colors",
-                isOverdue
-                  ? "border-destructive/30 bg-destructive/5"
-                  : isWeekAway
-                    ? "border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950"
-                    : "border-border bg-card hover:border-primary/20",
-              )}
-            >
-              <div className="flex-shrink-0">
-                {isOverdue ? (
-                  <AlertCircle className="h-5 w-5 text-destructive" />
+    const getDaysRemainingColor = (days: number) => {
+        if (days < 0) return 'text-red-600 dark:text-red-400';
+        if (days === 0) return 'text-orange-600 dark:text-orange-400';
+        if (days <= 2) return 'text-yellow-600 dark:text-yellow-400';
+        return 'text-green-600 dark:text-green-400';
+    };
+
+    const formatDaysRemaining = (days: number) => {
+        if (days < 0) return `${Math.abs(days)} days overdue`;
+        if (days === 0) return 'Due today';
+        if (days === 1) return '1 day left';
+        return `${days} days left`;
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Upcoming Deadlines</CardTitle>
+                <CardDescription>Tasks due in the next 7 days</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {data.length > 0 ? (
+                    <div className="space-y-4">
+                        {data.map((task) => (
+                            <div
+                                key={task.id}
+                                className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0"
+                            >
+                                <div className="space-y-1">
+                                    <p className="font-medium text-foreground">{task.title}</p>
+                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                        <span>Assigned to {task.assigned_to}</span>
+                                        <span>•</span>
+                                        <span>{task.division}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <span
+                                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getPriorityColor(task.priority)}`}
+                                        >
+                                            {task.priority}
+                                        </span>
+                                        <span
+                                            className={`text-sm font-medium ${getDaysRemainingColor(task.days_remaining)}`}
+                                        >
+                                            {formatDaysRemaining(task.days_remaining)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="text-right text-sm text-muted-foreground">
+                                    {formatDate(task.deadline)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 ) : (
-                  <Clock className="h-5 w-5 text-muted-foreground" />
+                    <div className="py-8 text-center text-muted-foreground">
+                        <svg
+                            className="mx-auto h-12 w-12 text-muted-foreground/50"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1}
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                        </svg>
+                        <p className="mt-2">No upcoming deadlines</p>
+                    </div>
                 )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground line-clamp-1">{task.title}</p>
-                <p className="text-xs text-muted-foreground">{assignee?.name}</p>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                  {task.priority}
-                </Badge>
-                <span
-                  className={cn(
-                    "text-xs font-medium whitespace-nowrap",
-                    isOverdue ? "text-destructive" : "text-muted-foreground",
-                  )}
-                >
-                  {isOverdue ? `${Math.abs(task.daysUntilDue)}d overdue` : `${task.daysUntilDue}d left`}
-                </span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </Card>
-  )
+            </CardContent>
+        </Card>
+    );
 }

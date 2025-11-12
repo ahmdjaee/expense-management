@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
+use App\Http\Controllers\DashboardController; // Tambahkan ini
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -13,9 +14,8 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Update route dashboard ke controller
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ========================================
     // ADMIN TASK ROUTES

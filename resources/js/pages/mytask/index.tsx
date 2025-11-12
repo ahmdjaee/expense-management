@@ -1,8 +1,14 @@
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -19,6 +25,7 @@ interface Task {
     status: 'pending' | 'in_progress' | 'completed';
     priority: 'low' | 'medium' | 'high';
     deadline: string | null;
+    is_personal: boolean;
     division?: {
         id: number;
         name: string;
@@ -131,6 +138,23 @@ export default function MyTasksPage({ tasks = [] }: MyTasksPageProps) {
             colors[division] ||
             'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
         );
+    };
+
+    // Handle actions
+    const handleEdit = (id: number) => {
+        router.visit(`/mytasks/${id}/edit`);
+    };
+
+    const handleDelete = (id: number) => {
+        if (confirm('Are you sure you want to delete this task?')) {
+            router.delete(`/mytasks/${id}`);
+        }
+    };
+
+    const handleStatusChange = (taskId: number, newStatus: string) => {
+        router.patch(`/mytasks/${taskId}/status`, {
+            status: newStatus,
+        });
     };
 
     return (
@@ -246,6 +270,79 @@ export default function MyTasksPage({ tasks = [] }: MyTasksPageProps) {
                                     key={task.id}
                                     className="relative rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
                                 >
+                                    {/* Header with status and action dropdown */}
+                                    <div className="mb-3 flex items-start justify-between">
+                                        {/* Status Dropdown - Show for all tasks */}
+                                        <div className="mr-2 flex-1">
+                                            <Select
+                                                value={task.status}
+                                                onValueChange={(value) => handleStatusChange(task.id, value)}
+                                            >
+                                                <SelectTrigger
+                                                    className={`w-full ${getStatusColor(task.status)} border-0 font-medium`}
+                                                >
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="pending">
+                                                        <span className="flex items-center gap-2">
+                                                            <span className="h-2 w-2 rounded-full bg-orange-500"></span>
+                                                            Pending
+                                                        </span>
+                                                    </SelectItem>
+                                                    <SelectItem value="in_progress">
+                                                        <span className="flex items-center gap-2">
+                                                            <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                                                            In Progress
+                                                        </span>
+                                                    </SelectItem>
+                                                    <SelectItem value="completed">
+                                                        <span className="flex items-center gap-2">
+                                                            <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                                                            Completed
+                                                        </span>
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Dropdown Menu - Only show for personal tasks */}
+                                        {task.is_personal && (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button
+                                                        className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <MoreVertical className="h-5 w-5" />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="z-50">
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEdit(task.id);
+                                                        }}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                        Edit Task
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(task.id);
+                                                        }}
+                                                        className="cursor-pointer text-red-600 focus:text-red-600"
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Delete Task
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        )}
+                                    </div>
+
                                     <h3 className="mb-2 text-base font-semibold text-neutral-900 dark:text-neutral-50">
                                         {task.title}
                                     </h3>
@@ -263,15 +360,15 @@ export default function MyTasksPage({ tasks = [] }: MyTasksPageProps) {
                                             </span>
                                         )}
                                         <span
-                                            className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getStatusColor(task.status)}`}
-                                        >
-                                            {getStatusLabel(task.status)}
-                                        </span>
-                                        <span
                                             className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getPriorityColor(task.priority)}`}
                                         >
                                             {getPriorityLabel(task.priority)}
                                         </span>
+                                        {!task.is_personal && (
+                                            <span className="rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                                                Assigned
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Footer */}

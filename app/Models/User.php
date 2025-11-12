@@ -24,7 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'division_id', // Tambahkan ini
+        'division_id',
     ];
 
     /**

@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}', [MemberTaskController::class, 'show'])->name('.show');
         Route::get('/{id}/edit', [MemberTaskController::class, 'edit'])->name('.edit');
         Route::put('/{id}', [MemberTaskController::class, 'update'])->name('.update');
+        Route::patch('/{id}/status', [MemberTaskController::class, 'updateStatus'])->name('.updateStatus');
         Route::delete('/{id}', [MemberTaskController::class, 'destroy'])->name('.destroy');
     });
 });

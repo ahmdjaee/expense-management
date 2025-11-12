@@ -14,7 +14,7 @@ class DivisionSeeder extends Seeder
      */
     public function run(): void
     {
-        Division::insert(
+        $divisions = [
             [
                 'name' => 'Human Resources',
                 'description' => 'Handles recruitment, employee relations, and benefits management.',
@@ -31,7 +31,13 @@ class DivisionSeeder extends Seeder
                 'name' => 'Marketing',
                 'description' => 'Focuses on market research, advertising, and promotional activities.',
             ],
+        ];
 
-        );
+        foreach ($divisions as $division) {
+            Division::firstOrCreate(
+                ['name' => $division['name']],
+                ['description' => $division['description']]
+            );
+        }
     }
 }

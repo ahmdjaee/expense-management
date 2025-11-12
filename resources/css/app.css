@@ -141,3 +141,130 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* 
+  React Select (classNamePrefix="select") - Shadcn/UI Style
+  Support: Light + Dark Mode
+  ----------------------------------------------------------
+  Gunakan classNamePrefix="select" pada komponen React Select kamu.
+*/
+
+.select__control {
+  @apply bg-background border border-input rounded-lg min-h-[2.5rem] text-sm transition-colors duration-200 shadow-none;
+}
+
+.select__control--is-focused {
+  @apply border-ring ring-1 ring-ring;
+}
+
+.select__control:hover {
+  @apply border-ring;
+}
+
+.select__value-container {
+  @apply px-1 text-foreground flex flex-wrap gap-1;
+}
+
+.select__placeholder {
+  @apply text-muted-foreground;
+}
+
+.select__single-value {
+  @apply text-foreground;
+}
+
+/* Multi value (chip style) */
+/* Multi-value (chip style) - improved contrast */
+.select__multi-value {
+  @apply flex items-center bg-accent rounded-md px-2 py-0.5;
+}
+
+.select__multi-value__label {
+  @apply text-sm mr-1 text-foreground font-medium;
+}
+
+.select__multi-value__remove {
+  @apply text-muted-foreground cursor-pointer hover:text-destructive transition-colors;
+}
+
+/* Dark mode fix: ensure label visible */
+.dark .select__multi-value {
+  @apply bg-accent;
+}
+
+.dark .select__multi-value__label {
+  @apply text-foreground;
+}
+
+
+.select__multi-value__remove {
+  @apply text-muted-foreground cursor-pointer hover:text-destructive transition-colors;
+}
+
+.select__input-container input {
+  @apply text-foreground;
+}
+
+/* Menu */
+.select__menu {
+  @apply mt-1 bg-popover border border-border rounded-lg shadow-md z-50;
+}
+
+.select__menu-list {
+  @apply py-1;
+}
+
+/* Option item */
+.select__option {
+  @apply px-3 py-2 cursor-pointer text-sm rounded-md text-foreground;
+}
+
+.select__option--is-focused {
+  @apply bg-accent text-accent-foreground;
+}
+
+.select__option--is-selected {
+  @apply bg-primary text-primary-foreground;
+}
+
+/* Indicators */
+.select__indicator-separator {
+  display: none;
+}
+
+.select__dropdown-indicator {
+  @apply text-muted-foreground transition-colors;
+}
+
+.select__dropdown-indicator:hover {
+  @apply text-ring;
+}
+
+.select__clear-indicator {
+  @apply text-muted-foreground hover:text-destructive transition-colors;
+}
+
+/* 🌙 Dark Mode Auto (Tailwind "dark" class handled globally) */
+.dark .select__control {
+  @apply bg-background border-input;
+}
+
+.dark .select__menu {
+  @apply bg-popover border-border;
+}
+
+.dark .select__option--is-focused {
+  @apply bg-accent text-accent-foreground;
+}
+
+.dark .select__option--is-selected {
+  @apply bg-primary text-primary-foreground;
+}
+
+.dark .select__multi-value {
+  @apply bg-accent text-accent-foreground;
+}
+
+.dark .select__multi-value__remove {
+  @apply hover:text-destructive;
+}

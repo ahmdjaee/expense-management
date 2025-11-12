@@ -16,7 +16,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::firstOrCreate(
+
+
+        $this->call(DivisionSeeder::class);
+
+        $user = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'admin',
@@ -25,6 +29,10 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $this->call(DivisionSeeder::class);
+        // Assign ke division (bisa banyak)
+        $user->divisions()->attach(
+            [1, 2] // Ganti dengan ID divisi yang sesuai
+        );
+
     }
 }

@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -9,9 +9,8 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -150,121 +149,120 @@
 */
 
 .select__control {
-  @apply bg-background border border-input rounded-lg min-h-[2.5rem] text-sm transition-colors duration-200 shadow-none;
+    @apply min-h-[2.5rem] rounded-lg border border-input bg-background text-sm shadow-none transition-colors duration-200;
 }
 
 .select__control--is-focused {
-  @apply border-ring ring-1 ring-ring;
+    @apply border-ring ring-1 ring-ring;
 }
 
 .select__control:hover {
-  @apply border-ring;
+    @apply border-ring;
 }
 
 .select__value-container {
-  @apply px-1 text-foreground flex flex-wrap gap-1;
+    @apply flex flex-wrap gap-1 px-1 text-foreground;
 }
 
 .select__placeholder {
-  @apply text-muted-foreground;
+    @apply text-muted-foreground;
 }
 
 .select__single-value {
-  @apply text-foreground;
+    @apply text-foreground;
 }
 
 /* Multi value (chip style) */
 /* Multi-value (chip style) - improved contrast */
 .select__multi-value {
-  @apply flex items-center bg-accent rounded-md px-2 py-0.5;
+    @apply flex items-center rounded-md bg-accent px-2 py-0.5;
 }
 
 .select__multi-value__label {
-  @apply text-sm mr-1 text-foreground font-medium;
+    @apply mr-1 text-sm font-medium text-foreground;
 }
 
 .select__multi-value__remove {
-  @apply text-muted-foreground cursor-pointer hover:text-destructive transition-colors;
+    @apply cursor-pointer text-muted-foreground transition-colors hover:text-destructive;
 }
 
 /* Dark mode fix: ensure label visible */
 .dark .select__multi-value {
-  @apply bg-accent;
+    @apply bg-accent;
 }
 
 .dark .select__multi-value__label {
-  @apply text-foreground;
+    @apply text-foreground;
 }
 
-
 .select__multi-value__remove {
-  @apply text-muted-foreground cursor-pointer hover:text-destructive transition-colors;
+    @apply cursor-pointer text-muted-foreground transition-colors hover:text-destructive;
 }
 
 .select__input-container input {
-  @apply text-foreground;
+    @apply text-foreground;
 }
 
 /* Menu */
 .select__menu {
-  @apply mt-1 bg-popover border border-border rounded-lg shadow-md z-50;
+    @apply z-50 mt-1 rounded-lg border border-border bg-popover shadow-md;
 }
 
 .select__menu-list {
-  @apply py-1;
+    @apply py-1;
 }
 
 /* Option item */
 .select__option {
-  @apply px-3 py-2 cursor-pointer text-sm rounded-md text-foreground;
+    @apply cursor-pointer px-3 py-2 text-sm text-foreground;
 }
 
 .select__option--is-focused {
-  @apply bg-accent text-accent-foreground;
+    @apply bg-accent text-accent-foreground;
 }
 
 .select__option--is-selected {
-  @apply bg-primary text-primary-foreground;
+    @apply bg-primary text-primary-foreground;
 }
 
 /* Indicators */
 .select__indicator-separator {
-  display: none;
+    display: none;
 }
 
 .select__dropdown-indicator {
-  @apply text-muted-foreground transition-colors;
+    @apply text-muted-foreground transition-colors;
 }
 
 .select__dropdown-indicator:hover {
-  @apply text-ring;
+    @apply text-ring;
 }
 
 .select__clear-indicator {
-  @apply text-muted-foreground hover:text-destructive transition-colors;
+    @apply text-muted-foreground transition-colors hover:text-destructive;
 }
 
 /* 🌙 Dark Mode Auto (Tailwind "dark" class handled globally) */
 .dark .select__control {
-  @apply bg-background border-input;
+    @apply border-input bg-background;
 }
 
 .dark .select__menu {
-  @apply bg-popover border-border;
+    @apply border-border bg-popover;
 }
 
 .dark .select__option--is-focused {
-  @apply bg-accent text-accent-foreground;
+    @apply bg-accent text-accent-foreground;
 }
 
 .dark .select__option--is-selected {
-  @apply bg-primary text-primary-foreground;
+    @apply bg-primary text-primary-foreground;
 }
 
 .dark .select__multi-value {
-  @apply bg-accent text-accent-foreground;
+    @apply bg-accent text-accent-foreground;
 }
 
 .dark .select__multi-value__remove {
-  @apply hover:text-destructive;
+    @apply hover:text-destructive;
 }

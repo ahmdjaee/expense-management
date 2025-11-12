@@ -65,7 +65,7 @@ export function TaskCard({ task }: TaskCardProps) {
                 <div className="flex items-center justify-between border-t border-border pt-2">
                     <div className="flex items-center gap-2">
                         {/* <span className="text-2xl">{task.assignedTo?.avatar}</span> */}
-                        <span className="text-xs text-muted-foreground">{task.assignedTo?.name}</span>
+                        <span className="text-xs text-muted-foreground">{task.assigned_to?.name}</span>
                     </div>
                     <div
                         className={cn(

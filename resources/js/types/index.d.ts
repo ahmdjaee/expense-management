@@ -34,11 +34,11 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    two_factor_enabled?: boolean;
+    email_verified_at: string;
+    two_factor_confirmed_at: any;
     created_at: string;
-    updated_at: string;
+updated_at: string;
+    divisions: Division[];
     [key: string]: unknown; // This allows for additional properties...
 }
 

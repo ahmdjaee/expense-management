@@ -14,7 +14,6 @@ import Select from 'react-select'
 
 
 export default function Register({ divisions }: { divisions: Division[] }) {
-    console.log("🚀 ~ Register ~ divisions:", divisions)
     
     return (
         <AuthLayout title="Create an account" description="Enter your details below to create your account">

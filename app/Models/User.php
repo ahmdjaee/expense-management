@@ -6,7 +6,8 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -25,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'division_id', // Tambahkan ini
     ];
 
     /**
@@ -63,5 +65,27 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Division::class)
             ->withPivot('role_in_division')
             ->withTimestamps();
+    }
+
+    /*
+      |--------------------------------------------------------------------------
+      | RELATIONSHIPS
+      |--------------------------------------------------------------------------
+      */
+
+    /**
+     * Tasks assigned to this user
+     */
+    public function assignedTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assigned_to');
+    }
+
+    /**
+     * Tasks created by this user
+     */
+    public function createdTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'created_by');
     }
 }

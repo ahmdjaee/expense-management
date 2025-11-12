@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\TaskController as AdminTaskController;
+use App\Http\Controllers\Member\TaskController as MemberTaskController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -16,13 +17,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('tasks', [TaskController::class, 'index'])->name('tasks');
-    Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
-    Route::post('tasks/store', [TaskController::class, 'store'])->name('task.store');
+    // ========================================
+    // ADMIN TASK ROUTES
+    // ========================================
+    Route::prefix('tasks')->name('tasks')->group(function () {
+        Route::get('/', [AdminTaskController::class, 'index']);
+        Route::get('/create', [AdminTaskController::class, 'create'])->name('.create');
+        Route::post('/store', [AdminTaskController::class, 'store'])->name('.store');
+        Route::get('/{id}/edit', [AdminTaskController::class, 'edit'])->name('.edit');
+        Route::put('/{id}', [AdminTaskController::class, 'update'])->name('.update');
+        Route::delete('/{id}', [AdminTaskController::class, 'destroy'])->name('.destroy');
+    });
 
-    Route::get('mytasks', function () {
-        return Inertia::render('mytask/index');
-    })->name('mytasks');
+    // ========================================
+    // MEMBER TASK ROUTES (My Tasks)
+    // ========================================
+    Route::prefix('mytasks')->name('mytasks')->group(function () {
+        Route::get('/', [MemberTaskController::class, 'index']);
+        Route::get('/create', [MemberTaskController::class, 'create'])->name('.create');
+        Route::post('/store', [MemberTaskController::class, 'store'])->name('.store');
+        Route::get('/{id}', [MemberTaskController::class, 'show'])->name('.show');
+        Route::get('/{id}/edit', [MemberTaskController::class, 'edit'])->name('.edit');
+        Route::put('/{id}', [MemberTaskController::class, 'update'])->name('.update');
+        Route::delete('/{id}', [MemberTaskController::class, 'destroy'])->name('.destroy');
+    });
 });
 
 require __DIR__ . '/settings.php';

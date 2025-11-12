@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { tasks } from '@/routes';
+import { create } from '@/routes/tasks';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { GridIcon, ListIcon, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { DIVISIONS, TASKS } from '../mockdata';
-import { create } from '@/routes/tasks';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function TaskManagementDashboard({tasks}: {tasks: any[]}) {
+export default function TaskManagementDashboard({ tasks }: { tasks: any[] }) {
     const [selectedDivision, setSelectedDivision] = useState<string>('all');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedPriority, setSelectedPriority] = useState<string>('all');

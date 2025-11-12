@@ -12,66 +12,36 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Mockup data untuk My Tasks
-const myTasks = [
-    {
-        id: 1,
-        title: 'Database Optimization',
-        description: 'Optimize database queries and improve overall performance',
-        division: 'Engineering',
-        assignedTo: 'Ahmad Rizki',
-        avatar: '👨‍💻',
-        status: 'completed',
-        priority: 'medium',
-        deadline: '2025-11-09',
-        hasIndicator: true,
-    },
-    {
-        id: 2,
-        title: 'Security Audit Implementation',
-        description: 'Implement recommended security measures from recent audit',
-        division: 'Engineering',
-        assignedTo: 'Ahmad Rizki',
-        avatar: '👨‍💻',
-        status: 'in-progress',
-        priority: 'high',
-        deadline: '2025-11-16',
-        daysLeft: 5,
-    },
-    {
-        id: 3,
-        title: 'API Documentation Update',
-        description: 'Update API documentation for new endpoints',
-        division: 'Engineering',
-        assignedTo: 'Ahmad Rizki',
-        avatar: '👨‍💻',
-        status: 'pending',
-        priority: 'low',
-        deadline: '2025-11-20',
-        daysLeft: 9,
-    },
-    {
-        id: 4,
-        title: 'Code Review Sprint',
-        description: 'Review pending pull requests from team members',
-        division: 'Engineering',
-        assignedTo: 'Ahmad Rizki',
-        avatar: '👨‍💻',
-        status: 'in-progress',
-        priority: 'high',
-        deadline: '2025-11-13',
-        daysLeft: 2,
-    },
-];
+interface Task {
+    id: number;
+    title: string;
+    description: string | null;
+    status: 'pending' | 'in_progress' | 'completed';
+    priority: 'low' | 'medium' | 'high';
+    deadline: string | null;
+    division?: {
+        id: number;
+        name: string;
+    };
+    assigned_to?: {
+        id: number;
+        name: string;
+    };
+    created_at: string;
+}
 
-export default function MyTasksPage() {
+interface MyTasksPageProps {
+    tasks: Task[];
+}
+
+export default function MyTasksPage({ tasks = [] }: MyTasksPageProps) {
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedPriority, setSelectedPriority] = useState('all');
     const [sortBy, setSortBy] = useState('dueDate');
 
     // Filter and sort tasks
     const filteredAndSortedTasks = useMemo(() => {
-        let filtered = myTasks.filter((task) => {
+        let filtered = tasks.filter((task) => {
             const statusMatch = selectedStatus === 'all' || task.status === selectedStatus;
             const priorityMatch = selectedPriority === 'all' || task.priority === selectedPriority;
             return statusMatch && priorityMatch;
@@ -79,13 +49,17 @@ export default function MyTasksPage() {
 
         // Sort tasks
         if (sortBy === 'dueDate') {
-            filtered.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
+            filtered.sort((a, b) => {
+                if (!a.deadline) return 1;
+                if (!b.deadline) return -1;
+                return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+            });
         } else if (sortBy === 'priority') {
             const priorityOrder = { high: 0, medium: 1, low: 2 };
             filtered.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
         } else if (sortBy === 'status') {
             const statusOrder = {
-                'in-progress': 0,
+                in_progress: 0,
                 pending: 1,
                 completed: 2,
             };
@@ -93,17 +67,24 @@ export default function MyTasksPage() {
         }
 
         return filtered;
-    }, [selectedStatus, selectedPriority, sortBy]);
+    }, [tasks, selectedStatus, selectedPriority, sortBy]);
 
     // Calculate stats
-    const totalTasks = myTasks.length;
-    const inProgressTasks = myTasks.filter((t) => t.status === 'in-progress').length;
-    const completedTasks = myTasks.filter((t) => t.status === 'completed').length;
-    const pendingTasks = myTasks.filter((t) => t.status === 'pending').length;
+    const totalTasks = tasks.length;
+    const inProgressTasks = tasks.filter((t) => t.status === 'in_progress').length;
+    const completedTasks = tasks.filter((t) => t.status === 'completed').length;
+    const pendingTasks = tasks.filter((t) => t.status === 'pending').length;
+
+    // Helper functions
+    const getDaysLeft = (deadline: string | null) => {
+        if (!deadline) return null;
+        const days = Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+        return days > 0 ? days : 0;
+    };
 
     const getStatusColor = (status: string) => {
         const colors = {
-            'in-progress':
+            in_progress:
                 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800',
             pending:
                 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800',
@@ -115,7 +96,7 @@ export default function MyTasksPage() {
 
     const getStatusLabel = (status: string) => {
         const labels = {
-            'in-progress': 'In Progress',
+            in_progress: 'In Progress',
             pending: 'Pending',
             completed: 'Completed',
         };
@@ -142,8 +123,14 @@ export default function MyTasksPage() {
                 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800',
             Marketing:
                 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-800',
+            Product:
+                'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800',
+            HR: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800',
         };
-        return colors[division] || colors['Engineering'];
+        return (
+            colors[division] ||
+            'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+        );
     };
 
     return (
@@ -154,9 +141,7 @@ export default function MyTasksPage() {
                 <div className="flex items-start justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">My Tasks</h1>
-                        <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                            Tasks assigned to Ahmad Rizki
-                        </p>
+                        <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">Your personal task list</p>
                     </div>
                     <Link
                         href="/mytasks/create"
@@ -205,7 +190,7 @@ export default function MyTasksPage() {
                                 <SelectContent>
                                     <SelectItem value="all">All Status</SelectItem>
                                     <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="in-progress">In Progress</SelectItem>
+                                    <SelectItem value="in_progress">In Progress</SelectItem>
                                     <SelectItem value="completed">Completed</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -254,70 +239,70 @@ export default function MyTasksPage() {
                 {/* Tasks Grid */}
                 {filteredAndSortedTasks.length > 0 ? (
                     <div className="grid gap-4 md:grid-cols-2">
-                        {filteredAndSortedTasks.map((task) => (
-                            <div
-                                key={task.id}
-                                className="relative rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
-                            >
-                                {/* Red indicator for specific tasks */}
-                                {task.hasIndicator && (
-                                    <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-red-500"></div>
-                                )}
+                        {filteredAndSortedTasks.map((task) => {
+                            const daysLeft = getDaysLeft(task.deadline);
+                            return (
+                                <div
+                                    key={task.id}
+                                    className="relative rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+                                >
+                                    <h3 className="mb-2 text-base font-semibold text-neutral-900 dark:text-neutral-50">
+                                        {task.title}
+                                    </h3>
+                                    <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
+                                        {task.description || 'No description'}
+                                    </p>
 
-                                <h3 className="mb-2 text-base font-semibold text-neutral-900 dark:text-neutral-50">
-                                    {task.title}
-                                </h3>
-                                <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
-                                    {task.description}
-                                </p>
-
-                                {/* Tags */}
-                                <div className="mb-4 flex flex-wrap items-center gap-2">
-                                    <span
-                                        className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getDivisionColor(task.division)}`}
-                                    >
-                                        {task.division}
-                                    </span>
-                                    <span
-                                        className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getStatusColor(task.status)}`}
-                                    >
-                                        {getStatusLabel(task.status)}
-                                    </span>
-                                    <span
-                                        className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getPriorityColor(task.priority)}`}
-                                    >
-                                        {getPriorityLabel(task.priority)}
-                                    </span>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-neutral-800">
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-sm dark:bg-neutral-800">
-                                            {task.avatar}
-                                        </div>
-                                        <span className="text-sm text-neutral-900 dark:text-neutral-50">
-                                            {task.assignedTo}
+                                    {/* Tags */}
+                                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                                        {task.division && (
+                                            <span
+                                                className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getDivisionColor(task.division.name)}`}
+                                            >
+                                                {task.division.name}
+                                            </span>
+                                        )}
+                                        <span
+                                            className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getStatusColor(task.status)}`}
+                                        >
+                                            {getStatusLabel(task.status)}
+                                        </span>
+                                        <span
+                                            className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getPriorityColor(task.priority)}`}
+                                        >
+                                            {getPriorityLabel(task.priority)}
                                         </span>
                                     </div>
-                                    {task.status === 'completed' ? (
-                                        <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                                            Completed
-                                        </span>
-                                    ) : task.daysLeft !== undefined ? (
-                                        <span
-                                            className={`text-sm font-medium ${
-                                                task.daysLeft <= 3
-                                                    ? 'text-orange-600 dark:text-orange-400'
-                                                    : 'text-neutral-600 dark:text-neutral-400'
-                                            }`}
-                                        >
-                                            {task.daysLeft} days left
-                                        </span>
-                                    ) : null}
+
+                                    {/* Footer */}
+                                    <div className="flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-neutral-800">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-sm dark:bg-neutral-800">
+                                                👤
+                                            </div>
+                                            <span className="text-sm text-neutral-900 dark:text-neutral-50">
+                                                {task.assigned_to?.name || 'You'}
+                                            </span>
+                                        </div>
+                                        {task.status === 'completed' ? (
+                                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                                                Completed
+                                            </span>
+                                        ) : daysLeft !== null ? (
+                                            <span
+                                                className={`text-sm font-medium ${
+                                                    daysLeft <= 3
+                                                        ? 'text-orange-600 dark:text-orange-400'
+                                                        : 'text-neutral-600 dark:text-neutral-400'
+                                                }`}
+                                            >
+                                                {daysLeft === 0 ? 'Due today' : `${daysLeft} days left`}
+                                            </span>
+                                        ) : null}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">

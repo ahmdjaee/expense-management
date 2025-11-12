@@ -28,12 +28,21 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
+            'divisions' => ['required', 'array', 'min:1'], // ubah dari divisi -> divisions (lebih umum)
+            'divisions.*' => ['exists:divisions,id'], // pastikan ID-nya valid
         ])->validate();
 
-        return User::create([
+
+
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
         ]);
+
+        // Assign ke division (bisa banyak)
+        $user->divisions()->attach($input['divisions']);
+
+        return $user;
     }
 }

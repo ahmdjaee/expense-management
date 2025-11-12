@@ -9,13 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
+import { Division } from '@/types';
+import Select from 'react-select'
 
-export default function Register() {
+
+export default function Register({ divisions }: { divisions: Division[] }) {
+    console.log("🚀 ~ Register ~ divisions:", divisions)
+    
     return (
-        <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
-        >
+        <AuthLayout title="Create an account" description="Enter your details below to create your account">
             <Head title="Register" />
             <Form
                 {...store.form()}
@@ -38,10 +40,23 @@ export default function Register() {
                                     name="name"
                                     placeholder="Full name"
                                 />
-                                <InputError
-                                    message={errors.name}
-                                    className="mt-2"
+                                <InputError message={errors.name} className="mt-2" />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="divisi">Divisi</Label>
+
+                                <Select
+                                    isMulti
+                                    name="divisions[]"
+                                    options={divisions.map((division) => ({
+                                        value: division.id,
+                                        label: division.name,
+                                    }))}
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
                                 />
+                                <InputError message={errors.divisions} className="mt-2" />
                             </div>
 
                             <div className="grid gap-2">
@@ -73,9 +88,7 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
-                                    Confirm password
-                                </Label>
+                                <Label htmlFor="password_confirmation">Confirm password</Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
@@ -85,17 +98,10 @@ export default function Register() {
                                     name="password_confirmation"
                                     placeholder="Confirm password"
                                 />
-                                <InputError
-                                    message={errors.password_confirmation}
-                                />
+                                <InputError message={errors.password_confirmation} />
                             </div>
 
-                            <Button
-                                type="submit"
-                                className="mt-2 w-full"
-                                tabIndex={5}
-                                data-test="register-user-button"
-                            >
+                            <Button type="submit" className="mt-2 w-full" tabIndex={5} data-test="register-user-button">
                                 {processing && <Spinner />}
                                 Create account
                             </Button>

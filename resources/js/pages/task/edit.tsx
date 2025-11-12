@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { tasks } from '@/routes';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, User } from '@/types';
 import { Form, Head, router } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 
@@ -22,12 +22,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    division_id?: number;
-}
 
 interface Division {
     id: number;

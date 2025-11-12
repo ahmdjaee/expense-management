@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\TaskController as AdminTaskController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -41,6 +42,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', [MemberTaskController::class, 'update'])->name('.update');
         Route::patch('/{id}/status', [MemberTaskController::class, 'updateStatus'])->name('.updateStatus');
         Route::delete('/{id}', [MemberTaskController::class, 'destroy'])->name('.destroy');
+    });
+
+    // ========================================
+    // USERS ROUTES
+    // ========================================
+    Route::prefix('users')->name('users')->group(function () {
+        Route::middleware('role:superadmin,admin')->group(function () {
+            Route::get('/', [UserController::class, 'index']);
+            Route::get('/create', [UserController::class, 'create'])->name('.create');
+            Route::post('/', [UserController::class, 'store'])->name('.store');
+        });
     });
 });
 

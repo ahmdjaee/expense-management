@@ -26,6 +26,26 @@ class TaskController extends Controller
     }
 
     /**
+     * Update the status of the specified task.
+     */
+    public function updateStatus(Request $request, string $id)
+    {
+        $task = Task::where('assigned_to', auth()->id())
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+        ]);
+
+        $task->update([
+            'status' => $validated['status'],
+            'completed_at' => $validated['status'] === 'completed' ? now() : null,
+        ]);
+
+        return redirect()->route('mytasks')->with('success', 'Task status updated successfully.');
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -68,6 +88,7 @@ class TaskController extends Controller
             'deadline' => $validated['deadline'] ?? null,
             'status' => $validated['status'],
             'created_by' => auth()->id(), // Yang buat juga member ini
+            'is_personal' => true, // Tandai sebagai personal task
         ]);
 
         // 🔹 4. (Opsional) Kirim notifikasi jika task punya deadline

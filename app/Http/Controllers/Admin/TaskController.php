@@ -102,7 +102,30 @@ class TaskController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $task = Task::with(['division', 'assignedTo'])->findOrFail($id);
+        $users = User::all();
+        $divisions = Division::all();
+
+        // Format data task untuk frontend
+        $formattedTask = [
+            'id' => $task->id,
+            'title' => $task->title,
+            'description' => $task->description,
+            'status' => $task->status,
+            'priority' => $task->priority,
+            'deadline' => $task->deadline,
+            'division_id' => $task->division_id,
+            'assigned_to' => $task->assigned_to,
+            'is_personal' => $task->is_personal,
+            'division' => $task->division,
+            'assigned_to_user' => $task->assignedTo, // Pastikan nama key sesuai dengan yang diharapkan frontend
+        ];
+
+        return Inertia::render('task/edit', [
+            'task' => $formattedTask,
+            'users' => $users,
+            'divisions' => $divisions,
+        ]);
     }
 
     /**
@@ -110,7 +133,32 @@ class TaskController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+
+        $validated = $request->validate([
+            'division_id' => 'required|exists:divisions,id',
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'assigned_to' => 'nullable|exists:users,id',
+            'priority' => 'required|in:low,medium,high',
+            'deadline' => 'nullable|date|after_or_equal:today',
+            'status' => 'required|in:pending,in_progress,completed',
+        ]);
+
+        // Handle empty assigned_to
+        $assignedTo = $validated['assigned_to'] === '' ? null : $validated['assigned_to'];
+
+        $task->update([
+            'division_id' => $validated['division_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'assigned_to' => $assignedTo,
+            'priority' => $validated['priority'],
+            'deadline' => $validated['deadline'],
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->route('tasks')->with('success', 'Task berhasil diupdate.');
     }
 
     /**
@@ -118,6 +166,9 @@ class TaskController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+        $task->delete();
+
+        return redirect()->route('tasks')->with('success', 'Task berhasil dihapus.');
     }
 }

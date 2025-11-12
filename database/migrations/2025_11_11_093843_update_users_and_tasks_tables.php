@@ -7,13 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
-        // Cek dan tambah division_id ke users jika belum ada
-        if (!Schema::hasColumn('users', 'division_id')) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->foreignId('division_id')->nullable()->constrained('divisions');
-            });
-        }
-
         // Cek dan tambah is_personal ke tasks jika belum ada
         if (!Schema::hasColumn('tasks', 'is_personal')) {
             Schema::table('tasks', function (Blueprint $table) {

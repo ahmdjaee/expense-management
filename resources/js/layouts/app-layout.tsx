@@ -7,16 +7,9 @@ import { useEffect, type ReactNode } from 'react';
 interface AppLayoutProps {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
-    messages?: any;
 }
 
-export default ({ children, breadcrumbs, messages, ...props }: AppLayoutProps) => {
-    // Render flash messages ketika mount atau messages berubah
-    useEffect(() => {
-        if (messages) {
-            flasher.render(messages);
-        }
-    }, [messages]);
+export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
 
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>

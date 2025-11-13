@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TaskAssignedMail;
 use App\Models\Division;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class TaskController extends Controller
@@ -72,9 +75,11 @@ class TaskController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
-        // 🔹 2. Simpan ke database
+               // 🔹 2. Simpan ke database dan kirim email
+        $createdTasks = [];
+        
         foreach ($validated['users'] as $userId) {
-            Task::create([
+            $task = Task::create([
                 'division_id' => $validated['division_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
@@ -84,25 +89,23 @@ class TaskController extends Controller
                 'status' => $validated['status'],
                 'created_by' => auth()->id(),
             ]);
+
+            $createdTasks[] = $task;
+
+            // 🔹 3. Kirim email ke user yang ditugaskan
+            try {
+                $user = User::find($userId);
+                
+                if ($user && $user->email) {
+                    Mail::to($user->email)->send(new TaskAssignedMail($task, $user));
+                }
+            } catch (\Exception $e) {
+                // Log error tapi jangan stop proses
+                Log::error('Failed to send task email: ' . $e->getMessage());
+            }
         }
 
-        // 🔹 3. (Opsional) Kirim notifikasi jika task punya deadline
-        // if ($task->deadline) {
-        //     // Jika deadline dalam 7 hari, bisa langsung kirim notifikasi awal
-        //     $diffInDays = now()->diffInDays($task->deadline, false);
-
-        //     if ($diffInDays === 7 && $task->assigned_to) {
-        //         \App\Models\TaskNotification::create([
-        //             'task_id' => $task->id,
-        //             'user_id' => $task->assigned_to,
-        //             'notification_date' => now(),
-        //             'status' => 'pending',
-        //         ]);
-        //     }
-        // }
-
-        // Cara 2: Menggunakan session()->flash()
-        flash()->success('Task berhasil ditambahkan!');
+        flash()->success('Task berhasil dibuat dan email notifikasi telah dikirim!');
 
         // 🔹 4. Redirect atau kembalikan response
         return redirect()->route('tasks');

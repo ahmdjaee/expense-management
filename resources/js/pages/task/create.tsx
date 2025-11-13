@@ -163,6 +163,7 @@ export default function TaskCreate({ users, divisions }: TaskCreateProps) {
                                             name="deadline"
                                             required
                                             className="border-muted bg-muted/50"
+                                            min={new Date().toISOString().split('T')[0]}
                                         />
                                         <InputError message={errors.deadline} />
                                     </div>

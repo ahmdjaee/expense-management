@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard, mytasks, tasks, users } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, User, Workflow } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { ClipboardCheck, LayoutGrid, User, Workflow } from 'lucide-react';
+import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -21,6 +22,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        role: ['admin', 'manager'], // Hanya untuk role selain 'user'
     },
     {
         title: 'All Tasks',
@@ -30,7 +32,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'My Tasks',
         href: mytasks(),
-        icon: LayoutGrid,
+        icon: ClipboardCheck,
     },
     {
         title: 'User',
@@ -39,20 +41,24 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
+    // Ambil data user dari Inertia
+    const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
+    const userRole = auth.user.role;
+
+    // Filter menu berdasarkan role
+    const filteredNavItems = useMemo(() => {
+        return mainNavItems.filter((item) => {
+            // Jika item tidak punya batasan role, tampilkan
+            if (!item.role) return true;
+            
+            // Jika ada batasan role, cek apakah user role termasuk
+            return item.role.includes(userRole);
+        });
+    }, [userRole]);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -68,7 +74,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={filteredNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

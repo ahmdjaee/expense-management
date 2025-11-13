@@ -105,8 +105,10 @@ class TaskController extends Controller
             }
         }
 
+        flash()->success('Task pribadi ditambahkan!');
+
         // 🔹 5. Redirect ke My Tasks
-        return redirect()->route('mytasks')->with('success', 'Personal task berhasil dibuat.');
+        return redirect()->route('mytasks');
     }
 
     /**
@@ -154,7 +156,8 @@ class TaskController extends Controller
 
         $task->update($validated);
 
-        return redirect()->route('mytasks')->with('success', 'Task berhasil diupdate.');
+        flash()->success('Task berhasil diperbarui!');
+        return redirect()->route('mytasks');
     }
 
     /**
@@ -167,6 +170,7 @@ class TaskController extends Controller
 
         $task->delete();
 
+        flash()->success('Task berhasil dihapus!');
         return redirect()->route('mytasks')->with('success', 'Task berhasil dihapus.');
     }
 }

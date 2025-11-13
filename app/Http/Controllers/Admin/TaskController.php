@@ -101,10 +101,11 @@ class TaskController extends Controller
         //     }
         // }
 
-        notyf()->success('Task created successfully!');
+        // Cara 2: Menggunakan session()->flash()
+        flash()->success('Task berhasil ditambahkan!');
 
         // 🔹 4. Redirect atau kembalikan response
-        return redirect()->route('tasks')->with('success', 'Task berhasil dibuat.');
+        return redirect()->route('tasks');
     }
 
     /**
@@ -165,10 +166,10 @@ class TaskController extends Controller
             'completed_at' => $validated['status'] === 'completed' ? now() : null,
         ]);
 
-        flash()->success('Task updated successfully!');
+        flash()->success('Task berhasil ditambahkan!');
 
         // 🔹 3. Redirect
-        return redirect()->route('tasks')->with('success', 'Task berhasil diupdate.');
+        return redirect()->route('tasks');
     }
 
     /**
@@ -179,6 +180,7 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
         $task->delete();
 
-        return redirect()->route('tasks')->with('success', 'Task berhasil dihapus.');
+        flash()->success('Task berhasil dihapus!');
+        return redirect()->route('tasks');
     }
 }

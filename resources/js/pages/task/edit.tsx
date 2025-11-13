@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { tasks } from '@/routes';
-import { BreadcrumbItem, User } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Form, Head, router } from '@inertiajs/react';
+<<<<<<< HEAD
 import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,111 +28,99 @@ interface Division {
     name: string;
     description?: string;
 }
+=======
+import { useMemo, useState, useEffect } from 'react';
+import ReactSelect from 'react-select';
+>>>>>>> a3083930f0dbca63d70ecd6ebee6edd343e19a46
 
 interface Task {
     id: number;
     title: string;
     description: string | null;
-    status: 'pending' | 'in_progress' | 'completed';
+    division_id: number;
+    assigned_to: number;
     priority: 'low' | 'medium' | 'high';
     deadline: string | null;
-    division_id: number;
-    assigned_to: number | null; // Bisa null jika tidak diassign
-    is_personal: boolean;
-    division?: Division;
-    assigned_to_user?: User;
+    status: 'pending' | 'in_progress' | 'completed';
 }
 
 interface TaskEditProps {
     task: Task;
-    users: User[];
-    divisions: Division[];
+    users: Array<{ id: number; name: string; divisions: Array<{ id: number; name: string; description: string }> }>;
+    divisions: Array<{ id: number; name: string; description: string }>;
 }
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Task',
+        href: tasks().url,
+    },
+    {
+        title: 'Edit Task',
+        href: '',
+    },
+];
+
 export default function TaskEdit({ task, users, divisions }: TaskEditProps) {
-    const handleCancel = () => {
-        router.visit(tasks().url);
-    };
+    const [selectedDivision, setSelectedDivision] = useState(task.division_id.toString());
 
-    const formatDateForInput = (dateString: string | null) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        // Format ke YYYY-MM-DD untuk input type="date"
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
+    // Format deadline untuk input type="date" (YYYY-MM-DD)
+    const formattedDeadline = useMemo(() => {
+        if (!task.deadline) return '';
+        // Konversi "2025-11-13T00:00:00.000000Z" menjadi "2025-11-13"
+        return task.deadline.split('T')[0];
+    }, [task.deadline]);
 
-    // Filter users by selected division (opsional, bisa digunakan di onValueChange division)
-    const getUsersByDivision = (divisionId: number) => {
-        return users.filter((user) => user.division_id === divisionId);
-    };
+    // Filter user berdasarkan divisi yang dipilih
+    const filteredUsers = useMemo(() => {
+        if (!selectedDivision) return [];
+        return users
+            .filter((user) =>
+                user.divisions.some((division) => division.id.toString() === selectedDivision)
+            )
+            .map((user) => ({
+                value: user.id,
+                label: user.name,
+            }));
+    }, [selectedDivision, users]);
+
+    // Set initial selected user menggunakan useMemo untuk menghindari re-render
+    const initialSelectedUser = useMemo(() => {
+        if (task.assigned_to) {
+            return filteredUsers.find((user) => user.value === task.assigned_to.id) || null;
+        }
+        return null;
+    }, [task.assigned_to, filteredUsers]);
+
+    const [selectedUser, setSelectedUser] = useState(initialSelectedUser);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit Task - ${task.title}`} />
+            <Head title="Edit Task" />
             <div className="p-4">
                 <Card className="flex-1 p-6">
-                    <div className="mb-6 flex items-center gap-4">
-                        <button
-                            onClick={handleCancel}
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-300 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                        </button>
-                        <div>
-                            <h1 className="text-3xl font-bold text-foreground">Edit Task</h1>
-                            <p className="mt-1 text-muted-foreground">Update task details and assignment</p>
-                        </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-foreground">Edit Task</h1>
                     </div>
-                    <Form action={`/tasks/${task.id}`} method="put" className="space-y-6">
-                        {({ processing, errors, data, setData }) => (
+                    <Form action={`/tasks/${task.id}/update`} className="space-y-6" method="post">
+                        {({ processing, errors }) => (
                             <>
-                                {/* Task Type Info */}
-                                <div
-                                    className={`rounded-lg border p-4 ${
-                                        task.is_personal
-                                            ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950'
-                                            : 'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950'
-                                    }`}
-                                >
-                                    <p
-                                        className={`text-sm font-medium ${
-                                            task.is_personal
-                                                ? 'text-blue-800 dark:text-blue-200'
-                                                : 'text-orange-800 dark:text-orange-200'
-                                        }`}
-                                    >
-                                        {task.is_personal ? 'Personal Task' : 'Admin-Assigned Task'}
-                                    </p>
-                                    <p
-                                        className={`mt-1 text-sm ${
-                                            task.is_personal
-                                                ? 'text-blue-700 dark:text-blue-300'
-                                                : 'text-orange-700 dark:text-orange-300'
-                                        }`}
-                                    >
-                                        {task.is_personal
-                                            ? 'This task was created by the assigned user as a personal task.'
-                                            : 'This task was created by an administrator and assigned to a user.'}
-                                    </p>
-                                </div>
                                 {/* Title */}
                                 <div className="space-y-2">
                                     <Label htmlFor="title" className="font-medium text-foreground">
-                                        Task Title <span className="text-red-500">*</span>
+                                        Task Title
                                     </Label>
                                     <Input
                                         id="title"
-                                        name="title"
-                                        defaultValue={task.title}
                                         placeholder="Enter task title"
                                         required
                                         className="border-muted bg-muted/50"
+                                        name="title"
+                                        defaultValue={task.title}
                                     />
                                     <InputError message={errors.title} />
                                 </div>
+
                                 {/* Description */}
                                 <div className="space-y-2">
                                     <Label htmlFor="description" className="font-medium text-foreground">
@@ -139,124 +128,98 @@ export default function TaskEdit({ task, users, divisions }: TaskEditProps) {
                                     </Label>
                                     <Textarea
                                         id="description"
-                                        name="description"
-                                        defaultValue={task.description || ''}
                                         placeholder="Enter task description"
+                                        name="description"
                                         className="min-h-24 border-muted bg-muted/50"
+                                        defaultValue={task.description || ''}
                                     />
                                     <InputError message={errors.description} />
                                 </div>
+
                                 {/* Grid Layout */}
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     {/* Division */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="division_id" className="font-medium text-foreground">
-                                            Division <span className="text-red-500">*</span>
+                                        <Label htmlFor="division" className="font-medium text-foreground">
+                                            Division
                                         </Label>
                                         <Select
                                             name="division_id"
-                                            defaultValue={task.division_id.toString()}
+                                            value={selectedDivision}
                                             onValueChange={(value) => {
-                                                // Opsional: Reset assigned_to jika division berubah dan ingin membersihkan pilihan
-                                                // setData('assigned_to', 'null'); // Atau nilai default lain jika diperlukan
-                                                // Pastikan setData hanya digunakan jika menggunakan Form Inertia dan tidak langsung mengirim ke server
+                                                setSelectedDivision(value);
+                                                setSelectedUser(null); // reset user saat ganti divisi
                                             }}
                                         >
-                                            <SelectTrigger id="division_id" className="border-muted bg-muted/50">
+                                            <SelectTrigger id="division" className="border-muted bg-muted/50">
                                                 <SelectValue placeholder="Select division" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {divisions.map((division) => (
-                                                    <SelectItem key={division.id} value={division.id.toString()}>
-                                                        {division.name}
+                                                {divisions.map((d) => (
+                                                    <SelectItem key={d.id} value={d.id.toString()}>
+                                                        {d.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.division_id} />
                                     </div>
-                                    {/* Assigned To */}
+
+                                    {/* Assigned To - SINGLE USER */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="assigned_to" className="font-medium text-foreground">
+                                        <Label htmlFor="assignedTo" className="font-medium text-foreground">
                                             Assign To
                                         </Label>
-                                        <Select
+                                        <ReactSelect
                                             name="assigned_to"
-                                            // Gunakan 'null' jika task.assigned_to null, atau ID user jika tidak null
-                                            defaultValue={task.assigned_to?.toString() || 'null'}
-                                        >
-                                            <SelectTrigger id="assigned_to" className="border-muted bg-muted/50">
-                                                <SelectValue placeholder="Select team member" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {/* Gunakan 'null' sebagai value untuk Unassigned */}
-                                                <SelectItem value="null">Unassigned</SelectItem>
-                                                {users.map((user) => (
-                                                    <SelectItem
-                                                        key={user.id}
-                                                        value={user.id.toString()}
-                                                        disabled={user.division_id !== task.division_id}
-                                                    >
-                                                        {user.name}
-                                                        {user.division_id !== task.division_id &&
-                                                            ' (Different division)'}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            options={filteredUsers}
+                                            value={selectedUser}
+                                            onChange={setSelectedUser}
+                                            isDisabled={!selectedDivision}
+                                            className="basic-single-select"
+                                            classNamePrefix="select"
+                                            placeholder={
+                                                selectedDivision ? 'Pilih user...' : 'Pilih divisi terlebih dahulu'
+                                            }
+                                        />
                                         <InputError message={errors.assigned_to} />
-                                        <p className="text-xs text-muted-foreground">
-                                            Only users from the selected division are available for assignment
-                                        </p>
                                     </div>
+
                                     {/* Priority */}
                                     <div className="space-y-2">
                                         <Label htmlFor="priority" className="font-medium text-foreground">
-                                            Priority <span className="text-red-500">*</span>
+                                            Priority
                                         </Label>
                                         <Select name="priority" defaultValue={task.priority}>
                                             <SelectTrigger id="priority" className="border-muted bg-muted/50">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="low">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-gray-500"></span>
-                                                        Low
-                                                    </span>
-                                                </SelectItem>
-                                                <SelectItem value="medium">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
-                                                        Medium
-                                                    </span>
-                                                </SelectItem>
-                                                <SelectItem value="high">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-red-500"></span>
-                                                        High
-                                                    </span>
-                                                </SelectItem>
+                                                <SelectItem value="low">Low</SelectItem>
+                                                <SelectItem value="medium">Medium</SelectItem>
+                                                <SelectItem value="high">High</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.priority} />
                                     </div>
+
                                     {/* Due Date */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="deadline" className="font-medium text-foreground">
+                                        <Label htmlFor="dueDate" className="font-medium text-foreground">
                                             Due Date
                                         </Label>
                                         <Input
-                                            id="deadline"
+                                            id="dueDate"
                                             type="date"
                                             name="deadline"
-                                            defaultValue={formatDateForInput(task.deadline)}
-                                            min={new Date().toISOString().split('T')[0]} // Hari ini sebagai minimum
+                                            required
                                             className="border-muted bg-muted/50"
+                                            defaultValue={formattedDeadline}
                                         />
                                         <InputError message={errors.deadline} />
                                     </div>
                                 </div>
+
                                 {/* Status */}
                                 <div className="space-y-2">
                                     <Label htmlFor="status" className="font-medium text-foreground">
@@ -267,52 +230,20 @@ export default function TaskEdit({ task, users, divisions }: TaskEditProps) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="pending">
-                                                <span className="flex items-center gap-2">
-                                                    <span className="h-2 w-2 rounded-full bg-orange-500"></span>
-                                                    Pending
-                                                </span>
-                                            </SelectItem>
-                                            <SelectItem value="in_progress">
-                                                <span className="flex items-center gap-2">
-                                                    <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-                                                    In Progress
-                                                </span>
-                                            </SelectItem>
-                                            <SelectItem value="completed">
-                                                <span className="flex items-center gap-2">
-                                                    <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                                                    Completed
-                                                </span>
-                                            </SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="in_progress">In Progress</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <InputError message={errors.status} />
                                 </div>
-                                {/* Current Assignment Info */}
-                                {(task.division || task.assigned_to_user) && (
-                                    <div className="rounded-lg border border-border bg-card p-4">
-                                        <p className="text-sm font-medium text-foreground">Current Assignment</p>
-                                        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <span className="text-muted-foreground">Division:</span>
-                                                <p className="font-medium">{task.division?.name || 'Not assigned'}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-muted-foreground">Assigned to:</span>
-                                                <p className="font-medium">
-                                                    {task.assigned_to_user?.name || 'Unassigned'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+
                                 {/* Buttons */}
                                 <div className="flex justify-end gap-3 pt-4">
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={handleCancel}
+                                        onClick={() => router.visit(tasks().url)}
                                         disabled={processing}
                                     >
                                         Cancel
@@ -322,14 +253,7 @@ export default function TaskEdit({ task, users, divisions }: TaskEditProps) {
                                         className="bg-primary text-primary-foreground hover:bg-primary/90"
                                         disabled={processing}
                                     >
-                                        {processing ? (
-                                            <>
-                                                <span className="mr-2">Updating...</span>
-                                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                                            </>
-                                        ) : (
-                                            'Update Task'
-                                        )}
+                                        {processing ? 'Updating...' : 'Update Task'}
                                     </Button>
                                 </div>
                             </>

@@ -37,7 +37,7 @@ export interface User {
     email_verified_at: string;
     two_factor_confirmed_at: any;
     created_at: string;
-updated_at: string;
+    updated_at: string;
     divisions: Division[];
     [key: string]: unknown; // This allows for additional properties...
 }

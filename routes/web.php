@@ -26,7 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [AdminTaskController::class, 'create'])->name('.create');
         Route::post('/store', [AdminTaskController::class, 'store'])->name('.store');
         Route::get('/{id}/edit', [AdminTaskController::class, 'edit'])->name('.edit');
-        Route::put('/{id}', [AdminTaskController::class, 'update'])->name('.update');
+        Route::post('{id}/update', [AdminTaskController::class, 'update'])->name('.update');
         Route::delete('/{id}', [AdminTaskController::class, 'destroy'])->name('.destroy');
     });
 

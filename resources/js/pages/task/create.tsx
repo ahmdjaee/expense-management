@@ -12,7 +12,7 @@ import { Form, Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import ReactSelect from 'react-select';
 
-interface TaskFormProps {
+interface TaskCreateProps {
     users: Array<{ id: number; name: string; divisions: Array<{ id: number; name: string; description: string }> }>;
     divisions: Array<{ id: number; name: string; description: string }>;
 }
@@ -28,7 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function TaskForm({ users, divisions }: TaskFormProps) {
+export default function TaskCreate({ users, divisions }: TaskCreateProps) {
     const [selectedDivision, setSelectedDivision] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
 

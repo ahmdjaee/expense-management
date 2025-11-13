@@ -48,11 +48,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // USERS ROUTES
     // ========================================
     Route::prefix('users')->name('users')->group(function () {
-        Route::middleware('role:superadmin,admin')->group(function () {
-            Route::get('/', [UserController::class, 'index']);
-            Route::get('/create', [UserController::class, 'create'])->name('.create');
-            Route::post('/', [UserController::class, 'store'])->name('.store');
-        });
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/create', [UserController::class, 'create'])->name('.create');
+        Route::post('/', [UserController::class, 'store'])->name('.store');
     });
 });
 

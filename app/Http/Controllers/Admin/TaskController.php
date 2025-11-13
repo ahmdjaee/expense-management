@@ -7,6 +7,7 @@ use App\Models\Division;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TaskController extends Controller
@@ -16,7 +17,24 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::with(['division', 'assignedTo'])->get();
+        $user = Auth::user();
+
+        // Base query
+        $query = Task::with(['division', 'assignedTo']);
+
+        // 🔹 Superadmin → lihat semua task
+        if ($user->role === 'superadmin') {
+            $tasks = $query->latest()->get();
+        }
+
+        // 🔹 Admin → task dari divisinya saja
+        elseif ($user->role === 'admin' || $user->role === 'user') {
+            $divisionIds = $user->divisions()->pluck('divisions.id');
+            $tasks = $query
+                ->whereIn('division_id', $divisionIds)
+                ->latest()
+                ->get();
+        }
 
         return Inertia::render('task/index', [
             'tasks' => $tasks,
@@ -83,7 +101,7 @@ class TaskController extends Controller
         //     }
         // }
 
-        flash()->success('Task created successfully!');
+        notyf()->success('Task created successfully!');
 
         // 🔹 4. Redirect atau kembalikan response
         return redirect()->route('tasks')->with('success', 'Task berhasil dibuat.');

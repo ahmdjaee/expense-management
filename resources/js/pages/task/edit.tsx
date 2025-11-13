@@ -22,7 +22,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-
 interface Division {
     id: number;
     name: string;

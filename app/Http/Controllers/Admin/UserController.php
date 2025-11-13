@@ -66,7 +66,8 @@ class UserController extends Controller
 
         // Cegah admin membuat superadmin
         if ($authUser->role === 'admin' && $validated['role'] === 'superadmin') {
-            abort(403, 'Admin tidak dapat membuat superadmin');
+            flash()->error('Admin tidak dapat membuat superadmin');
+            return redirect()->back();
         }
 
         // Jika admin, pastikan hanya memilih divisi miliknya
@@ -74,7 +75,8 @@ class UserController extends Controller
             $validDivisions = $authUser->divisions->pluck('id')->toArray();
             foreach ($validated['divisions'] as $divisionId) {
                 if (!in_array($divisionId, $validDivisions)) {
-                    abort(403, 'Kamu tidak berhak menambahkan user ke divisi ini');
+                    flash()->error('Kamu tidak berhak menambahkan user ke divisi ini');
+                    return redirect()->back();
                 }
             }
         }
@@ -89,15 +91,8 @@ class UserController extends Controller
 
         $user->divisions()->sync($validated['divisions']);
 
-        return redirect()->route('users')->with('success', 'User berhasil dibuat.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+        flash()->success('User berhasil dibuat');
+        return redirect()->route('users');
     }
 
     /**
@@ -105,7 +100,36 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $authUser = auth()->user();
+        $user = User::with('divisions')->findOrFail($id);
+
+        // Cek authorization
+        if ($authUser->role === 'admin') {
+            // Admin hanya bisa edit user di divisinya
+            $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
+            $userDivisionIds = $user->divisions->pluck('id')->toArray();
+            
+            if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
+                flash()->error('Kamu tidak berhak mengedit user ini');
+                return redirect()->route('users');
+            }
+
+            // Admin tidak bisa edit superadmin
+            if ($user->role === 'superadmin') {
+                flash()->error('Admin tidak dapat mengedit superadmin');
+                return redirect()->route('users');
+            }
+        }
+
+        // Get divisions based on role
+        $divisions = $authUser->role === 'superadmin'
+            ? Division::all()
+            : $authUser->divisions;
+
+        return inertia('user/edit', [
+            'user' => $user,
+            'divisions' => $divisions,
+        ]);
     }
 
     /**
@@ -113,7 +137,67 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $authUser = auth()->user();
+        $user = User::findOrFail($id);
+
+        // Cek authorization
+        if ($authUser->role === 'admin') {
+            // Admin hanya bisa edit user di divisinya
+            $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
+            $userDivisionIds = $user->divisions->pluck('id')->toArray();
+            
+            if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
+                flash()->error('Kamu tidak berhak mengedit user ini');
+                return redirect()->route('users');
+            }
+
+            // Admin tidak bisa edit superadmin
+            if ($user->role === 'superadmin') {
+                flash()->error('Admin tidak dapat mengedit superadmin');
+                return redirect()->route('users');
+            }
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => 'nullable|min:6',
+            'role' => 'required|in:superadmin,admin,user',
+            'divisions' => 'required|array|min:1',
+        ]);
+
+        // Cegah admin membuat/mengubah jadi superadmin
+        if ($authUser->role === 'admin' && $validated['role'] === 'superadmin') {
+            flash()->error('Admin tidak dapat mengubah role menjadi superadmin');
+            return redirect()->back();
+        }
+
+        // Jika admin, pastikan hanya memilih divisi miliknya
+        if ($authUser->role === 'admin') {
+            $validDivisions = $authUser->divisions->pluck('id')->toArray();
+            foreach ($validated['divisions'] as $divisionId) {
+                if (!in_array($divisionId, $validDivisions)) {
+                    flash()->error('Kamu tidak berhak menambahkan user ke divisi ini');
+                    return redirect()->back();
+                }
+            }
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        
+        // Update password hanya jika diisi
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+        
+        $user->role = $validated['role'];
+        $user->save();
+
+        $user->divisions()->sync($validated['divisions']);
+
+        flash()->success('User berhasil diupdate');
+        return redirect()->route('users');
     }
 
     /**
@@ -121,6 +205,40 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $authUser = auth()->user();
+        $user = User::findOrFail($id);
+
+        // Cegah user menghapus dirinya sendiri
+        if ($authUser->id === $user->id) {
+            flash()->error('Kamu tidak dapat menghapus akun sendiri');
+            return redirect()->back();
+        }
+
+        // Cek authorization
+        if ($authUser->role === 'admin') {
+            // Admin hanya bisa hapus user di divisinya
+            $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
+            $userDivisionIds = $user->divisions->pluck('id')->toArray();
+            
+            if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
+                flash()->error('Kamu tidak berhak menghapus user ini');
+                return redirect()->back();
+            }
+
+            // Admin tidak bisa hapus superadmin
+            if ($user->role === 'superadmin') {
+                flash()->error('Admin tidak dapat menghapus superadmin');
+                return redirect()->back();
+            }
+        }
+
+        // Hapus relasi divisions
+        $user->divisions()->detach();
+        
+        // Hapus user
+        $user->delete();
+
+        flash()->success('User berhasil dihapus');
+        return redirect()->route('users');
     }
 }

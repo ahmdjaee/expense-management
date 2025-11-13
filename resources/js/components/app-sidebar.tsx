@@ -22,7 +22,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
-        role: ['admin', 'manager'], // Hanya untuk role selain 'user'
+        role: ['admin', 'superadmin'], // Hanya untuk role selain 'user'
     },
     {
         title: 'All Tasks',

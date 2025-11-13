@@ -35,6 +35,19 @@ export default function UserPage({ users }: { users: User[] }) {
         router.visit(`/users/${id}/edit`);
     };
 
+    const getDescription = (role: string) => {
+        switch (role) {
+            case 'superadmin':
+                return 'Atur dan kelola semua user';
+            case 'admin':
+                return 'Kelola user sesuai divisi anda';
+            case 'user':
+                return 'Menampilkan user sesuai divisi anda';
+            default:
+                return 'User';
+        }
+    }
+
     const getDivisionColor = (division: string) => {
         const colors = {
             Design: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -57,7 +70,7 @@ export default function UserPage({ users }: { users: User[] }) {
                             <div>
                                 <h1 className="text-3xl font-bold text-foreground">All Users</h1>
                                 <p className="mt-1 text-muted-foreground">
-                                    View and manage all users across your organization
+                                    {getDescription(userRole)}
                                 </p>
                             </div>
                             {/* Tombol New User hanya muncul untuk superadmin & admin */}

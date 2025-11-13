@@ -69,22 +69,26 @@ class DashboardController extends Controller
 
         // Upcoming deadlines (next 7 days)
         $upcomingDeadlines = Task::with(['assignedTo', 'division'])
-            ->where('deadline', '>=', now())
-            ->where('deadline', '<=', now()->addDays(7))
+            ->where(function ($query) {
+                $query->whereDate('deadline', '>=', now()->toDateString())
+                    ->whereDate('deadline', '<=', now()->addDays(7)->toDateString());
+            })
             ->where('status', '!=', 'completed')
             ->orderBy('deadline', 'asc')
             ->limit(10)
             ->get()
             ->map(function ($task) {
+                $deadline = \Carbon\Carbon::parse($task->deadline);
+
                 return [
                     'id' => $task->id,
                     'title' => $task->title,
-                    'deadline' => $task->deadline,
+                    'deadline' => $deadline->format('Y-m-d'),
                     'priority' => $task->priority,
                     'status' => $task->status,
                     'assigned_to' => $task->assignedTo?->name,
                     'division' => $task->division?->name,
-                    'days_remaining' => now()->diffInDays($task->deadline, false),
+                    'days_remaining' => now()->startOfDay()->diffInDays($deadline->startOfDay(), false),
                 ];
             });
 

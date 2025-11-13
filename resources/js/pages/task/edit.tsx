@@ -9,7 +9,7 @@ import AppLayout from '@/layouts/app-layout';
 import { tasks } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Form, Head, router } from '@inertiajs/react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import ReactSelect from 'react-select';
 
 interface Task {
@@ -54,9 +54,7 @@ export default function TaskEdit({ task, users, divisions }: TaskEditProps) {
     const filteredUsers = useMemo(() => {
         if (!selectedDivision) return [];
         return users
-            .filter((user) =>
-                user.divisions.some((division) => division.id.toString() === selectedDivision)
-            )
+            .filter((user) => user.divisions.some((division) => division.id.toString() === selectedDivision))
             .map((user) => ({
                 value: user.id,
                 label: user.name,

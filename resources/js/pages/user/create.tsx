@@ -7,12 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AppLayout from '@/layouts/app-layout';
 import { users as usersRoute } from '@/routes';
 import { BreadcrumbItem } from '@/types';
-import { Form, Head, router } from '@inertiajs/react';
+import { Form, Head, router, usePage } from '@inertiajs/react';
 import ReactSelect from 'react-select';
 
 interface CreateUserProps {
     divisions: Array<{ id: number; name: string }>;
-    authRole: 'superadmin' | 'admin';
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,8 +19,10 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create User', href: '' },
 ];
 
-export default function CreateUser({ divisions, authRole }: CreateUserProps) {
-
+export default function CreateUser({ divisions }: CreateUserProps) {
+    // Ambil data auth user
+    const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
+    const authRole = auth.user.role;
     // Role options tergantung siapa yang login
     const roleOptions =
         authRole === 'superadmin'

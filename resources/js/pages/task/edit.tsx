@@ -9,29 +9,8 @@ import AppLayout from '@/layouts/app-layout';
 import { tasks } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Form, Head, router } from '@inertiajs/react';
-<<<<<<< HEAD
-import { ArrowLeft } from 'lucide-react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Tasks',
-        href: tasks().url,
-    },
-    {
-        title: 'Edit Task',
-        href: '',
-    },
-];
-
-interface Division {
-    id: number;
-    name: string;
-    description?: string;
-}
-=======
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import ReactSelect from 'react-select';
->>>>>>> a3083930f0dbca63d70ecd6ebee6edd343e19a46
 
 interface Task {
     id: number;
@@ -75,9 +54,7 @@ export default function TaskEdit({ task, users, divisions }: TaskEditProps) {
     const filteredUsers = useMemo(() => {
         if (!selectedDivision) return [];
         return users
-            .filter((user) =>
-                user.divisions.some((division) => division.id.toString() === selectedDivision)
-            )
+            .filter((user) => user.divisions.some((division) => division.id.toString() === selectedDivision))
             .map((user) => ({
                 value: user.id,
                 label: user.name,

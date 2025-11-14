@@ -59,7 +59,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        // 🔹 1. Validasi input (lebih sederhana dari admin)
+        // 🔹 1. Validasi input
         $validated = $request->validate([
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
@@ -68,19 +68,22 @@ class TaskController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
-        // 🔹 2. Ambil division_id dari user yang login
-        $user = auth()->user();
+        // 🔹 2. Ambil user yang login dengan relasi divisions
+        $user = auth()->user()->load('divisions');
 
         // 🔹 3. Validasi: User harus punya division
-        if (!$user->division_id) {
+        if ($user->divisions->isEmpty()) {
             return back()->withErrors([
                 'division' => 'Your account is not assigned to any division. Please contact administrator to assign you to a division before creating tasks.'
             ]);
         }
 
-        // 🔹 4. Simpan ke database dengan auto-assign ke member yang login
+        // 🔹 4. Ambil divisi pertama dari user
+        $division = $user->divisions->first();
+
+        // 🔹 5. Simpan ke database dengan auto-assign ke member yang login
         $task = Task::create([
-            'division_id' => $user->division_id, // Ambil dari user's division
+            'division_id' => $division->id, // Ambil dari user's division
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'assigned_to' => auth()->id(), // Otomatis ke member yang create
@@ -91,7 +94,7 @@ class TaskController extends Controller
             'is_personal' => true, // Tandai sebagai personal task
         ]);
 
-        // 🔹 4. (Opsional) Kirim notifikasi jika task punya deadline
+        // 🔹 6. (Opsional) Kirim notifikasi jika task punya deadline
         if ($task->deadline) {
             $diffInDays = now()->diffInDays($task->deadline, false);
 
@@ -107,7 +110,7 @@ class TaskController extends Controller
 
         flash()->success('Task pribadi ditambahkan!');
 
-        // 🔹 5. Redirect ke My Tasks
+        // 🔹 7. Redirect ke My Tasks
         return redirect()->route('mytasks');
     }
 

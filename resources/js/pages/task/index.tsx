@@ -45,6 +45,8 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedPriority, setSelectedPriority] = useState<string>('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
+    const userRole = auth.user.role;
 
     const filteredTasks = useMemo(() => {
         return tasks.filter((task) => {

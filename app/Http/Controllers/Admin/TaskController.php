@@ -75,9 +75,9 @@ class TaskController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
-               // 🔹 2. Simpan ke database dan kirim email
+        // 🔹 2. Simpan ke database dan kirim email
         $createdTasks = [];
-        
+
         foreach ($validated['users'] as $userId) {
             $task = Task::create([
                 'division_id' => $validated['division_id'],
@@ -95,7 +95,7 @@ class TaskController extends Controller
             // 🔹 3. Kirim email ke user yang ditugaskan
             try {
                 $user = User::find($userId);
-                
+
                 if ($user && $user->email) {
                     Mail::to($user->email)->send(new TaskAssignedMail($task, $user));
                 }

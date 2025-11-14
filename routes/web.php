@@ -23,11 +23,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ========================================
     Route::prefix('tasks')->name('tasks')->group(function () {
         Route::get('/', [AdminTaskController::class, 'index']);
-        Route::get('/create', [AdminTaskController::class, 'create'])->name('.create');
-        Route::post('/store', [AdminTaskController::class, 'store'])->name('.store');
-        Route::get('/{id}/edit', [AdminTaskController::class, 'edit'])->name('.edit');
-        Route::post('{id}/update', [AdminTaskController::class, 'update'])->name('.update');
-        Route::delete('/{id}', [AdminTaskController::class, 'destroy'])->name('.destroy');
+
+        Route::middleware(['role:admin,superadmin'])->group(function () {
+            Route::get('/create', [AdminTaskController::class, 'create'])->name('.create');
+            Route::post('/store', [AdminTaskController::class, 'store'])->name('.store');
+            Route::get('/{id}/edit', [AdminTaskController::class, 'edit'])->name('.edit');
+            Route::post('{id}/update', [AdminTaskController::class, 'update'])->name('.update');
+            Route::delete('/{id}', [AdminTaskController::class, 'destroy'])->name('.destroy');
+        });
     });
 
     // ========================================

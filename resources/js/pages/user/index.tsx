@@ -46,15 +46,15 @@ export default function UserPage({ users }: { users: User[] }) {
             default:
                 return 'User';
         }
-    }
+    };
 
     const getDivisionColor = (division: string) => {
         const colors = {
-            Design: 'bg-purple-50 text-purple-700 border-purple-200',
-            Marketing: 'bg-blue-50 text-blue-700 border-blue-200',
-            IT: 'bg-pink-50 text-pink-700 border-pink-200',
-            Finance: 'bg-green-50 text-green-700 border-green-200',
-            "Human Resources": 'bg-orange-50 text-orange-700 border-orange-200',
+            Design: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300',
+            Marketing: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300',
+            IT: 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300',
+            Finance: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300',
+            'Human Resources': 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300',
         };
         return colors[division] || 'bg-gray-50 text-gray-700 border-gray-200';
     };
@@ -69,9 +69,7 @@ export default function UserPage({ users }: { users: User[] }) {
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <h1 className="text-3xl font-bold text-foreground">All Users</h1>
-                                <p className="mt-1 text-muted-foreground">
-                                    {getDescription(userRole)}
-                                </p>
+                                <p className="mt-1 text-muted-foreground">{getDescription(userRole)}</p>
                             </div>
                             {/* Tombol New User hanya muncul untuk superadmin & admin */}
                             {canManageUsers && (
@@ -119,14 +117,22 @@ export default function UserPage({ users }: { users: User[] }) {
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         )}
-                                        
-                                        <h3 className="mb-2 pr-8 text-base font-semibold text-foreground">
+
+                                        <h3 className="mb-2 flex items-center justify-between pr-8 text-base font-semibold text-foreground">
                                             {user.name}
+
+                                            {user.role === 'superadmin' ? (
+                                                <span className="text-sm font-medium text-green-600">Super Admin</span>
+                                            ) : user.role === 'admin' ? (
+                                                <span className="text-sm font-medium text-blue-600">Admin</span>
+                                            ) : (
+                                                <span className="text-sm font-medium text-gray-600">User</span>
+                                            )}
                                         </h3>
                                         <p className="mb-4 text-sm text-muted-foreground">{user.email}</p>
 
                                         {/* Tags */}
-                                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
                                             {user.divisions &&
                                                 user.divisions.map((division, index) => (
                                                     <span

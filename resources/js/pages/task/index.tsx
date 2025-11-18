@@ -61,6 +61,13 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
     const stats = useMemo(() => {
         return {
             highPriority: tasks.filter((t) => t.priority === 'high' && t.status !== 'completed').length,
+            overdueTasks: tasks.filter((t) => {
+                if (t.status === 'completed' || !t.deadline) return false;
+                const daysLeft = Math.ceil(
+                    (new Date(t.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24),
+                );
+                return daysLeft < 0;
+            }).length,
             completionRate:
                 tasks.length > 0
                     ? Math.round((tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100)
@@ -120,10 +127,10 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
         return colors[division] || 'bg-gray-50 text-gray-700 border-gray-200';
     };
 
+    // 修改这个函数，让它返回正数（剩余天数）或负数（已过期天数）
     const getDaysLeft = (deadline: string | null) => {
         if (!deadline) return null;
-        const days = Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        return days > 0 ? days : 0;
+        return Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
     };
 
     return (
@@ -151,7 +158,7 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
                         </div>
 
                         {/* Quick Stats */}
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                             <div className="rounded-lg border border-border bg-card p-4">
                                 <p className="mb-1 text-xs font-medium text-muted-foreground">Total Tasks</p>
                                 <p className="text-2xl font-bold text-foreground">{tasks.length}</p>
@@ -163,6 +170,10 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
                             <div className="rounded-lg border border-border bg-card p-4">
                                 <p className="mb-1 text-xs font-medium text-muted-foreground">High Priority</p>
                                 <p className="text-2xl font-bold text-red-600">{stats.highPriority}</p>
+                            </div>
+                            <div className="rounded-lg border border-border bg-card p-4">
+                                <p className="mb-1 text-xs font-medium text-muted-foreground">Overdue</p>
+                                <p className="text-2xl font-bold text-red-600">{stats.overdueTasks}</p>
                             </div>
                         </div>
                     </div>
@@ -260,7 +271,11 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
                                 return (
                                     <div
                                         key={task.id}
-                                        className="relative rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg"
+                                        className={`relative rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg ${
+                                            daysLeft !== null && daysLeft < 0 && task.status !== 'completed'
+                                                ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950'
+                                                : ''
+                                        }`}
                                     >
                                         {/* Dropdown Menu */}
                                         {authRole === 'admin' || authRole === 'superadmin' ? (
@@ -315,6 +330,11 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
                                             >
                                                 {getPriorityLabel(task.priority)}
                                             </span>
+                                            {daysLeft !== null && daysLeft < 0 && task.status !== 'completed' && (
+                                                <span className="rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+                                                    Overdue
+                                                </span>
+                                            )}
                                         </div>
 
                                         {/* Footer */}
@@ -332,10 +352,18 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
                                             ) : daysLeft !== null ? (
                                                 <span
                                                     className={`text-sm font-medium ${
-                                                        daysLeft <= 3 ? 'text-orange-600' : 'text-muted-foreground'
+                                                        daysLeft < 0
+                                                            ? 'text-red-600'
+                                                            : daysLeft <= 3
+                                                              ? 'text-orange-600'
+                                                              : 'text-muted-foreground'
                                                     }`}
                                                 >
-                                                    {daysLeft === 0 ? 'Due today' : `${daysLeft} days left`}
+                                                    {daysLeft < 0
+                                                        ? `Overdue by ${Math.abs(daysLeft)} day${Math.abs(daysLeft) > 1 ? 's' : ''}`
+                                                        : daysLeft === 0
+                                                          ? 'Due today'
+                                                          : `${daysLeft} day${daysLeft > 1 ? 's' : ''} left`}
                                                 </span>
                                             ) : null}
                                         </div>

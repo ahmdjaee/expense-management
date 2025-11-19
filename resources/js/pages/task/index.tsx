@@ -117,7 +117,6 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
         return priority.charAt(0).toUpperCase() + priority.slice(1);
     };
 
-    // 修改这个函数，让它返回正数（剩余天数）或负数（已过期天数）
     const getDaysLeft = (deadline: string | null) => {
         if (!deadline) return null;
         return Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));

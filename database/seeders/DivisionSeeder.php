@@ -16,19 +16,27 @@ class DivisionSeeder extends Seeder
     {
         $divisions = [
             [
-                'name' => 'Human Resources',
+                'name' => 'HRGA',
                 'description' => 'Handles recruitment, employee relations, and benefits management.',
             ],
             [
-                'name' => 'Finance',
-                'description' => 'Manages budgeting, accounting, and financial reporting.',
+                'name' => 'IT',
+                'description' => 'Buil Application.',
             ],
             [
-                'name' => 'IT',
+                'name' => 'DEALING',
                 'description' => 'Responsible for technology infrastructure, software development, and IT support.',
             ],
             [
-                'name' => 'Marketing',
+                'name' => 'ACCOUNTING',
+                'description' => 'Focuses on market research, advertising, and promotional activities.',
+            ],
+            [
+                'name' => 'FINANCE',
+                'description' => 'Manages budgeting, accounting, and financial reporting.',
+            ],
+            [
+                'name' => 'WAKIL PIALANG',
                 'description' => 'Focuses on market research, advertising, and promotional activities.',
             ],
         ];

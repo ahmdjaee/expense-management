@@ -106,7 +106,7 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                 {/* Role */}
                                 <div className="space-y-2">
                                     <Label htmlFor="role">Role</Label>
-                                    <Select name="role" defaultValue={roleOptions[0].value}>
+                                    <Select required name="role" defaultValue={roleOptions[0].value}>
                                         <SelectTrigger id="role" className="border-muted bg-muted/50">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -131,6 +131,7 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                             value: d.id,
                                             label: d.name,
                                         }))}
+                                        required
                                         // value={selectedDivisions}
                                         // onChange={setSelectedDivisions}
                                         placeholder="Select divisions..."

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { dashboard, mytasks, tasks, users } from '@/routes';
-import profile, { edit } from '@/routes/profile';
+import { edit } from '@/routes/profile';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ClipboardCheck, LayoutGrid, Settings, User, Workflow } from 'lucide-react';
@@ -28,7 +28,6 @@ const mainNavItems: NavItem[] = [
         title: 'Users',
         href: users(),
         icon: User,
-        role: ['admin', 'superadmin'],
     },
     {
         title: 'Settings',
@@ -67,17 +66,18 @@ export function BottomNav() {
         5: 'grid-cols-5',
     }[filteredNavItems.length] || 'grid-cols-5';
 
+    // Jika grid 4, tampilkan semua menu normal (tanpa center elevated)
+    const showCenterElevated = filteredNavItems.length !== 4;
+
     return (
         <>
-
-
             {/* Bottom Navigation */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
                 <div className={cn('mx-auto grid h-16 max-w-screen-xl', gridCols)}>
                     {filteredNavItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = isItemActive(item.href);
-                        const isCenter = item.isCenter;
+                        const isCenter = item.isCenter && showCenterElevated;
 
                         if (isCenter) {
                             return (
@@ -104,7 +104,7 @@ export function BottomNav() {
                                 )}
                             >
                                 <Icon className={cn('h-5 w-5', isActive && 'fill-current')} />
-                                <span className="truncate max-w-[60px] text-center">{item.title}</span>
+                                <span className="max-w-[60px] truncate text-center">{item.title}</span>
                             </Link>
                         );
                     })}

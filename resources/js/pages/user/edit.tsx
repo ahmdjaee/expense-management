@@ -98,7 +98,7 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
                                 {/* Role */}
                                 <div className="space-y-2">
                                     <Label htmlFor="role">Role</Label>
-                                    <Select name="role" defaultValue={user.role}>
+                                    <Select name="role" defaultValue={user.role} required>
                                         <SelectTrigger id="role" className="border-muted bg-muted/50">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -127,6 +127,7 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
                                             value: d.id,
                                             label: d.name,
                                         }))}
+                                        required
                                         placeholder="Select divisions..."
                                         className="basic-multi-select"
                                         classNamePrefix="select"

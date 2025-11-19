@@ -6,6 +6,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/app-layout';
+import { getDivisionColor } from '@/lib/badge-color';
 import { BreadcrumbItem, User } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -48,22 +49,11 @@ export default function UserPage({ users }: { users: User[] }) {
         }
     };
 
-    const getDivisionColor = (division: string) => {
-        const colors = {
-            Design: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300',
-            Marketing: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300',
-            IT: 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300',
-            Finance: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300',
-            'Human Resources': 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300',
-        };
-        return colors[division] || 'bg-gray-50 text-gray-700 border-gray-200';
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="User Management" />
             <div className="flex-1 overflow-auto">
-                <div className="mx-auto max-w-7xl p-4 md:p-8">
+                <div className="mx-auto px-4 py-6">
                     {/* Header Section */}
                     <div className="mb-8">
                         <div className="mb-6 flex items-center justify-between">

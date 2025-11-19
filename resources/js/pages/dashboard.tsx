@@ -85,9 +85,9 @@ export default function Dashboard({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl">
                 <div className="flex-1 overflow-auto">
-                    <div className="mx-auto max-w-7xl p-4 md:p-8">
+                    <div className="mx-auto px-4 py-6">
                         {/* Header Section */}
                         <div className="mb-8">
                             <div className="mb-6 flex items-center justify-between">

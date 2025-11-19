@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import { getDivisionColor } from '@/lib/badge-color';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { GridIcon, ListIcon, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -116,18 +117,6 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
         return priority.charAt(0).toUpperCase() + priority.slice(1);
     };
 
-    const getDivisionColor = (division: string) => {
-        const colors = {
-            Design: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300',
-            Marketing: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300',
-            IT: 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300',
-            Finance: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300',
-            'Human Resources': 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300',
-        };
-        return colors[division] || 'bg-gray-50 text-gray-700 border-gray-200';
-    };
-
-    // 修改这个函数，让它返回正数（剩余天数）或负数（已过期天数）
     const getDaysLeft = (deadline: string | null) => {
         if (!deadline) return null;
         return Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
@@ -137,7 +126,7 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Task Management" />
             <div className="flex-1 overflow-auto">
-                <div className="mx-auto max-w-7xl p-4 md:p-8">
+                <div className="mx-auto px-4 py-6">
                     {/* Header Section */}
                     <div className="mb-8">
                         <div className="mb-6 flex items-center justify-between">
@@ -193,11 +182,12 @@ export default function TaskManagementDashboard({ tasks = [] }: TaskManagementDa
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="all">All Divisions</SelectItem>
-                                                <SelectItem value="1">Engineering</SelectItem>
+                                                <SelectItem value="1">HRGA</SelectItem>
                                                 <SelectItem value="2">Design</SelectItem>
-                                                <SelectItem value="3">Marketing</SelectItem>
-                                                <SelectItem value="4">Product</SelectItem>
-                                                <SelectItem value="5">HR</SelectItem>
+                                                <SelectItem value="3">IT</SelectItem>
+                                                <SelectItem value="4">DEALING</SelectItem>
+                                                <SelectItem value="5">ACCOUNTING</SelectItem>
+                                                <SelectItem value="6">WAKIL PIALANG</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

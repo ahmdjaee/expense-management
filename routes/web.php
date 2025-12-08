@@ -14,6 +14,14 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/expenses/dashboard', function () {
+    return Inertia::render('expense/dashboard');
+})->name('expenses.dashboard');
+
+Route::get('/expenses/request/detail', function () {
+    return Inertia::render('expense/request/index');
+})->name('expenses.dashboard');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Update route dashboard ke controller
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

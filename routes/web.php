@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
-use App\Http\Controllers\DashboardController; // Tambahkan ini
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -14,10 +14,15 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/expenses/dashboard', function () {
-    return Inertia::render('expense/dashboard');
-})->name('expenses.dashboard');
+// Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
+// Route::get('/expenses/dashboard', function () {
+//     return Inertia::render('expense/dashboard');
+// })->name('expenses.dashboard');
 
+// Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
+// Route::get('/expenses/request/detail', function () {
+//     return Inertia::render('expense/request/index');
+// })->name('expenses.dashboard');
 Route::get('/expenses/request/detail', function () {
     return Inertia::render('expense/request/detail/index');
 })->name('expenses.request.detail');
@@ -73,6 +78,63 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}/edit', [UserController::class, 'edit'])->name('.edit');
         Route::put('/{id}', [UserController::class, 'update'])->name('.update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('.destroy');
+    });
+
+    // ========================================
+    // EXPENSE MANAGEMENT ROUTES
+    // ========================================
+    Route::prefix('expense')->name('expense.')->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('expense/dashboard', [
+                'auth' => [
+                    'user' => auth()->user(),
+                ],
+            ]);
+        })->name('dashboard');
+
+        Route::get('/approvals', function () {
+            return Inertia::render('expense/approvals/index', [
+                'auth' => [
+                    'user' => auth()->user(),
+                ],
+            ]);
+        })->name('approvals');
+
+        Route::get('/payments', function () {
+            return Inertia::render('expense/payments/index', [
+                'auth' => [
+                    'user' => auth()->user(),
+                ],
+            ]);
+        })->name('payments');
+
+        Route::get('/reports', function () {
+            return Inertia::render('expense/reports/index', [
+                'auth' => [
+                    'user' => auth()->user(),
+                ],
+            ]);
+        })->name('reports');
+
+        // Detail request routes
+        Route::get('/requests/{id}', function ($id) {
+            // In a real app, you would fetch the request from the database
+            return Inertia::render('expense/requests/show', [
+                'requestId' => $id,
+                'auth' => [
+                    'user' => auth()->user(),
+                ],
+            ]);
+        })->name('requests.show');
+
+        Route::get('/requests/{id}/pay', function ($id) {
+            return Inertia::render('expense/requests/pay', [
+                'requestId' => $id,
+                'auth' => [
+                    'user' => auth()->user(),
+                ],
+            ]);
+        })->name('requests.pay');
     });
 });
 

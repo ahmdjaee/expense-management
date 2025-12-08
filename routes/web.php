@@ -23,6 +23,17 @@ Route::get('/', function () {
 // Route::get('/expenses/request/detail', function () {
 //     return Inertia::render('expense/request/index');
 // })->name('expenses.dashboard');
+Route::get('/expenses/request/detail', function () {
+    return Inertia::render('expense/request/detail/index');
+})->name('expenses.request.detail');
+
+Route::get('/expenses/request/new', function () {
+    return Inertia::render('expense/request/new/index');
+})->name('expenses.request.detail');
+
+Route::get('/expenses/request', function () {
+    return Inertia::render('expense/request/index');
+})->name('expenses.request');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Update route dashboard ke controller

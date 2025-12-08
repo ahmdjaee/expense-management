@@ -41,8 +41,6 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-
-
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
@@ -55,7 +53,7 @@ export function AppSidebar() {
         return mainNavItems.filter((item) => {
             // Jika item tidak punya batasan role, tampilkan
             if (!item.role) return true;
-            
+
             // Jika ada batasan role, cek apakah user role termasuk
             return item.role.includes(userRole);
         });

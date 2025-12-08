@@ -41,6 +41,8 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
+
+
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
@@ -74,7 +76,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={filteredNavItems} />
+                <NavMain items={filteredNavItems} groupLabel="Task Management" />
             </SidebarContent>
 
             <SidebarFooter>

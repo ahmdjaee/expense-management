@@ -1,3 +1,5 @@
+import type { ExpenseRequest, User } from '@/lib/types';
+
 export const DIVISIONS = [
     { id: 1, name: 'Engineering', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
     { id: 2, name: 'Design', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
@@ -153,5 +155,100 @@ export const TASKS = [
 ];
 
 export type Task = (typeof TASKS)[0];
-export type User = (typeof USERS)[0];
 export type Division = (typeof DIVISIONS)[0];
+
+// Mock data untuk development
+
+export const mockUsers: User[] = [
+    {
+        id: '1',
+        name: 'Budi Santoso',
+        email: 'budi@company.com',
+        phone: '0812345678',
+        role: 'user',
+        division: 'IT',
+        bankAccount: '1234567890',
+        bankName: 'BCA',
+        accountHolder: 'Budi Santoso',
+        createdAt: new Date('2024-01-01'),
+    },
+    {
+        id: '2',
+        name: 'Siti Nurhaliza',
+        email: 'siti@company.com',
+        phone: '0812345679',
+        role: 'head',
+        division: 'IT',
+        bankAccount: '9876543210',
+        bankName: 'Mandiri',
+        accountHolder: 'Siti Nurhaliza',
+        createdAt: new Date('2024-01-01'),
+    },
+    {
+        id: '3',
+        name: 'Ahmad Wijaya',
+        email: 'ahmad@company.com',
+        phone: '0812345680',
+        role: 'director',
+        division: 'Finance',
+        bankAccount: '5555555555',
+        bankName: 'BNI',
+        accountHolder: 'Ahmad Wijaya',
+        createdAt: new Date('2024-01-01'),
+    },
+    {
+        id: '4',
+        name: 'Dewi Lestari',
+        email: 'dewi@company.com',
+        phone: '0812345681',
+        role: 'finance',
+        division: 'Finance',
+        bankAccount: '4444444444',
+        bankName: 'BCA',
+        accountHolder: 'Dewi Lestari',
+        createdAt: new Date('2024-01-01'),
+    },
+    {
+        id: '5',
+        name: 'Raka Pratama',
+        email: 'raka@company.com',
+        phone: '0812345682',
+        role: 'user',
+        division: 'HR',
+        bankAccount: '7777777777',
+        bankName: 'Mandiri',
+        accountHolder: 'Raka Pratama',
+        createdAt: new Date('2024-01-01'),
+    },
+];
+
+export const mockRequests: ExpenseRequest[] = [
+    {
+        id: '1',
+        userId: '1',
+        type: 'reimbursement',
+        amount: 500000,
+        title: 'Pembelian Stationery',
+        description: 'Pembelian alat tulis kantor untuk departemen IT',
+        status: 'submitted',
+        paymentMethod: 'transfer',
+        currency: 'IDR',
+        createdAt: new Date('2024-11-20'),
+        updatedAt: new Date('2024-11-20'),
+    },
+    {
+        id: '2',
+        userId: '5',
+        type: 'advance',
+        amount: 2000000,
+        title: 'Dana Advance Perjalanan Dinas',
+        description: 'Advance untuk perjalanan dinas ke Jakarta',
+        status: 'head_approved',
+        paymentMethod: 'cash',
+        currency: 'IDR',
+        headApprovedAt: new Date('2024-11-21'),
+        headApprovedBy: '2',
+        createdAt: new Date('2024-11-20'),
+        updatedAt: new Date('2024-11-21'),
+    },
+];

@@ -19,10 +19,9 @@ Route::get('/', function () {
 //     return Inertia::render('expense/dashboard');
 // })->name('expenses.dashboard');
 
-// Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
-// Route::get('/expenses/request/detail', function () {
-//     return Inertia::render('expense/request/index');
-// })->name('expenses.dashboard');
+Route::get('/expenses/request/detail', function () {
+    return Inertia::render('expense/request/index');
+})->name('expenses.dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Update route dashboard ke controller

@@ -1,14 +1,13 @@
 import { PrintForm } from "@/components/request/print-form";
 import AppLayout from "@/layouts/expense-app-layout";
+import { ExpenseRequest } from "@/lib/types";
 import { formatCurrency, formatDateTime, getStatusBadgeColor, getStatusLabel } from "@/lib/utils";
 import { mockRequests, mockUsers } from "@/pages/mockdata";
 import { router } from "@inertiajs/react";
 import { useState } from "react";
-const findRequestById = (id: string) => mockRequests.find(r => r.id === id);
 
 
-export default function RequestDetailPage() {
-  const request = findRequestById('1');
+export default function RequestDetailPage({ request } : { request: ExpenseRequest }) {
   const auth = { user: mockUsers.find(u => u.role === 'head') }; // Simulasi user login sebagai 'head'
 
   const [showPrintModal, setShowPrintModal] = useState(false)

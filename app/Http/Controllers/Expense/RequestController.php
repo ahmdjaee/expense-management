@@ -57,6 +57,7 @@ class RequestController extends Controller
         $expenseRequest->payment_method = $request->input('payment_method');
         $expenseRequest->type = $request->input('type');
         $expenseRequest->attachment = $filePath;
+        $expenseRequest->status = 'submitted';
         $expenseRequest->save();
 
         flash()->success('Pengajuan berhasil dibuat.');

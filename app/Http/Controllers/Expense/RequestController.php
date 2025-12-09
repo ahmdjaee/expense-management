@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Expense;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Request as ExpenseRequest;
 use Inertia\Inertia;
 
 class RequestController extends Controller
@@ -13,7 +14,8 @@ class RequestController extends Controller
      */
     public function index()
     {
-        return Inertia::render('expense/request/index');
+        $requests = ExpenseRequest::where('user_id', auth()->id())->get();
+        return Inertia::render('expense/request/index', compact('requests'));
     }
 
     /**
@@ -48,7 +50,7 @@ class RequestController extends Controller
         }
 
         // Create the request
-        $expenseRequest = new \App\Models\Request();
+        $expenseRequest = new ExpenseRequest();
         $expenseRequest->user_id = auth()->id();
         $expenseRequest->title = $request->input('title');
         $expenseRequest->amount = $request->input('amount');
@@ -70,7 +72,8 @@ class RequestController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $request = ExpenseRequest::findOrFail($id);
+        return Inertia::render('expense/request/detail', compact('request'));
     }
 
     /**

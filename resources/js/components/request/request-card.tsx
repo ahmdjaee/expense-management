@@ -12,7 +12,7 @@ export function RequestCard({ request }: RequestCardProps) {
   const isReimbursement = request.type === "reimbursement"
 
   return (
-    <Link href={`/requests/${request.id}`}>
+    <Link href={`/expenses/request/${request.id}`}>
       <div className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1">

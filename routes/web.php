@@ -68,9 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // EXPENSE MANAGEMENT ROUTES
     // ========================================
     Route::prefix('expenses')->name('expense.')->group(function () {
-        Route::get('/request/detail', function () {
-            return Inertia::render('expense/request/detail/index');
-        })->name('requestDetail');
+        Route::get('/request/{id}',[RequestController::class, 'show'])->name('requestDetail');
 
         Route::get('/request/new',[RequestController::class, 'create'])->name('requestNew');
         Route::post('/request/new',[RequestController::class, 'store'])->name('requestStore');

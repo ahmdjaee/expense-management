@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Expense\RequestController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -71,13 +72,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return Inertia::render('expense/request/detail/index');
         })->name('requestDetail');
 
-        Route::get('/request/new', function () {
-            return Inertia::render('expense/request/new/index');
-        })->name('requestNew');
+        Route::get('/request/new',[RequestController::class, 'create'])->name('requestNew');
+        Route::post('/request/new',[RequestController::class, 'store'])->name('requestStore');
 
-        Route::get('/request', function () {
-            return Inertia::render('expense/request/index');
-        })->name('requestIndex');
+        Route::get('/request',[RequestController::class, 'index'])->name('requestIndex');
 
 
         Route::get('/dashboard', function () {

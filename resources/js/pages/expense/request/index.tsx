@@ -2,7 +2,7 @@
 
 import { RequestCard } from '@/components/request/request-card';
 import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/expense-app-layout';
 import { ExpenseRequest } from '@/lib/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';

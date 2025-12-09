@@ -14,23 +14,28 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-// Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
-// Route::get('/expenses/dashboard', function () {
-//     return Inertia::render('expense/dashboard');
-// })->name('expenses.dashboard');
-
-// Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
-// Route::get('/expenses/request/detail', function () {
-//     return Inertia::render('expense/request/index');
-// })->name('expenses.dashboard');
-Route::get('/expenses/request/detail', function () {
-    return Inertia::render('expense/request/index');
-})->name('expenses.dashboard');
-})->name('expenses.request');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Update route dashboard ke controller
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+
+    // Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
+    Route::get('/expenses/dashboard', function () {
+        return Inertia::render('expense/dashboard');
+    })->name('expenseDashboard');
+
+    Route::get('/expenses/request/detail', function () {
+        return Inertia::render('expense/request/detail/index');
+    })->name('expenseDetail');
+
+    Route::get('/expenses/request/new', function () {
+        return Inertia::render('expense/request/new/index');
+    })->name('expenseNew');
+
+    Route::get('/expenses/request', function () {
+        return Inertia::render('expense/request/index');
+    })->name('expense');
 
     // ========================================
     // ADMIN TASK ROUTES

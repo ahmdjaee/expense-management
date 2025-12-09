@@ -16,6 +16,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { CheckSquare, ClipboardCheck, FileText, LayoutGrid, User, Wallet, Workflow } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
+import { approvals, expenseDashboard, payments, reports, requestDetail, requestIndex, requestNew } from '@/routes/expense';
 
 const taskNavItems: NavItem[] = [
     {
@@ -44,34 +45,34 @@ const taskNavItems: NavItem[] = [
 const expenseNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: '/expense/dashboard',
+        href: expenseDashboard(),
         icon: LayoutGrid,
     },
     {
         title: 'Pengajuan Saya',
-        href: '/expense/request',
+        href: requestIndex(),
         icon: FileText,
     },
     {
         title: 'Buat Pengajuan',
-        href: '/expense/request/new',
+        href: requestNew(),
         icon: LayoutGrid,
     },
     {
         title: 'Persetujuan',
-        href: '/expense/approvals',
+        href: approvals(),
         icon: CheckSquare,
         role: ['admin', 'superadmin'], // Hanya untuk admin dan superadmin
     },
     {
         title: 'Pembayaran',
-        href: '/expense/payments',
+        href: payments(),
         icon: Wallet,
         role: ['superadmin'], // Hanya untuk superadmin
     },
     {
         title: 'Laporan',
-        href: '/expense/reports',
+        href: reports(),
         icon: FileText,
         role: ['superadmin'], // Hanya untuk superadmin
     },

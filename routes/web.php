@@ -21,21 +21,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // Hapus route yang duplikat ini karena sudah ada di dalam middleware auth
-    Route::get('/expenses/dashboard', function () {
-        return Inertia::render('expense/dashboard');
-    })->name('expenseDashboard');
-
-    Route::get('/expenses/request/detail', function () {
-        return Inertia::render('expense/request/detail/index');
-    })->name('expenseDetail');
-
-    Route::get('/expenses/request/new', function () {
-        return Inertia::render('expense/request/new/index');
-    })->name('expenseNew');
-
-    Route::get('/expenses/request', function () {
-        return Inertia::render('expense/request/index');
-    })->name('expense');
 
     // ========================================
     // ADMIN TASK ROUTES
@@ -81,14 +66,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ========================================
     // EXPENSE MANAGEMENT ROUTES
     // ========================================
-    Route::prefix('expense')->name('expense.')->group(function () {
+    Route::prefix('expenses')->name('expense.')->group(function () {
+        Route::get('/request/detail', function () {
+            return Inertia::render('expense/request/detail/index');
+        })->name('requestDetail');
+
+        Route::get('/request/new', function () {
+            return Inertia::render('expense/request/new/index');
+        })->name('requestNew');
+
+        Route::get('/request', function () {
+            return Inertia::render('expense/request/index');
+        })->name('requestIndex');
+
+
         Route::get('/dashboard', function () {
             return Inertia::render('expense/dashboard', [
                 'auth' => [
                     'user' => auth()->user(),
                 ],
             ]);
-        })->name('dashboard');
+        })->name('expenseDashboard');
 
         Route::get('/approvals', function () {
             return Inertia::render('expense/approvals/index', [
@@ -115,15 +113,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('reports');
 
         // Detail request routes
-        Route::get('/requests/{id}', function ($id) {
-            // In a real app, you would fetch the request from the database
-            return Inertia::render('expense/requests/show', [
-                'requestId' => $id,
-                'auth' => [
-                    'user' => auth()->user(),
-                ],
-            ]);
-        })->name('requests.show');
+        // Route::get('/requests/{id}', function ($id) {
+        //     // In a real app, you would fetch the request from the database
+        //     return Inertia::render('expense/requests/show', [
+        //         'requestId' => $id,
+        //         'auth' => [
+        //             'user' => auth()->user(),
+        //         ],
+        //     ]);
+        // })->name('requests.show');
 
         Route::get('/requests/{id}/pay', function ($id) {
             return Inertia::render('expense/requests/pay', [

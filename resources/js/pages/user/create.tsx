@@ -23,6 +23,7 @@ export default function CreateUser({ divisions }: CreateUserProps) {
     // Ambil data auth user
     const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
     const authRole = auth.user.role;
+
     // Role options tergantung siapa yang login
     const roleOptions =
         authRole === 'superadmin'
@@ -35,6 +36,15 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                   { value: 'admin', label: 'Admin' },
                   { value: 'user', label: 'User' },
               ];
+
+    // Position options
+    const positionOptions = [
+        { value: 'karyawan', label: 'Karyawan' },
+        { value: 'head', label: 'Head' },
+        { value: 'direktur', label: 'Direktur' },
+        { value: 'finance', label: 'Finance' },
+        { value: 'direksi', label: 'Direksi' },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -89,20 +99,6 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                     <InputError message={errors.password} />
                                 </div>
 
-                                {/* 🔹 Confirm Password */}
-                                {/* <div className="space-y-2">
-                                    <Label htmlFor="password_confirmation">Confirm Password</Label>
-                                    <Input
-                                        id="password_confirmation"
-                                        name="password_confirmation"
-                                        type="password"
-                                        required
-                                        placeholder="Re-type password"
-                                        className="border-muted bg-muted/50"
-                                    />
-                                    <InputError message={errors.password_confirmation} />
-                                </div> */}
-
                                 {/* Role */}
                                 <div className="space-y-2">
                                     <Label htmlFor="role">Role</Label>
@@ -121,6 +117,92 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                     <InputError message={errors.role} />
                                 </div>
 
+                                {/* Position - Hanya untuk superadmin */}
+                                {authRole === 'superadmin' && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="position">Position</Label>
+                                        <Select name="position" defaultValue="karyawan">
+                                            <SelectTrigger id="position" className="border-muted bg-muted/50">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {positionOptions.map((p) => (
+                                                    <SelectItem key={p.value} value={p.value}>
+                                                        {p.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.position} />
+                                    </div>
+                                )}
+
+                                {/* Phone */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Phone Number</Label>
+                                    <Input
+                                        id="phone"
+                                        name="phone"
+                                        type="tel"
+                                        placeholder="Enter phone number"
+                                        className="border-muted bg-muted/50"
+                                    />
+                                    <InputError message={errors.phone} />
+                                </div>
+
+                                {/* Address */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="address">Address</Label>
+                                    <Input
+                                        id="address"
+                                        name="address"
+                                        placeholder="Enter address"
+                                        className="border-muted bg-muted/50"
+                                    />
+                                    <InputError message={errors.address} />
+                                </div>
+
+                                {/* Bank Information Section */}
+                                <div className="space-y-4 rounded-lg border border-muted bg-muted/20 p-4">
+                                    <h3 className="text-sm font-semibold text-foreground">Bank Information</h3>
+
+                                    {/* Bank Name */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="bank">Bank Name</Label>
+                                        <Input
+                                            id="bank"
+                                            name="bank"
+                                            placeholder="e.g., BCA, Mandiri, BNI"
+                                            className="border-muted bg-muted/50"
+                                        />
+                                        <InputError message={errors.bank} />
+                                    </div>
+
+                                    {/* Account Number */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="rekening">Account Number</Label>
+                                        <Input
+                                            id="rekening"
+                                            name="rekening"
+                                            placeholder="Enter account number"
+                                            className="border-muted bg-muted/50"
+                                        />
+                                        <InputError message={errors.rekening} />
+                                    </div>
+
+                                    {/* Account Holder Name */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="rekening_name">Account Holder Name</Label>
+                                        <Input
+                                            id="rekening_name"
+                                            name="rekening_name"
+                                            placeholder="Name as per bank account"
+                                            className="border-muted bg-muted/50"
+                                        />
+                                        <InputError message={errors.rekening_name} />
+                                    </div>
+                                </div>
+
                                 {/* Divisions */}
                                 <div className="space-y-2">
                                     <Label htmlFor="divisions">Divisions</Label>
@@ -132,8 +214,6 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                             label: d.name,
                                         }))}
                                         required
-                                        // value={selectedDivisions}
-                                        // onChange={setSelectedDivisions}
                                         placeholder="Select divisions..."
                                         className="basic-multi-select"
                                         classNamePrefix="select"

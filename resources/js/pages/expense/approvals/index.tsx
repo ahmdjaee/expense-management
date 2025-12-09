@@ -33,7 +33,7 @@ export default function ApprovalsPage({ auth, requests = mockRequests }: Approva
 
             <div className="flex flex-1 flex-col pb-20 md:pb-0">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground md:rounded-bl-2xl">
+                <div className="bg-linear-to-r from-primary to-primary/80 p-6 text-primary-foreground md:rounded-bl-2xl">
                     <h1 className="mb-2 text-3xl font-bold">Persetujuan Pengajuan</h1>
                     <p className="opacity-90">Kelola persetujuan reimbursement dan kasbon</p>
                 </div>

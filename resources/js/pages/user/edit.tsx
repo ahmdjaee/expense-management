@@ -15,7 +15,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface EditUserProps {
-    user: User & { divisions: Division[] };
+    user: User & {
+        divisions: Division[];
+        position?: string;
+        phone?: string;
+        address?: string;
+        rekening?: string;
+        bank?: string;
+        rekening_name?: string;
+    };
     divisions: Division[];
 }
 
@@ -23,6 +31,7 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
     // Ambil data auth user
     const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
     const authRole = auth.user.role;
+
     // Role options tergantung siapa yang login
     const roleOptions =
         authRole === 'superadmin'
@@ -36,13 +45,22 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
                   { value: 'user', label: 'User' },
               ];
 
+    // Position options
+    const positionOptions = [
+        { value: 'karyawan', label: 'Karyawan' },
+        { value: 'head', label: 'Head' },
+        { value: 'direktur', label: 'Direktur' },
+        { value: 'finance', label: 'Finance' },
+        { value: 'direksi', label: 'Direksi' },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit User" />
             <div className="p-4">
                 <Card className="flex-1 p-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">Create User</h1>
+                        <h1 className="text-3xl font-bold text-foreground">Edit User</h1>
                     </div>
 
                     <Form action={`/users/${user.id}`} method="put" className="space-y-6">
@@ -112,6 +130,29 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
                                     </Select>
                                     <InputError message={errors.role} />
                                 </div>
+
+                                {/* Position - Hanya untuk superadmin */}
+                                {authRole === 'superadmin' && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="position">Position</Label>
+                                        <Select name="position" defaultValue={user.position || 'karyawan'}>
+                                            <SelectTrigger id="position" className="border-muted bg-muted/50">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {positionOptions.map((p) => (
+                                                    <SelectItem key={p.value} value={p.value}>
+                                                        {p.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.position} />
+                                        <p className="text-xs text-muted-foreground">
+                                            Only superadmin can change user position
+                                        </p>
+                                    </div>
+                                )}
 
                                 {/* Divisions */}
                                 <div className="space-y-2">

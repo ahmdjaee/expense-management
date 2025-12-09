@@ -13,7 +13,7 @@ export default function Welcome({ canRegister = true, auth }) {
 
             <div className="relative flex min-h-screen flex-col bg-zinc-900 text-zinc-100">
                 {/* Subtle Background Pattern */}
-                <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800 via-zinc-900 to-zinc-900"></div>
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-zinc-800 via-zinc-900 to-zinc-900"></div>
                 <div className="absolute inset-0 -z-10 bg-[url('/path/to/your/pattern.svg')] opacity-5"></div>{' '}
                 {/* Ganti dengan URL pola Anda jika ada */}
                 {/* Navigation */}

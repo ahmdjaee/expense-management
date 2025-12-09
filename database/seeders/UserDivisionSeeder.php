@@ -41,7 +41,7 @@ class UserDivisionSeeder extends Seeder
             $user->update([
                 'division_id' => $divisions->random()->id
             ]);
- 
+
             $this->command->info("Assigned {$user->name} to division");
         }
 

@@ -11,12 +11,12 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, mytasks, tasks, users } from '@/routes';
+import { approvals, expenseDashboard, payments, reports, requestIndex, requestNew } from '@/routes/expense';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { CheckSquare, ClipboardCheck, FileText, LayoutGrid, User, Wallet, Workflow } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
-import { approvals, expenseDashboard, payments, reports, requestDetail, requestIndex, requestNew } from '@/routes/expense';
 
 const taskNavItems: NavItem[] = [
     {

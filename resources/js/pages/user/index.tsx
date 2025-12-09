@@ -18,7 +18,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function UserPage({ users }: { users: User[] }) {
+interface UserWithPosition extends User {
+    position?: string;
+}
+
+export default function UserPage({ users }: { users: UserWithPosition[] }) {
     // Ambil data auth user
     const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
     const userRole = auth.user.role;
@@ -46,6 +50,38 @@ export default function UserPage({ users }: { users: User[] }) {
                 return 'Menampilkan user sesuai divisi anda';
             default:
                 return 'User';
+        }
+    };
+
+    const getPositionBadgeColor = (position?: string) => {
+        switch (position) {
+            case 'direktur':
+                return 'bg-purple-100 text-purple-700 border-purple-200';
+            case 'head':
+                return 'bg-blue-100 text-blue-700 border-blue-200';
+            case 'finance':
+                return 'bg-green-100 text-green-700 border-green-200';
+            case 'direksi':
+                return 'bg-orange-100 text-orange-700 border-orange-200';
+            case 'karyawan':
+            default:
+                return 'bg-gray-100 text-gray-700 border-gray-200';
+        }
+    };
+
+    const getPositionLabel = (position?: string) => {
+        switch (position) {
+            case 'head':
+                return 'Head';
+            case 'direktur':
+                return 'Direktur';
+            case 'finance':
+                return 'Finance';
+            case 'direksi':
+                return 'Direksi';
+            case 'karyawan':
+            default:
+                return 'Karyawan';
         }
     };
 
@@ -111,13 +147,25 @@ export default function UserPage({ users }: { users: User[] }) {
                                         <h3 className="mb-2 flex items-center justify-between pr-8 text-base font-semibold text-foreground">
                                             {user.name}
 
-                                            {user.role === 'superadmin' ? (
-                                                <span className="text-sm font-medium text-green-600">Super Admin</span>
-                                            ) : user.role === 'admin' ? (
-                                                <span className="text-sm font-medium text-blue-600">Admin</span>
-                                            ) : (
-                                                <span className="text-sm font-medium text-gray-600">User</span>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {/* Position Badge */}
+                                                <span
+                                                    className={`rounded-md border px-2.5 py-1 text-xs font-medium ${getPositionBadgeColor(user.position)}`}
+                                                >
+                                                    {getPositionLabel(user.position)}
+                                                </span>
+
+                                                {/* Role Badge */}
+                                                {user.role === 'superadmin' ? (
+                                                    <span className="text-sm font-medium text-green-600">
+                                                        Super Admin
+                                                    </span>
+                                                ) : user.role === 'admin' ? (
+                                                    <span className="text-sm font-medium text-blue-600">Admin</span>
+                                                ) : (
+                                                    <span className="text-sm font-medium text-gray-600">User</span>
+                                                )}
+                                            </div>
                                         </h3>
                                         <p className="mb-4 text-sm text-muted-foreground">{user.email}</p>
 

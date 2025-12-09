@@ -28,16 +28,16 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
-            'divisions' => ['required', 'array', 'min:1'], // ubah dari divisi -> divisions (lebih umum)
-            'divisions.*' => ['exists:divisions,id'], // pastikan ID-nya valid
+            'divisions' => ['required', 'array', 'min:1'],
+            'divisions.*' => ['exists:divisions,id'],
         ])->validate();
 
-
-
+        // Create user dengan position default 'karyawan'
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'position' => 'karyawan', // Default position untuk user baru
         ]);
 
         // Assign ke division (bisa banyak)

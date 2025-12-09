@@ -265,7 +265,7 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
                                     const percentage = ((data.count / stats.totalRequests) * 100).toFixed(1);
                                     return (
                                         <div key={status} className="flex items-center gap-3">
-                                            <div className="flex h-6 w-12 items-center justify-center rounded bg-gradient-to-r from-primary to-primary/60 text-xs font-bold text-white">
+                                            <div className="flex h-6 w-12 items-center justify-center rounded bg-linear-to-r from-primary to-primary/60 text-xs font-bold text-white">
                                                 {percentage}%
                                             </div>
                                             <p className="text-sm text-foreground capitalize">{status}</p>

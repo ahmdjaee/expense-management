@@ -61,6 +61,12 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'role' => 'required|in:superadmin,admin,user',
+            'position' => 'nullable|in:head,karyawan,direktur,finance,direksi',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'rekening' => 'nullable|string|max:50',
+            'bank' => 'nullable|string|max:50',
+            'rekening_name' => 'nullable|string|max:150',
             'divisions' => 'required|array|min:1',
         ]);
 
@@ -86,6 +92,12 @@ class UserController extends Controller
         $user->email = $validated['email'];
         $user->password = Hash::make($validated['password']);
         $user->role = $validated['role'];
+        $user->position = $validated['position'] ?? 'karyawan'; // Default karyawan
+        $user->phone = $validated['phone'] ?? null;
+        $user->address = $validated['address'] ?? null;
+        $user->rekening = $validated['rekening'] ?? null;
+        $user->bank = $validated['bank'] ?? null;
+        $user->rekening_name = $validated['rekening_name'] ?? null;
         $user->email_verified_at = now();
         $user->save();
 
@@ -108,7 +120,7 @@ class UserController extends Controller
             // Admin hanya bisa edit user di divisinya
             $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
             $userDivisionIds = $user->divisions->pluck('id')->toArray();
-            
+
             if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
                 flash()->error('Kamu tidak berhak mengedit user ini');
                 return redirect()->route('users');
@@ -145,7 +157,7 @@ class UserController extends Controller
             // Admin hanya bisa edit user di divisinya
             $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
             $userDivisionIds = $user->divisions->pluck('id')->toArray();
-            
+
             if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
                 flash()->error('Kamu tidak berhak mengedit user ini');
                 return redirect()->route('users');
@@ -163,6 +175,12 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:6',
             'role' => 'required|in:superadmin,admin,user',
+            'position' => 'nullable|in:head,karyawan,direktur,finance,direksi',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'rekening' => 'nullable|string|max:50',
+            'bank' => 'nullable|string|max:50',
+            'rekening_name' => 'nullable|string|max:150',
             'divisions' => 'required|array|min:1',
         ]);
 
@@ -185,13 +203,26 @@ class UserController extends Controller
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        
+
         // Update password hanya jika diisi
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
-        
+
         $user->role = $validated['role'];
+
+        // Hanya superadmin yang bisa mengubah position
+        if ($authUser->role === 'superadmin') {
+            $user->position = $validated['position'] ?? 'karyawan';
+        }
+
+        // Update informasi tambahan
+        $user->phone = $validated['phone'] ?? null;
+        $user->address = $validated['address'] ?? null;
+        $user->rekening = $validated['rekening'] ?? null;
+        $user->bank = $validated['bank'] ?? null;
+        $user->rekening_name = $validated['rekening_name'] ?? null;
+
         $user->save();
 
         $user->divisions()->sync($validated['divisions']);
@@ -219,7 +250,7 @@ class UserController extends Controller
             // Admin hanya bisa hapus user di divisinya
             $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
             $userDivisionIds = $user->divisions->pluck('id')->toArray();
-            
+
             if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
                 flash()->error('Kamu tidak berhak menghapus user ini');
                 return redirect()->back();
@@ -234,7 +265,7 @@ class UserController extends Controller
 
         // Hapus relasi divisions
         $user->divisions()->detach();
-        
+
         // Hapus user
         $user->delete();
 

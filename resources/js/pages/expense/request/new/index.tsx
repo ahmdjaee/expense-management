@@ -1,5 +1,5 @@
 import { RequestForm } from '@/components/request/request-form';
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/expense-app-layout';
 
 export default function NewRequestPage() {
     return (

@@ -1,29 +1,28 @@
 import { cn } from '@/lib/utils';
-import { expense, expenseNew } from '@/routes';
-import { dashboard } from '@/routes/expense';
+import { expenseDashboard, requestIndex, requestNew } from '@/routes/expense';
 // import { dashboard } from '@/routes/expense';
 import { edit } from '@/routes/profile';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Check, ClipboardCheck, LayoutGrid, LucideGitPullRequest, Plus, Settings, User, Workflow } from 'lucide-react';
+import { Check, LayoutGrid, LucideGitPullRequest, Plus, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: expenseDashboard(),
         icon: LayoutGrid,
         role: ['admin', 'superadmin'],
     },
     {
         title: 'Pengajuan Saya',
-        href: expense(),
+        href: requestIndex(),
         icon: LucideGitPullRequest,
         role: ['admin', 'superadmin'],
     },
     {
         title: 'Buat Pengajuan',
-        href: expenseNew(),
+        href: requestNew(),
         icon: Plus,
         role: ['admin', 'superadmin'],
         isCenter: true,

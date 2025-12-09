@@ -10,10 +10,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, expense, expenseDashboard, expenseNew, mytasks, tasks, users } from '@/routes';
+import { dashboard, mytasks, tasks, users } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { ClipboardCheck, LayoutGrid, User, Workflow } from 'lucide-react';
+import { CheckSquare, ClipboardCheck, FileText, LayoutGrid, User, Wallet, Workflow } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
@@ -22,7 +22,7 @@ const taskNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
-        role: ['admin', 'superadmin'], // Hanya untuk role selain 'user'
+        role: ['admin', 'superadmin'],
     },
     {
         title: 'All Tasks',
@@ -44,33 +44,36 @@ const taskNavItems: NavItem[] = [
 const expenseNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: expenseDashboard(),
+        href: '/expense/dashboard',
         icon: LayoutGrid,
     },
     {
         title: 'Pengajuan Saya',
-        href: expense(),
-        icon: LayoutGrid,
+        href: '/expense/request',
+        icon: FileText,
     },
     {
         title: 'Buat Pengajuan',
-        href: expenseNew(),
+        href: '/expense/request/new',
         icon: LayoutGrid,
     },
     {
         title: 'Persetujuan',
-        href: expenseNew(),
-        icon: LayoutGrid,
+        href: '/expense/approvals',
+        icon: CheckSquare,
+        role: ['admin', 'superadmin'], // Hanya untuk admin dan superadmin
     },
     {
         title: 'Pembayaran',
-        href: expenseNew(),
-        icon: LayoutGrid,
+        href: '/expense/payments',
+        icon: Wallet,
+        role: ['superadmin'], // Hanya untuk superadmin
     },
     {
         title: 'Laporan',
-        href: expenseNew(),
-        icon: LayoutGrid,
+        href: '/expense/reports',
+        icon: FileText,
+        role: ['superadmin'], // Hanya untuk superadmin
     },
 ];
 
@@ -81,7 +84,7 @@ export function AppSidebar() {
     const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
     const userRole = auth.user.role;
 
-    // Filter menu berdasarkan role
+    // Filter menu Task Management berdasarkan role
     const filteredNavItemsTask = useMemo(() => {
         return taskNavItems.filter((item) => {
             // Jika item tidak punya batasan role, tampilkan
@@ -92,6 +95,7 @@ export function AppSidebar() {
         });
     }, [userRole]);
 
+    // Filter menu Expense Management berdasarkan role
     const filteredNavItemsExpense = useMemo(() => {
         return expenseNavItems.filter((item) => {
             // Jika item tidak punya batasan role, tampilkan

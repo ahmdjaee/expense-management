@@ -10,14 +10,14 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, mytasks, tasks, users } from '@/routes';
+import { dashboard, expense, expenseDashboard, expenseNew, mytasks, tasks, users } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ClipboardCheck, LayoutGrid, User, Workflow } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const taskNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -41,6 +41,39 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
+const expenseNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: expenseDashboard(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Pengajuan Saya',
+        href: expense(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Buat Pengajuan',
+        href: expenseNew(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Persetujuan',
+        href: expenseNew(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Pembayaran',
+        href: expenseNew(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Laporan',
+        href: expenseNew(),
+        icon: LayoutGrid,
+    },
+];
+
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
@@ -49,8 +82,18 @@ export function AppSidebar() {
     const userRole = auth.user.role;
 
     // Filter menu berdasarkan role
-    const filteredNavItems = useMemo(() => {
-        return mainNavItems.filter((item) => {
+    const filteredNavItemsTask = useMemo(() => {
+        return taskNavItems.filter((item) => {
+            // Jika item tidak punya batasan role, tampilkan
+            if (!item.role) return true;
+
+            // Jika ada batasan role, cek apakah user role termasuk
+            return item.role.includes(userRole);
+        });
+    }, [userRole]);
+
+    const filteredNavItemsExpense = useMemo(() => {
+        return expenseNavItems.filter((item) => {
             // Jika item tidak punya batasan role, tampilkan
             if (!item.role) return true;
 
@@ -74,7 +117,8 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={filteredNavItems} groupLabel="Task Management" />
+                <NavMain items={filteredNavItemsTask} groupLabel="Task Management" />
+                <NavMain items={filteredNavItemsExpense} groupLabel="Expense Management" />
             </SidebarContent>
 
             <SidebarFooter>

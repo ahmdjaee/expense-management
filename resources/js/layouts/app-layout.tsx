@@ -1,3 +1,4 @@
+import { BottomNav } from '@/components/bottom-nav';
 import { FlashNotification } from '@/components/flash-notification';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -16,6 +17,7 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
             <FlashNotification />
             {/* Spacer untuk prevent content tertutup bottom nav */}
             <div className="h-20 md:hidden" />
+            <BottomNav />
         </AppLayoutTemplate>
     );
 };

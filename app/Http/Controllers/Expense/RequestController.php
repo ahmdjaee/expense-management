@@ -23,7 +23,7 @@ class RequestController extends Controller
      */
     public function create()
     {
-        return Inertia::render('expense/request/new/index');
+        return Inertia::render('expense/request/new');
     }
 
     /**
@@ -72,7 +72,8 @@ class RequestController extends Controller
      */
     public function show(string $id)
     {
-        $request = ExpenseRequest::findOrFail($id);
+        $request = ExpenseRequest::with('user', 'user.divisions')->find($id);
+
         return Inertia::render('expense/request/detail', compact('request'));
     }
 

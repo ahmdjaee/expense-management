@@ -7,7 +7,7 @@ interface PrintFormProps {
 
 export function PrintForm({ request }: PrintFormProps) {
   return (
-    <div className="bg-white p-8 rounded-lg border border-gray-300 print:border-0 print:p-0">
+    <div className="print-area bg-white p-8 rounded-lg border border-gray-300 print:border-0 print:p-0">
       <div className="text-center mb-8 border-b pb-6">
         <h1 className="text-2xl font-bold mb-2">FORM PENGAJUAN</h1>
         <p className="text-gray-600">Advance & Expense System</p>
@@ -24,11 +24,13 @@ export function PrintForm({ request }: PrintFormProps) {
             </div>
             <div>
               <p className="text-sm text-gray-600">Tipe</p>
-              <p className="font-semibold">{request.type === "reimbursement" ? "Reimbursement" : "Advance/Kasbon"}</p>
+              <p className="font-semibold">
+                {request.type === "reimbursement" ? "Reimbursement" : "Advance/Kasbon"}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Tanggal Pengajuan</p>
-              <p className="font-semibold">{formatDateTime(request.createdAt)}</p>
+              <p className="font-semibold">{formatDateTime(request.created_at)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Status</p>
@@ -51,11 +53,15 @@ export function PrintForm({ request }: PrintFormProps) {
             </div>
             <div>
               <p className="text-sm text-gray-600">Nominal</p>
-              <p className="font-bold text-lg text-green-600">{formatCurrency(request.amount)}</p>
+              <p className="font-bold text-lg text-green-600">
+                {formatCurrency(request.amount)}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Metode Pembayaran</p>
-              <p className="font-semibold">{request.paymentMethod === "transfer" ? "Transfer Bank" : "Cash"}</p>
+              <p className="font-semibold">
+                {request.payment_method === "transfer" ? "Transfer Bank" : "Cash"}
+              </p>
             </div>
           </div>
         </div>
@@ -82,7 +88,7 @@ export function PrintForm({ request }: PrintFormProps) {
         </div>
       </div>
 
-      {/* Print Button */}
+      {/* Tombol print hilang saat print */}
       <div className="mt-8 text-center print:hidden">
         <button
           onClick={() => window.print()}

@@ -54,11 +54,6 @@ const expenseNavItems: NavItem[] = [
         icon: FileText,
     },
     {
-        title: 'Buat Pengajuan',
-        href: requestNew(),
-        icon: LayoutGrid,
-    },
-    {
         title: 'Persetujuan',
         href: approvals(),
         icon: CheckSquare,

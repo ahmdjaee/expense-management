@@ -10,7 +10,7 @@ export interface User {
   email: string
   phone: string
   role: UserRole
-  division: string
+  divisions: Division[]
   bankAccount?: string
   bankName?: string
   accountHolder?: string
@@ -20,23 +20,24 @@ export interface User {
 export interface ExpenseRequest {
   id: string
   userId: string
+  user ?: User
   type: RequestType
   amount: number
   title: string
   description: string
   status: RequestStatus
-  paymentMethod: PaymentMethod
+  payment_method: PaymentMethod
   currency: string
   attachments?: string[]
-  headApprovedAt?: Date
-  headApprovedBy?: string
-  directorApprovedAt?: Date
-  directorApprovedBy?: string
-  paidAt?: Date
-  paidBy?: string
-  rejectionReason?: string
-  createdAt: Date
-  updatedAt: Date
+  head_approved_at?: Date
+  head_approved_by?: string
+  director_approved_at?: Date
+  director_approved_by?: string
+  paid_at?: Date
+  paid_by?: string
+  rejection_reason?: string
+  created_at: Date
+  updated_at: Date
 }
 
 export interface Approval {
@@ -60,4 +61,9 @@ export interface Payment {
   referenceNumber?: string
   paidAt?: Date
   createdAt: Date
+}
+
+export interface Division {
+  id: number
+  name: string
 }

@@ -51,7 +51,6 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
         { value: 'head', label: 'Head' },
         { value: 'direktur', label: 'Direktur' },
         { value: 'finance', label: 'Finance' },
-        { value: 'direksi', label: 'Direksi' },
     ];
 
     return (

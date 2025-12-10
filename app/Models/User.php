@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,26 +13,22 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'division_id', // Keep this for backward compatibility
+        'division_id',
+        'role',
+        'position',
+        'phone',
+        'address',
+        'rekening',
+        'bank',
+        'rekening_name',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'two_factor_secret',
@@ -41,11 +36,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -96,6 +86,22 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Expense requests created by this user
+     */
+    public function expenseRequests(): HasMany
+    {
+        return $this->hasMany(Request::class, 'user_id');
+    }
+
+    /**
+     * Approvals made by this user
+     */
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(Approval::class, 'approver_id');
+    }
+
+    /**
      * Get user's division name (primary division or first from many-to-many)
      */
     public function getDivisionNameAttribute(): string
@@ -125,5 +131,45 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return 'No Division';
+    }
+
+    /**
+     * Check if user is head
+     */
+    public function isHead(): bool
+    {
+        return $this->position === 'head';
+    }
+
+    /**
+     * Check if user is director
+     */
+    public function isDirector(): bool
+    {
+        return $this->position === 'direktur';
+    }
+
+    /**
+     * Check if user is finance
+     */
+    public function isFinance(): bool
+    {
+        return $this->position === 'finance';
+    }
+
+    /**
+     * Check if user can approve requests
+     */
+    public function canApprove(): bool
+    {
+        return in_array($this->position, ['head', 'direktur']);
+    }
+
+    /**
+     * Check if user can process payments
+     */
+    public function canProcessPayment(): bool
+    {
+        return $this->position === 'finance';
     }
 }

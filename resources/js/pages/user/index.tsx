@@ -60,8 +60,6 @@ export default function UserPage({ users }: { users: UserWithPosition[] }) {
             case 'head':
                 return 'bg-blue-100 text-blue-700 border-blue-200';
             case 'finance':
-                return 'bg-green-100 text-green-700 border-green-200';
-            case 'direksi':
                 return 'bg-orange-100 text-orange-700 border-orange-200';
             case 'karyawan':
             default:
@@ -77,8 +75,6 @@ export default function UserPage({ users }: { users: UserWithPosition[] }) {
                 return 'Direktur';
             case 'finance':
                 return 'Finance';
-            case 'direksi':
-                return 'Direksi';
             case 'karyawan':
             default:
                 return 'Karyawan';

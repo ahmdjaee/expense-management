@@ -43,7 +43,6 @@ export default function CreateUser({ divisions }: CreateUserProps) {
         { value: 'head', label: 'Head' },
         { value: 'direktur', label: 'Direktur' },
         { value: 'finance', label: 'Finance' },
-        { value: 'direksi', label: 'Direksi' },
     ];
 
     return (

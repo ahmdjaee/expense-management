@@ -66,6 +66,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // EXPENSE MANAGEMENT ROUTES
     // ========================================
     Route::prefix('expenses')->name('expense.')->group(function () {
+        Route::get('/request/new', [RequestController::class, 'create'])->name('requestNew');
+        Route::post('/request/new', [RequestController::class, 'store'])->name('requestStore');
+
+        Route::get('/request/{id}', [RequestController::class, 'show'])->name('requestDetail');
+
+        Route::get('/request', [RequestController::class, 'index'])->name('requestIndex');
 
         // Dashboard
         Route::get('/dashboard', function () {

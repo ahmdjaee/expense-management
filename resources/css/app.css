@@ -266,3 +266,24 @@
 .dark .select__multi-value__remove {
     @apply hover:text-destructive;
 }
+
+@media print {
+  /* Sembunyikan semua elemen */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Tampilkan hanya area print */
+  .print-area,
+  .print-area * {
+    visibility: visible !important;
+  }
+
+  /* Pastikan posisi sesuai */
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

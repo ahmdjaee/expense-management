@@ -1,5 +1,3 @@
-'use client';
-
 import { RequestCard } from '@/components/request/request-card';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/expense-app-layout';
@@ -23,9 +21,13 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
         <AppLayout>
             <div className="flex flex-1 flex-col pb-20 md:pb-0">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground md:rounded-bl-2xl">
-                    <h1 className="mb-2 text-3xl font-bold">Pengajuan Saya</h1>
-                    <p className="opacity-90">Kelola semua pengajuan reimbursement dan kasbon Anda</p>
+                 <div className="px-4 py-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground">Pengajuan Saya</h1>
+                            <p className="mt-1 text-muted-foreground">Kelola semua pengajuan reimbursement dan kasbon Anda</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Content */}

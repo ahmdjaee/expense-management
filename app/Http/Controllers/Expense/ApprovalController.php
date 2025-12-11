@@ -18,7 +18,7 @@ class ApprovalController extends Controller
         $user = auth()->user();
 
         // Query berdasarkan position user
-        $query = ExpenseRequest::with(['user', 'approvals.approver']);
+        $query = ExpenseRequest::with(['user', 'approvals.approver', 'user.divisions']);
 
         if ($user->position === 'head') {
             // Head hanya lihat request dari karyawan di divisi yang sama dengan status 'submitted'
@@ -47,6 +47,8 @@ class ApprovalController extends Controller
             // Jika bukan approver, tidak ada yang ditampilkan
             $requests = collect();
         }
+
+        // dd($requests);
 
         return Inertia::render('expense/approvals/index', [
             'requests' => $requests,

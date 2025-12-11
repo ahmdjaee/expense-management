@@ -16,39 +16,40 @@ class ApprovalController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $userPosition = $user->position;
 
-        // Query berdasarkan position user
-        $query = ExpenseRequest::with(['user', 'approvals.approver', 'user.divisions']);
+        // Query requests yang perlu approval dari position user
+        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
 
-        if ($user->position === 'head') {
-            // Head hanya lihat request dari karyawan di divisi yang sama dengan status 'submitted'
-            $divisionIds = $user->divisions->pluck('id');
+        $requests = $query->get()->filter(function ($request) use ($user, $userPosition) {
+            // Skip if already rejected or paid
+            if (in_array($request->status, ['rejected', 'paid'])) {
+                return false;
+            }
 
-            $requests = $query->whereHas('user', function ($q) use ($divisionIds) {
-                $q->whereHas('divisions', function ($q2) use ($divisionIds) {
-                    $q2->whereIn('divisions.id', $divisionIds);
-                })->where('position', 'karyawan');
-            })->where('status', 'submitted')
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // Check if this position needs to approve this request
+            if (!$request->needsApprovalFrom($userPosition)) {
+                return false;
+            }
 
-        } elseif ($user->position === 'direktur') {
-            // Direktur hanya lihat request yang sudah di-approve head
-            $requests = $query->where('status', 'head_approved')
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // Check if it's this position's turn to approve
+            $nextPosition = $request->getNextApproverPosition();
+            if ($nextPosition !== $userPosition) {
+                return false;
+            }
 
-        } elseif ($user->position === 'finance') {
-            // Finance lihat semua request yang sudah di-approve direktur
-            $requests = $query->where('status', 'director_approved')
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            // Jika bukan approver, tidak ada yang ditampilkan
-            $requests = collect();
-        }
+            // Additional check for head: only approve requests from their division
+            if ($userPosition === 'head') {
+                $divisionIds = $user->divisions->pluck('id');
+                $requesterDivisionIds = $request->user->divisions->pluck('id');
 
-        // dd($requests);
+                if ($divisionIds->intersect($requesterDivisionIds)->isEmpty()) {
+                    return false;
+                }
+            }
+
+            return true;
+        })->values();
 
         return Inertia::render('expense/approvals/index', [
             'requests' => $requests,
@@ -64,23 +65,32 @@ class ApprovalController extends Controller
     public function show(string $id)
     {
         $user = auth()->user();
-        $request = ExpenseRequest::with(['user', 'approvals.approver'])
+        $request = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
             ->findOrFail($id);
 
-        // Check authorization
+        // Check if user can view this request
         $canView = false;
+        $userPosition = $user->position;
 
-        if ($user->position === 'head' && $request->status === 'submitted') {
-            // Head bisa lihat jika request dari karyawan di divisinya
-            $divisionIds = $user->divisions->pluck('id');
-            $requesterDivisionIds = $request->user->divisions->pluck('id');
-            $canView = $divisionIds->intersect($requesterDivisionIds)->isNotEmpty()
-                && $request->user->position === 'karyawan';
+        // Check if this position is in the approval flow
+        if ($request->needsApprovalFrom($userPosition)) {
+            // Check if it's this position's turn
+            $nextPosition = $request->getNextApproverPosition();
 
-        } elseif ($user->position === 'direktur' && $request->status === 'head_approved') {
-            $canView = true;
+            if ($nextPosition === $userPosition) {
+                // For head, check division
+                if ($userPosition === 'head') {
+                    $divisionIds = $user->divisions->pluck('id');
+                    $requesterDivisionIds = $request->user->divisions->pluck('id');
+                    $canView = $divisionIds->intersect($requesterDivisionIds)->isNotEmpty();
+                } else {
+                    $canView = true;
+                }
+            }
+        }
 
-        } elseif ($user->position === 'finance' && $request->status === 'director_approved') {
+        // Finance can also view if ready for payment
+        if ($userPosition === 'finance' && $request->canBePaid()) {
             $canView = true;
         }
 
@@ -103,15 +113,22 @@ class ApprovalController extends Controller
     public function approve(Request $request, string $id)
     {
         $user = auth()->user();
-        $expenseRequest = ExpenseRequest::findOrFail($id);
+        $expenseRequest = ExpenseRequest::with('user')->findOrFail($id);
 
         $request->validate([
             'notes' => 'nullable|string|max:500',
         ]);
 
-        // Check authorization dan update status
-        if ($user->position === 'head' && $expenseRequest->canBeApprovedByHead()) {
-            // Cek apakah head dari divisi yang sama dengan requester
+        $userPosition = $user->position;
+
+        // Verify this user can approve this request
+        if (!$expenseRequest->canBeApprovedBy($userPosition)) {
+            flash()->error('Anda tidak memiliki wewenang untuk approve request ini atau request sudah diproses');
+            return redirect()->back();
+        }
+
+        // Additional check for head: must be same division
+        if ($userPosition === 'head') {
             $divisionIds = $user->divisions->pluck('id');
             $requesterDivisionIds = $expenseRequest->user->divisions->pluck('id');
 
@@ -119,49 +136,38 @@ class ApprovalController extends Controller
                 flash()->error('Anda tidak memiliki wewenang untuk approve request ini');
                 return redirect()->back();
             }
-
-            // Update status dan record approval
-            $expenseRequest->status = 'head_approved';
-            $expenseRequest->head_approved_by = $user->id;
-            $expenseRequest->head_approved_at = now();
-            $expenseRequest->save();
-
-            // Create approval record
-            Approval::create([
-                'request_id' => $expenseRequest->id,
-                'approver_position' => 'head',
-                'approver_id' => $user->id,
-                'status' => 'approved',
-                'notes' => $request->input('notes'),
-                'approved_at' => now(),
-            ]);
-
-            flash()->success('Request berhasil di-approve oleh Head');
-
-        } elseif ($user->position === 'direktur' && $expenseRequest->canBeApprovedByDirector()) {
-            // Update status dan record approval
-            $expenseRequest->status = 'director_approved';
-            $expenseRequest->director_approved_by = $user->id;
-            $expenseRequest->director_approved_at = now();
-            $expenseRequest->save();
-
-            // Create approval record
-            Approval::create([
-                'request_id' => $expenseRequest->id,
-                'approver_position' => 'director',
-                'approver_id' => $user->id,
-                'status' => 'approved',
-                'notes' => $request->input('notes'),
-                'approved_at' => now(),
-            ]);
-
-            flash()->success('Request berhasil di-approve oleh Direktur');
-
-        } else {
-            flash()->error('Anda tidak memiliki wewenang untuk approve request ini');
-            return redirect()->back();
         }
 
+        // Create approval record
+        Approval::create([
+            'request_id' => $expenseRequest->id,
+            'approver_position' => $userPosition,
+            'approver_id' => $user->id,
+            'status' => 'approved',
+            'notes' => $request->input('notes'),
+            'approved_at' => now(),
+        ]);
+
+        // Update request fields based on position
+        if ($userPosition === 'head') {
+            $expenseRequest->head_approved_by = $user->id;
+            $expenseRequest->head_approved_at = now();
+        } elseif ($userPosition === 'direktur') {
+            $expenseRequest->director_approved_by = $user->id;
+            $expenseRequest->director_approved_at = now();
+        }
+
+        // Update status
+        $expenseRequest->status = $expenseRequest->getCurrentStatus();
+        $expenseRequest->save();
+
+        $positionLabel = [
+            'head' => 'Head',
+            'direktur' => 'Direktur',
+            'finance' => 'Finance'
+        ][$userPosition] ?? $userPosition;
+
+        flash()->success("Request berhasil di-approve oleh {$positionLabel}");
         return redirect()->route('expense.approvals');
     }
 
@@ -171,49 +177,45 @@ class ApprovalController extends Controller
     public function reject(Request $request, string $id)
     {
         $user = auth()->user();
-        $expenseRequest = ExpenseRequest::findOrFail($id);
+        $expenseRequest = ExpenseRequest::with('user')->findOrFail($id);
 
         $request->validate([
             'notes' => 'required|string|max:500',
         ]);
 
-        // Check authorization
-        $canReject = false;
-        $approverPosition = '';
+        $userPosition = $user->position;
 
-        if ($user->position === 'head' && $expenseRequest->status === 'submitted') {
-            $divisionIds = $user->divisions->pluck('id');
-            $requesterDivisionIds = $expenseRequest->user->divisions->pluck('id');
-
-            if ($divisionIds->intersect($requesterDivisionIds)->isNotEmpty()) {
-                $canReject = true;
-                $approverPosition = 'head';
-            }
-
-        } elseif ($user->position === 'direktur' && $expenseRequest->status === 'head_approved') {
-            $canReject = true;
-            $approverPosition = 'director';
-        }
-
-        if (!$canReject) {
+        // Verify this user can reject this request
+        if (!$expenseRequest->canBeApprovedBy($userPosition)) {
             flash()->error('Anda tidak memiliki wewenang untuk reject request ini');
             return redirect()->back();
         }
 
-        // Update status
-        $expenseRequest->status = 'rejected';
-        $expenseRequest->rejected_reason = $request->input('notes');
-        $expenseRequest->save();
+        // Additional check for head: must be same division
+        if ($userPosition === 'head') {
+            $divisionIds = $user->divisions->pluck('id');
+            $requesterDivisionIds = $expenseRequest->user->divisions->pluck('id');
 
-        // Create approval record
+            if ($divisionIds->intersect($requesterDivisionIds)->isEmpty()) {
+                flash()->error('Anda tidak memiliki wewenang untuk reject request ini');
+                return redirect()->back();
+            }
+        }
+
+        // Create approval record with rejected status
         Approval::create([
             'request_id' => $expenseRequest->id,
-            'approver_position' => $approverPosition,
+            'approver_position' => $userPosition,
             'approver_id' => $user->id,
             'status' => 'rejected',
             'notes' => $request->input('notes'),
             'approved_at' => now(),
         ]);
+
+        // Update request status
+        $expenseRequest->status = 'rejected';
+        $expenseRequest->rejected_reason = $request->input('notes');
+        $expenseRequest->save();
 
         flash()->success('Request berhasil di-reject');
         return redirect()->route('expense.approvals');

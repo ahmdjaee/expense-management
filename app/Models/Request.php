@@ -29,9 +29,9 @@ class Request extends Model
     ];
 
     protected $casts = [
-        'head_approved_at' => 'date',
-        'director_approved_at' => 'date',
-        'paid_at' => 'date',
+        'head_approved_at' => 'datetime',
+        'director_approved_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     /**
@@ -83,19 +83,59 @@ class Request extends Model
     }
 
     /**
-     * Check if request can be approved by head
+     * Get approval flow based on requester position
+     * Returns array of positions that need to approve
      */
-    public function canBeApprovedByHead(): bool
+    public function getApprovalFlow(): array
     {
-        return $this->status === 'submitted';
+        $requesterPosition = $this->user->position;
+
+        switch ($requesterPosition) {
+            case 'karyawan':
+                return ['head', 'direktur', 'finance'];
+            case 'head':
+                return ['direktur', 'finance'];
+            case 'direktur':
+                return ['finance'];
+            case 'finance':
+                return ['direktur'];
+            default:
+                return [];
+        }
     }
 
     /**
-     * Check if request can be approved by director
+     * Get next approver position in flow
      */
-    public function canBeApprovedByDirector(): bool
+    public function getNextApproverPosition(): ?string
     {
-        return $this->status === 'head_approved';
+        $flow = $this->getApprovalFlow();
+        $approvedPositions = $this->approvals()
+            ->where('status', 'approved')
+            ->pluck('approver_position')
+            ->toArray();
+
+        foreach ($flow as $position) {
+            if (!in_array($position, $approvedPositions)) {
+                return $position;
+            }
+        }
+
+        return null; // All approved
+    }
+
+    /**
+     * Check if request can be approved by specific position
+     */
+    public function canBeApprovedBy(string $position): bool
+    {
+        // Check if already rejected or paid
+        if (in_array($this->status, ['rejected', 'paid'])) {
+            return false;
+        }
+
+        $nextPosition = $this->getNextApproverPosition();
+        return $nextPosition === $position;
     }
 
     /**
@@ -103,6 +143,66 @@ class Request extends Model
      */
     public function canBePaid(): bool
     {
-        return $this->status === 'director_approved';
+        // Only finance can pay
+        // All approvals must be complete
+        $nextPosition = $this->getNextApproverPosition();
+        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'rejected';
+    }
+
+    /**
+     * Get current status based on approvals
+     */
+    public function getCurrentStatus(): string
+    {
+        if ($this->status === 'rejected') {
+            return 'rejected';
+        }
+
+        if ($this->status === 'paid') {
+            return 'paid';
+        }
+
+        $nextPosition = $this->getNextApproverPosition();
+
+        if ($nextPosition === null) {
+            // All approvals complete, ready for payment
+            return 'director_approved';
+        }
+
+        // Check what's been approved
+        $approvedPositions = $this->approvals()
+            ->where('status', 'approved')
+            ->pluck('approver_position')
+            ->toArray();
+
+        if (in_array('head', $approvedPositions)) {
+            return 'head_approved';
+        }
+
+        return 'submitted';
+    }
+
+    /**
+     * Check if request can be approved by head
+     */
+    public function canBeApprovedByHead(): bool
+    {
+        return $this->canBeApprovedBy('head');
+    }
+
+    /**
+     * Check if request can be approved by director
+     */
+    public function canBeApprovedByDirector(): bool
+    {
+        return $this->canBeApprovedBy('direktur');
+    }
+
+    /**
+     * Check if specific position is in approval flow
+     */
+    public function needsApprovalFrom(string $position): bool
+    {
+        return in_array($position, $this->getApprovalFlow());
     }
 }

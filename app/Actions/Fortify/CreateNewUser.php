@@ -25,7 +25,7 @@ class CreateNewUser implements CreatesNewUsers
                 'string',
                 'email',
                 'max:255',
-                Rule::unique(User::class),
+                Rule::unique(table: User::class),
             ],
             'password' => $this->passwordRules(),
             'divisions' => ['required', 'array', 'min:1'],

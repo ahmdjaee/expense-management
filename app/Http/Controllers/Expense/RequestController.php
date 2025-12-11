@@ -14,8 +14,14 @@ class RequestController extends Controller
      */
     public function index()
     {
-        $requests = ExpenseRequest::where('user_id', auth()->id())->get();
-        return Inertia::render('expense/request/index', compact('requests'));
+        $requests = ExpenseRequest::with(['user', 'approvals.approver'])
+            ->where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('expense/request/index', [
+            'requests' => $requests,
+        ]);
     }
 
     /**
@@ -72,9 +78,39 @@ class RequestController extends Controller
      */
     public function show(string $id)
     {
-        $request = ExpenseRequest::with('user', 'user.divisions')->find($id);
+        $request = ExpenseRequest::with([
+            'user',
+            'user.divisions',
+            'approvals.approver',
+            'headApprover',
+            'directorApprover',
+            'paidBy',
+            'payment'
+        ])->findOrFail($id);
 
-        return Inertia::render('expense/request/detail', compact('request'));
+        // Add approval flow information
+        $approvalFlow = $request->getApprovalFlow();
+        $nextApprover = $request->getNextApproverPosition();
+
+        // Check if current user can take action
+        $currentUser = auth()->user();
+        $canApprove = $request->canBeApprovedBy($currentUser->position);
+        $canPay = $currentUser->position === 'finance' && $request->canBePaid();
+
+        // Additional check for head
+        if ($canApprove && $currentUser->position === 'head') {
+            $divisionIds = $currentUser->divisions->pluck('id');
+            $requesterDivisionIds = $request->user->divisions->pluck('id');
+            $canApprove = $divisionIds->intersect($requesterDivisionIds)->isNotEmpty();
+        }
+
+        return Inertia::render('expense/request/detail', [
+            'request' => $request,
+            'approvalFlow' => $approvalFlow,
+            'nextApprover' => $nextApprover,
+            'canApprove' => $canApprove,
+            'canPay' => $canPay,
+        ]);
     }
 
     /**

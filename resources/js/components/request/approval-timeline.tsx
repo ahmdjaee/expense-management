@@ -1,0 +1,122 @@
+// resources/js/components/request/approval-timeline.tsx
+
+import { getApprovalFlowSteps, getPositionLabel, type Approval } from '@/lib/approval-flow-helper';
+import { formatDateTime } from '@/lib/utils';
+
+interface ApprovalTimelineProps {
+    request: {
+        user: {
+            name: string;
+            position: string;
+        };
+        approvals: Approval[];
+        created_at: string;
+        paid_at?: string;
+        status: string;
+    };
+}
+
+export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
+    const flowSteps = getApprovalFlowSteps(request.user.position, request.approvals);
+    const isRejected = request.status === 'rejected';
+    const isPaid = request.status === 'paid';
+
+    const rejectedApproval = request.approvals.find((a) => a.status === 'rejected');
+
+    return (
+        <div className="space-y-4">
+            <p className="text-sm font-semibold text-foreground">Riwayat Persetujuan</p>
+            <div className="space-y-3">
+                {/* Submission */}
+                <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                        <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                        <div className="h-12 w-0.5 bg-gray-200"></div>
+                    </div>
+                    <div className="flex-1">
+                        <p className="font-medium text-foreground">Pengajuan Dibuat</p>
+                        <p className="text-sm text-muted-foreground">
+                            oleh {request.user.name} ({getPositionLabel(request.user.position)})
+                        </p>
+                        <p className="text-sm text-muted-foreground">{formatDateTime(request.created_at)}</p>
+                    </div>
+                </div>
+
+                {/* Approval Steps */}
+                {flowSteps.map((step, index) => {
+                    const isLast = index === flowSteps.length - 1;
+                    const approval = request.approvals.find((a) => a.approver_position === step.position);
+                    const isThisRejected = approval?.status === 'rejected';
+
+                    return (
+                        <div key={step.position} className="flex gap-4">
+                            <div className="flex flex-col items-center">
+                                <div
+                                    className={`h-3 w-3 rounded-full ${
+                                        isThisRejected ? 'bg-red-500' : step.approved ? 'bg-green-500' : 'bg-gray-300'
+                                    }`}
+                                ></div>
+                                {(!isLast || !isRejected) && <div className="h-12 w-0.5 bg-gray-200"></div>}
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-medium text-foreground">Persetujuan {step.label}</p>
+                                {step.approved ? (
+                                    <>
+                                        <p className="text-sm text-green-600">✓ Disetujui oleh {step.approver?.name}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {step.approver?.approved_at && formatDateTime(step.approver.approved_at)}
+                                        </p>
+                                    </>
+                                ) : isThisRejected ? (
+                                    <>
+                                        <p className="text-sm text-red-600">
+                                            ✗ Ditolak oleh {approval?.approver?.name}
+                                        </p>
+                                        {approval?.notes && (
+                                            <p className="mt-1 rounded bg-red-50 p-2 text-sm text-red-900">
+                                                <span className="font-medium">Alasan:</span> {approval.notes}
+                                            </p>
+                                        )}
+                                        <p className="text-sm text-muted-foreground">
+                                            {approval?.approved_at && formatDateTime(approval.approved_at)}
+                                        </p>
+                                    </>
+                                ) : (
+                                    <p className="text-sm text-yellow-600">
+                                        {isRejected ? '- Proses dihentikan' : '⏳ Menunggu persetujuan'}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+
+                {/* Payment */}
+                {!isRejected && (
+                    <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                            <div className={`h-3 w-3 rounded-full ${isPaid ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-medium text-foreground">Pembayaran</p>
+                            {isPaid ? (
+                                <>
+                                    <p className="text-sm text-green-600">✓ Sudah dibayar</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {request.paid_at && formatDateTime(request.paid_at)}
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="text-sm text-yellow-600">
+                                    {flowSteps.every((s) => s.approved)
+                                        ? '⏳ Menunggu pembayaran oleh Finance'
+                                        : '- Menunggu approval selesai'}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

@@ -23,11 +23,13 @@ class PaymentController extends Controller
             return redirect()->route('expense.expenseDashboard');
         }
 
-        // Request yang siap dibayar (director_approved)
-        $readyForPayment = ExpenseRequest::with(['user', 'approvals.approver'])
-            ->where('status', 'director_approved')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Request yang siap dibayar (all approvals complete)
+        $readyForPayment = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
+            ->get()
+            ->filter(function ($request) {
+                return $request->canBePaid();
+            })
+            ->values();
 
         // Request yang sudah dibayar
         $paidRequests = ExpenseRequest::with(['user', 'payment'])
@@ -57,12 +59,12 @@ class PaymentController extends Controller
             return redirect()->route('expense.expenseDashboard');
         }
 
-        $request = ExpenseRequest::with(['user', 'approvals.approver'])
+        $request = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
             ->findOrFail($id);
 
         // Cek apakah request bisa dibayar
         if (!$request->canBePaid()) {
-            flash()->error('Request ini belum bisa dibayar');
+            flash()->error('Request ini belum bisa dibayar. Pastikan semua approval sudah lengkap.');
             return redirect()->route('expense.payments');
         }
 
@@ -91,7 +93,7 @@ class PaymentController extends Controller
 
         // Validasi
         if (!$expenseRequest->canBePaid()) {
-            flash()->error('Request ini belum bisa dibayar');
+            flash()->error('Request ini belum bisa dibayar. Pastikan semua approval sudah lengkap.');
             return redirect()->route('expense.payments');
         }
 

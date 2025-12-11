@@ -110,6 +110,7 @@ class PaymentController extends Controller
             'payment_method' => $request->input('payment_method'),
             'status' => 'completed',
             'reference_number' => $request->input('reference_number'),
+            'notes' => $request->input('notes'),
             'paid_at' => now(),
         ]);
 

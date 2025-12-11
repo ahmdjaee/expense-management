@@ -66,13 +66,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // EXPENSE MANAGEMENT ROUTES
     // ========================================
     Route::prefix('expenses')->name('expense.')->group(function () {
-        Route::get('/request/new', [RequestController::class, 'create'])->name('requestNew');
-        Route::post('/request/new', [RequestController::class, 'store'])->name('requestStore');
-
-        Route::get('/request/{id}', [RequestController::class, 'show'])->name('requestDetail');
-
-        Route::get('/request', [RequestController::class, 'index'])->name('requestIndex');
-
         // Dashboard
         Route::get('/dashboard', function () {
             return Inertia::render('expense/dashboard', [
@@ -87,6 +80,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/request/new', [RequestController::class, 'create'])->name('requestNew');
         Route::post('/request/new', [RequestController::class, 'store'])->name('requestStore');
         Route::get('/request/{id}', [RequestController::class, 'show'])->name('requestDetail');
+        Route::get('/request/{id}/edit', [RequestController::class, 'edit'])->name('requestEdit');
+        Route::put('/request/{id}', [RequestController::class, 'update'])->name('requestUpdate');
+        Route::delete('/request/{id}', [RequestController::class, 'destroy'])->name('requestDestroy');
 
         // Approval routes
         Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals');

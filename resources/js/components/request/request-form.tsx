@@ -1,19 +1,46 @@
+// resources/js/components/request/request-form.tsx
+
+'use client';
+
+import { ExpenseRequest } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { requestStore } from '@/routes/expense';
 import { Form } from '@inertiajs/react';
 import { File, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
-import InputError from '../input-error';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 
-export function RequestForm() {
-    const [type, setType] = useState<'reimbursement' | 'advance' | null>(null);
-    const [amount, setAmount] = useState('');
-    const [method, setMethod] = useState<'transfer' | 'cash'>('transfer');
+// Komponen untuk menampilkan error
+function InputError({ message }: { message?: string }) {
+    return message ? <p className="mt-1 text-sm text-red-600">{message}</p> : null;
+}
+
+interface RequestFormProps {
+    initialData?: ExpenseRequest;
+    isEdit?: boolean;
+}
+
+export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
+    const [type, setType] = useState<'reimbursement' | 'advance' | null>(
+        initialData ? (initialData.type as 'reimbursement' | 'advance') : null,
+    );
+    const [amount, setAmount] = useState(initialData ? initialData.amount.toString() : '');
+    const [method, setMethod] = useState<'transfer' | 'cash'>(
+        initialData ? (initialData.payment_method as 'transfer' | 'cash') : 'transfer',
+    );
     const [attachments, setAttachments] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Initialize form with initial data if in edit mode
+    useEffect(() => {
+        if (initialData && isEdit) {
+            // Set initial values
+            setAmount(initialData.amount.toString());
+            setMethod(initialData.payment_method as 'transfer' | 'cash');
+            setType(initialData.type as 'reimbursement' | 'advance');
+        }
+    }, [initialData, isEdit]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -26,7 +53,7 @@ export function RequestForm() {
         setAttachments((prev) => prev.filter((_, i) => i !== index));
     };
 
-    if (!type) {
+    if (!type && !isEdit) {
         return (
             <div className="mx-auto w-full max-w-2xl">
                 <div className="mb-8">
@@ -74,21 +101,34 @@ export function RequestForm() {
     }
 
     return (
-        <Form className="mx-auto w-full max-w-2xl" action={requestStore()} method="post" encType="multipart/form-data">
+        <Form
+            className="mx-auto w-full max-w-2xl"
+            action={isEdit ? `/expenses/request/${initialData?.id}` : '/expenses/request/new'}
+            method={isEdit ? 'put' : 'post'}
+            encType="multipart/form-data"
+        >
             {({ processing, errors }) => (
                 <>
                     <div className="mb-8">
-                        <button
-                            type="button"
-                            onClick={() => setType(null)}
-                            className="mb-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                        >
-                            ← Kembali memilih jenis
-                        </button>
+                        {!isEdit && (
+                            <button
+                                type="button"
+                                onClick={() => setType(null)}
+                                className="mb-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                            >
+                                ← Kembali memilih jenis
+                            </button>
+                        )}
                         <h1 className="mb-2 text-3xl font-bold text-foreground">
-                            {type === 'reimbursement' ? 'Pengajuan Reimbursement' : 'Pengajuan Advance / Kasbon'}
+                            {isEdit
+                                ? 'Edit Pengajuan'
+                                : type === 'reimbursement'
+                                  ? 'Pengajuan Reimbursement'
+                                  : 'Pengajuan Advance / Kasbon'}
                         </h1>
-                        <p className="text-muted-foreground">Lengkapi semua detail pengajuan Anda</p>
+                        <p className="text-muted-foreground">
+                            {isEdit ? 'Perbarui detail pengajuan Anda' : 'Lengkapi semua detail pengajuan Anda'}
+                        </p>
                     </div>
 
                     <div className="space-y-6">
@@ -99,6 +139,7 @@ export function RequestForm() {
                                 type="text"
                                 name="title"
                                 placeholder="Contoh: Pembelian Stationery Kantor"
+                                defaultValue={initialData?.title}
                                 required
                             />
                             <p className="mt-1 text-xs text-muted-foreground">
@@ -108,21 +149,21 @@ export function RequestForm() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-semibold text-foreground">Ketegori</label>
-                            <Select name="category" required>
+                            <label className="mb-2 block text-sm font-semibold text-foreground">Kategori</label>
+                            <Select name="category" defaultValue={initialData?.category} required>
                                 <SelectTrigger id="category">
-                                    <SelectValue placeholder="Pilih Ketegori" />
+                                    <SelectValue placeholder="Pilih Kategori" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="travel">Travel</SelectItem>
-                                    <SelectItem value="entertaiment">Entertaiment</SelectItem>
+                                    <SelectItem value="entertainment">Entertainment</SelectItem>
                                     <SelectItem value="office_supplies">Office Supplies</SelectItem>
                                     <SelectItem value="utilities">Utilities</SelectItem>
                                     <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Berikan judul yang jelas untuk pengajuan Anda
+                                Pilih kategori yang sesuai dengan pengajuan Anda
                             </p>
                             <InputError message={errors.category} />
                         </div>
@@ -133,6 +174,7 @@ export function RequestForm() {
                                 name="description"
                                 placeholder="Jelaskan secara detail tentang pengajuan Anda, apa yang dibeli, kapan, dan untuk apa..."
                                 rows={4}
+                                defaultValue={initialData?.description}
                                 required
                             />
                             <p className="mt-1 text-xs text-muted-foreground">
@@ -240,11 +282,11 @@ export function RequestForm() {
                                                 className="flex items-center justify-between rounded-lg border border-border bg-secondary p-3"
                                             >
                                                 <div className="flex min-w-0 items-center gap-2">
-                                                    <File className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                                    <File className="h-4 w-4 shrink-0 text-muted-foreground" />
                                                     <span className="truncate text-sm font-medium text-foreground">
                                                         {file.name}
                                                     </span>
-                                                    <span className="flex-shrink-0 text-xs text-muted-foreground">
+                                                    <span className="shrink-0 text-xs text-muted-foreground">
                                                         ({(file.size / 1024).toFixed(1)}KB)
                                                     </span>
                                                 </div>
@@ -264,19 +306,21 @@ export function RequestForm() {
                     </div>
 
                     <div className="mt-8 flex gap-3 border-t border-border pt-6">
-                        <button
-                            type="button"
-                            onClick={() => setType(null)}
-                            className="flex-1 rounded-lg border border-border px-4 py-3 font-medium text-foreground transition-colors hover:bg-secondary"
-                        >
-                            Ubah Jenis
-                        </button>
+                        {!isEdit && (
+                            <button
+                                type="button"
+                                onClick={() => setType(null)}
+                                className="flex-1 rounded-lg border border-border px-4 py-3 font-medium text-foreground transition-colors hover:bg-secondary"
+                            >
+                                Ubah Jenis
+                            </button>
+                        )}
                         <button
                             type="submit"
                             disabled={processing}
                             className="flex-1 rounded-lg bg-primary px-4 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
                         >
-                            {processing ? 'Memproses...' : 'Ajukan Pengajuan'}
+                            {processing ? 'Memproses...' : isEdit ? 'Perbarui Pengajuan' : 'Ajukan Pengajuan'}
                         </button>
                     </div>
                 </>

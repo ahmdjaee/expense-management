@@ -1,69 +1,84 @@
-// Database types dan interfaces
-export type UserRole = "user" | "head" | "director" | "finance" | "admin"
-export type RequestType = "reimbursement" | "advance"
-export type RequestStatus = "draft" | "submitted" | "head_approved" | "director_approved" | "paid" | "rejected"
-export type PaymentMethod = "transfer" | "cash"
+export type UserRole = 'user' | 'head' | 'director' | 'finance' | 'admin';
+export type RequestType = 'reimbursement' | 'advance';
+export type RequestStatus = 'draft' | 'submitted' | 'head_approved' | 'director_approved' | 'paid' | 'rejected';
+export type PaymentMethod = 'transfer' | 'cash';
 
 export interface User {
-  id: string
-  name: string
-  email: string
-  phone: string
-  role: UserRole
-  divisions: Division[]
-  bankAccount?: string
-  bankName?: string
-  accountHolder?: string
-  createdAt: Date
+    id: number;
+    name: string;
+    email: string;
+    phone?: string;
+    role: UserRole;
+    position: string;
+    divisions: Division[];
+    bankAccount?: string;
+    bankName?: string;
+    accountHolder?: string;
+    rekening?: string;
+    bank?: string;
+    rekening_name?: string;
+    createdAt: Date;
 }
 
 export interface ExpenseRequest {
-  id: string
-  userId: string
-  user ?: User
-  type: RequestType
-  amount: number
-  title: string
-  description: string
-  status: RequestStatus
-  payment_method: PaymentMethod
-  currency: string
-  attachments?: string[]
-  head_approved_at?: Date
-  head_approved_by?: string
-  director_approved_at?: Date
-  director_approved_by?: string
-  paid_at?: Date
-  paid_by?: string
-  rejection_reason?: string
-  created_at: Date
-  updated_at: Date
+    id: number;
+    user_id: number; // Tambahkan properti yang hilang
+    title: string;
+    description: string;
+    amount: number;
+    status: string;
+    type: string;
+    category: string;
+    payment_method: string;
+    created_at: string;
+    updated_at: string; // Tambahkan properti yang hilang
+    currency?: string;
+    paid_at?: string;
+    head_approved_at?: string;
+    director_approved_at?: string;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+        position: string;
+        divisions: Array<{ id: number; name: string }>;
+    };
+    approvals: Array<{
+        id: number;
+        approver_position: string;
+        status: string;
+        notes?: string;
+        approved_at?: string;
+        approver?: {
+            name: string;
+        };
+    }>;
 }
 
 export interface Approval {
-  id: string
-  requestId: string
-  approverRole: "head" | "director" | "finance"
-  approverId: string
-  status: "pending" | "approved" | "rejected"
-  notes?: string
-  createdAt: Date
-  updatedAt: Date
+    id: string;
+    requestId: string;
+    approverRole: 'head' | 'director' | 'finance';
+    approverId: string;
+    status: 'pending' | 'approved' | 'rejected';
+    notes?: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Payment {
-  id: string
-  requestId: string
-  userId: string
-  amount: number
-  method: PaymentMethod
-  status: "pending" | "completed" | "failed"
-  referenceNumber?: string
-  paidAt?: Date
-  createdAt: Date
+    id: string;
+    requestId: string;
+    userId: string;
+    amount: number;
+    method: PaymentMethod;
+    status: 'pending' | 'completed' | 'failed';
+    referenceNumber?: string;
+    paidAt?: Date;
+    createdAt: Date;
 }
 
 export interface Division {
-  id: number
-  name: string
+    id: number;
+    name: string;
 }

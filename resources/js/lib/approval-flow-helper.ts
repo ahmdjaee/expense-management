@@ -1,5 +1,3 @@
-// resources/js/lib/approval-flow-helper.ts
-
 export interface ApprovalFlowStep {
     position: string;
     label: string;
@@ -114,4 +112,32 @@ export function getApprovalStatusColor(status: string): string {
         rejected: 'bg-red-100 text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
+}
+
+/**
+ * Check if user can approve request based on position and division
+ */
+export function canUserApproveRequest(
+    userPosition: string,
+    userDivisions: Array<{ id: number; name: string }>,
+    requesterPosition: string,
+    requesterDivisions: Array<{ id: number; name: string }>,
+    currentApprovalStep: string | null,
+): boolean {
+    // Check if it's the user's turn to approve
+    if (currentApprovalStep !== userPosition) {
+        return false;
+    }
+
+    // Special check for head: must be from the same division
+    if (userPosition === 'head') {
+        const userDivisionIds = userDivisions.map((d) => d.id);
+        const requesterDivisionIds = requesterDivisions.map((d) => d.id);
+
+        // Check if they share at least one division
+        return userDivisionIds.some((id) => requesterDivisionIds.includes(id));
+    }
+
+    // Director and finance don't need to be from the same division
+    return true;
 }

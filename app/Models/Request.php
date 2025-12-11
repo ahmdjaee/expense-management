@@ -166,7 +166,7 @@ class Request extends Model
 
         if ($nextPosition === null) {
             // All approvals complete, ready for payment
-            return 'director_approved';
+            return 'director_approved'; // or 'approved' if finance is not considered a separate step in status
         }
 
         // Check what's been approved
@@ -175,27 +175,15 @@ class Request extends Model
             ->pluck('approver_position')
             ->toArray();
 
+        if (in_array('direktur', $approvedPositions)) {
+            return 'director_approved';
+        }
+
         if (in_array('head', $approvedPositions)) {
             return 'head_approved';
         }
 
         return 'submitted';
-    }
-
-    /**
-     * Check if request can be approved by head
-     */
-    public function canBeApprovedByHead(): bool
-    {
-        return $this->canBeApprovedBy('head');
-    }
-
-    /**
-     * Check if request can be approved by director
-     */
-    public function canBeApprovedByDirector(): bool
-    {
-        return $this->canBeApprovedBy('direktur');
     }
 
     /**

@@ -1,7 +1,7 @@
 import AppLogo from '@/components/app-logo';
 import { Button } from '@/components/ui/button';
 import { Head, Link } from '@inertiajs/react';
-import { CheckCircle, MoreHorizontal, Wallet } from 'lucide-react';
+import { CheckCircle, DollarSign, MoreHorizontal, Wallet } from 'lucide-react';
 
 export default function Welcome({ canRegister = true, auth }) {
     return (
@@ -76,6 +76,16 @@ export default function Welcome({ canRegister = true, auth }) {
                                             <Wallet className="h-8 w-8 text-white" />
                                         </div>
                                         <span className="text-sm font-medium text-zinc-300">Expense Tracker</span>
+                                    </div>
+                                </Link>
+
+                                {/* Menu Commision */}
+                                <Link href="/commissions/deals">
+                                    <div className="group flex flex-col items-center gap-3 rounded-2xl bg-zinc-800/30 p-6 transition-all hover:scale-105 hover:bg-zinc-800/50 hover:shadow-xl">
+                                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-green-500 shadow-lg group-hover:shadow-green-500/50">
+                                            <DollarSign className="h-8 w-8 text-white" />
+                                        </div>
+                                        <span className="text-sm font-medium text-zinc-300">Commission</span>
                                     </div>
                                 </Link>
 

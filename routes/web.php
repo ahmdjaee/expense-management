@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\CRM\DealController;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\RequestController;
@@ -16,6 +17,7 @@ Route::get('/', function () {
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
@@ -104,6 +106,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ],
             ]);
         })->name('reports');
+    });
+
+    Route::prefix('commissions')->group(function () {
+        Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
     });
 });
 

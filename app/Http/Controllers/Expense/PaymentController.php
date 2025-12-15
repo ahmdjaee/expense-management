@@ -33,7 +33,7 @@ class PaymentController extends Controller
 
         // Request yang sudah dibayar
         $paidRequests = ExpenseRequest::with(['user', 'payment'])
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'closed'])
             ->orderBy('paid_at', 'desc')
             ->get();
 
@@ -110,17 +110,24 @@ class PaymentController extends Controller
             'payment_method' => $request->input('payment_method'),
             'status' => 'completed',
             'reference_number' => $request->input('reference_number'),
-            'notes' => $request->input('notes'),
             'paid_at' => now(),
         ]);
 
-        // Update request status
-        $expenseRequest->status = 'paid';
+        // Update request status based on type
+        if ($expenseRequest->type === 'reimbursement') {
+            // Reimbursement langsung closed setelah paid
+            $expenseRequest->status = 'closed';
+            flash()->success('Pembayaran berhasil diproses. Request reimbursement telah ditutup.');
+        } else {
+            // Advance/Kasbon menunggu LPJ
+            $expenseRequest->status = 'paid';
+            flash()->success('Pembayaran berhasil diproses. Menunggu LPJ dari pemohon.');
+        }
+
         $expenseRequest->paid_by = $user->id;
         $expenseRequest->paid_at = now();
         $expenseRequest->save();
 
-        flash()->success('Pembayaran berhasil diproses');
         return redirect()->route('expense.payments');
     }
 

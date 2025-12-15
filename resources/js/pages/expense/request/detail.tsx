@@ -4,7 +4,7 @@ import { ApprovalTimeline } from '@/components/request/approval-timeline';
 import { PrintForm } from '@/components/request/print-form';
 import AppLayout from '@/layouts/expense-app-layout';
 import { formatCurrency } from '@/lib/utils';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 interface User {
@@ -36,6 +36,7 @@ interface ExpenseRequest {
     title: string;
     description: string;
     amount: number;
+    actual_amount?: number;
     status: string;
     type: string;
     category: string;
@@ -45,6 +46,8 @@ interface ExpenseRequest {
     paid_at?: string;
     head_approved_at?: string;
     director_approved_at?: string;
+    lpj_submitted_at?: string;
+    lpj_verified_at?: string;
     user: User;
     approvals: Approval[];
 }
@@ -86,6 +89,7 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
     }
 
     const requester = request.user;
+    const isOwner = request.user_id === auth.user.id;
 
     const handleApprove = () => {
         setIsProcessing(true);
@@ -176,6 +180,36 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
                             </div>
                         </div>
 
+                        {/* LPJ Info if exists */}
+                        {request.type === 'advance' && request.actual_amount && (
+                            <div className="rounded-lg bg-purple-50 p-4">
+                                <p className="mb-2 text-sm font-semibold text-purple-900">Informasi LPJ</p>
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <p className="text-purple-600">Nominal Aktual</p>
+                                        <p className="font-bold text-purple-900">
+                                            {formatCurrency(request.actual_amount)}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-purple-600">Selisih</p>
+                                        <p
+                                            className={`font-bold ${
+                                                request.actual_amount - request.amount > 0
+                                                    ? 'text-red-600'
+                                                    : request.actual_amount - request.amount < 0
+                                                      ? 'text-green-600'
+                                                      : 'text-purple-900'
+                                            }`}
+                                        >
+                                            {request.actual_amount - request.amount > 0 ? '+' : ''}
+                                            {formatCurrency(request.actual_amount - request.amount)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Description */}
                         <div>
                             <p className="mb-2 text-xs text-muted-foreground">Deskripsi</p>
@@ -226,30 +260,59 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
                                     🖨️ Cetak Form
                                 </button>
 
-                                {canApprove && request.status !== 'rejected' && request.status !== 'paid' && (
-                                    <>
-                                        <button
-                                            onClick={() => setShowApprovalModal(true)}
-                                            className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition hover:opacity-90"
-                                        >
-                                            ✓ Setujui
-                                        </button>
-                                        <button
-                                            onClick={() => setShowRejectModal(true)}
-                                            className="rounded-lg border border-red-300 px-4 py-2 font-medium text-red-600 transition hover:bg-red-50"
-                                        >
-                                            ✕ Tolak
-                                        </button>
-                                    </>
-                                )}
+                                {canApprove &&
+                                    request.status !== 'rejected' &&
+                                    request.status !== 'paid' &&
+                                    request.status !== 'closed' && (
+                                        <>
+                                            <button
+                                                onClick={() => setShowApprovalModal(true)}
+                                                className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition hover:opacity-90"
+                                            >
+                                                ✓ Setujui
+                                            </button>
+                                            <button
+                                                onClick={() => setShowRejectModal(true)}
+                                                className="rounded-lg border border-red-300 px-4 py-2 font-medium text-red-600 transition hover:bg-red-50"
+                                            >
+                                                ✕ Tolak
+                                            </button>
+                                        </>
+                                    )}
 
-                                {canPay && request.status !== 'paid' && (
+                                {canPay && request.status !== 'paid' && request.status !== 'closed' && (
                                     <button
                                         onClick={() => setShowPaymentModal(true)}
                                         className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:opacity-90"
                                     >
                                         💳 Proses Pembayaran
                                     </button>
+                                )}
+
+                                {/* LPJ Submit Button - Only for advance/kasbon owner after paid */}
+                                {request.type === 'advance' &&
+                                    request.status === 'paid' &&
+                                    !request.lpj_submitted_at &&
+                                    isOwner && (
+                                        <Link
+                                            href={`/expenses/lpj/${request.id}/create`}
+                                            className="rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition hover:opacity-90"
+                                        >
+                                            📋 Submit LPJ
+                                        </Link>
+                                    )}
+
+                                {/* LPJ Status Indicators */}
+                                {request.lpj_submitted_at && !request.lpj_verified_at && (
+                                    <span className="rounded-lg bg-yellow-100 px-4 py-2 text-sm font-medium text-yellow-800">
+                                        ⏳ Menunggu Verifikasi LPJ
+                                    </span>
+                                )}
+
+                                {request.status === 'closed' && (
+                                    <span className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-800">
+                                        ✓ Request Ditutup
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -402,6 +465,15 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
                                         </span>
                                     </div>
                                 </div>
+
+                                {request.type === 'advance' && (
+                                    <div className="rounded-lg bg-yellow-50 p-4">
+                                        <p className="text-sm text-yellow-900">
+                                            ℹ️ Setelah pembayaran, pemohon harus submit LPJ (Laporan Pertanggungjawaban)
+                                        </p>
+                                    </div>
+                                )}
+
                                 <div className="space-y-2">
                                     <button
                                         onClick={handlePayment}

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\RequestController;
 use App\Http\Controllers\Expense\ApprovalController;
 use App\Http\Controllers\Expense\PaymentController;
+use App\Http\Controllers\Expense\LPJController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -97,6 +98,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/payments/{id}', [PaymentController::class, 'show'])->name('payments.show');
         Route::post('/payments/{id}/process', [PaymentController::class, 'process'])->name('payments.process');
         Route::get('/payments-history', [PaymentController::class, 'history'])->name('payments.history');
+
+        // LPJ routes
+        Route::get('/lpj', [LPJController::class, 'index'])->name('lpj.index');
+        Route::get('/lpj/{id}', [LPJController::class, 'show'])->name('lpj.show');
+        Route::get('/lpj/{id}/create', [LPJController::class, 'create'])->name('lpj.create');
+        Route::post('/lpj/{id}/submit', [LPJController::class, 'store'])->name('lpj.store');
+        Route::post('/lpj/{id}/verify', [LPJController::class, 'verify'])->name('lpj.verify');
 
         // Reports
         Route::get('/reports', function () {

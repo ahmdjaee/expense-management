@@ -14,11 +14,18 @@ class Request extends Model
         'type',
         'category',
         'amount',
+        'actual_amount',
         'title',
         'description',
         'status',
         'payment_method',
         'attachment',
+        'lpj_attachment',
+        'lpj_notes',
+        'lpj_submitted_at',
+        'lpj_verified_at',
+        'lpj_verified_by',
+        'lpj_verification_notes',
         'head_approved_at',
         'head_approved_by',
         'director_approved_at',
@@ -32,6 +39,8 @@ class Request extends Model
         'head_approved_at' => 'datetime',
         'director_approved_at' => 'datetime',
         'paid_at' => 'datetime',
+        'lpj_submitted_at' => 'datetime',
+        'lpj_verified_at' => 'datetime',
     ];
 
     /**
@@ -83,8 +92,15 @@ class Request extends Model
     }
 
     /**
+     * Get LPJ verifier
+     */
+    public function lpjVerifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'lpj_verified_by');
+    }
+
+    /**
      * Get approval flow based on requester position
-     * Returns array of positions that need to approve
      */
     public function getApprovalFlow(): array
     {
@@ -121,7 +137,7 @@ class Request extends Model
             }
         }
 
-        return null; // All approved
+        return null;
     }
 
     /**
@@ -129,8 +145,7 @@ class Request extends Model
      */
     public function canBeApprovedBy(string $position): bool
     {
-        // Check if already rejected or paid
-        if (in_array($this->status, ['rejected', 'paid'])) {
+        if (in_array($this->status, ['rejected', 'paid', 'closed'])) {
             return false;
         }
 
@@ -143,10 +158,43 @@ class Request extends Model
      */
     public function canBePaid(): bool
     {
-        // Only finance can pay
-        // All approvals must be complete
         $nextPosition = $this->getNextApproverPosition();
-        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'rejected';
+        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'rejected' && $this->status !== 'closed';
+    }
+
+    /**
+     * Check if request needs LPJ (only for advance/kasbon)
+     */
+    public function needsLPJ(): bool
+    {
+        return $this->type === 'advance' && $this->status === 'paid';
+    }
+
+    /**
+     * Check if LPJ can be submitted
+     */
+    public function canSubmitLPJ(): bool
+    {
+        return $this->type === 'advance' && $this->status === 'paid' && !$this->lpj_submitted_at;
+    }
+
+    /**
+     * Check if LPJ can be verified
+     */
+    public function canVerifyLPJ(): bool
+    {
+        return $this->type === 'advance' && $this->status === 'paid' && $this->lpj_submitted_at && !$this->lpj_verified_at;
+    }
+
+    /**
+     * Get difference amount (actual - requested)
+     */
+    public function getDifferenceAmount(): ?float
+    {
+        if (!$this->actual_amount) {
+            return null;
+        }
+        return $this->actual_amount - $this->amount;
     }
 
     /**
@@ -158,6 +206,10 @@ class Request extends Model
             return 'rejected';
         }
 
+        if ($this->status === 'closed') {
+            return 'closed';
+        }
+
         if ($this->status === 'paid') {
             return 'paid';
         }
@@ -165,11 +217,9 @@ class Request extends Model
         $nextPosition = $this->getNextApproverPosition();
 
         if ($nextPosition === null) {
-            // All approvals complete, ready for payment
-            return 'director_approved'; // or 'approved' if finance is not considered a separate step in status
+            return 'director_approved';
         }
 
-        // Check what's been approved
         $approvedPositions = $this->approvals()
             ->where('status', 'approved')
             ->pluck('approver_position')

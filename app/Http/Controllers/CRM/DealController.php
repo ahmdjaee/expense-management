@@ -30,6 +30,7 @@ class DealController extends Controller
         // Fetch user profile data
         $userProfileResponse = $this->fetchUserProfile($login);
         
+        // dd($userProfileResponse);
         // Prepare dummy user data for now
         $dummyUsers = [
             '5000311' => [
@@ -56,7 +57,7 @@ class DealController extends Controller
                 'role' => 'Trader',
                 'avatar' => null,
             ],
-        ];
+        ]; 
         
         $currentUser = $dummyUsers[$login] ?? $dummyUsers['5000311'];
         

@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'rekening',
         'bank',
         'rekening_name',
+        'login_code',
     ];
 
     protected $hidden = [
@@ -42,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'login_code' => 'array', // Otomatis convert array ↔ JSON
         ];
     }
 

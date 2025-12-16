@@ -522,9 +522,9 @@ export default function GLORIDashboard() {
                     <SelectValue placeholder="Select Login ID" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="5000311">5000311 - John Doe</SelectItem>
-                    <SelectItem value="5000312">5000312 - Jane Smith</SelectItem>
-                    <SelectItem value="5000313">5000313 - Bob Johnson</SelectItem>
+                    <SelectItem value="5000311">5000311</SelectItem>
+                    <SelectItem value="5000312">5000312</SelectItem>
+                    <SelectItem value="5000313">5000313</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -582,11 +582,11 @@ export default function GLORIDashboard() {
               <Select value={login} onValueChange={handleLoginChange}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Select Login ID" />
-                </SelectTrigger>
+                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5000311">5000311 - John Doe</SelectItem>
-                  <SelectItem value="5000312">5000312 - Jane Smith</SelectItem>
-                  <SelectItem value="5000313">5000313 - Bob Johnson</SelectItem>
+                  <SelectItem value="5000311">5000311</SelectItem>
+                  <SelectItem value="5000312">5000312</SelectItem>
+                  <SelectItem value="5000313">5000313</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -715,7 +715,7 @@ export default function GLORIDashboard() {
               <span className="text-xs lg:text-sm text-gray-500">Account Profile</span>
             </div>
             <div className="text-lg lg:text-xl font-bold text-blue-600">
-              {currentUser?.name || `Login ${login}`}
+              {userProfile?.name || `Login ${login}`}
             </div>
             <div className="text-xs text-gray-600">
               Account {login}

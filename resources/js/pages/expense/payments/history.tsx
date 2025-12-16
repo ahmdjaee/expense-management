@@ -1,3 +1,5 @@
+// resources/js/pages/expense/payments/history.tsx
+
 import AppLayout from '@/layouts/app/app-sidebar-layout';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/react';
@@ -39,6 +41,11 @@ interface HistoryPageProps {
 }
 
 export default function PaymentHistoryPage({ auth, payments }: HistoryPageProps) {
+    // Calculate statistics
+    const totalAmount = payments.data.reduce((acc, p) => acc + p.amount, 0);
+    const transferCount = payments.data.filter((p) => p.payment_method === 'transfer').length;
+    const cashCount = payments.data.filter((p) => p.payment_method === 'cash').length;
+
     return (
         <AppLayout>
             <Head title="Riwayat Pembayaran" />
@@ -70,21 +77,15 @@ export default function PaymentHistoryPage({ auth, payments }: HistoryPageProps)
                         </div>
                         <div className="rounded-lg border border-border bg-card p-4">
                             <p className="mb-1 text-xs text-muted-foreground">Total Nominal</p>
-                            <p className="text-2xl font-bold text-foreground">
-                                {formatCurrency(payments.data.reduce((acc, p) => acc + p.amount, 0))}
-                            </p>
+                            <p className="text-lg font-bold text-green-600">{formatCurrency(totalAmount)}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-card p-4">
                             <p className="mb-1 text-xs text-muted-foreground">Transfer</p>
-                            <p className="text-2xl font-bold text-foreground">
-                                {payments.data.filter((p) => p.payment_method === 'transfer').length}
-                            </p>
+                            <p className="text-2xl font-bold text-foreground">{transferCount}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-card p-4">
                             <p className="mb-1 text-xs text-muted-foreground">Cash</p>
-                            <p className="text-2xl font-bold text-foreground">
-                                {payments.data.filter((p) => p.payment_method === 'cash').length}
-                            </p>
+                            <p className="text-2xl font-bold text-foreground">{cashCount}</p>
                         </div>
                     </div>
 
@@ -120,11 +121,13 @@ export default function PaymentHistoryPage({ auth, payments }: HistoryPageProps)
                                 <tbody className="divide-y divide-border">
                                     {payments.data.length > 0 ? (
                                         payments.data.map((payment) => (
-                                            <tr key={payment.id} className="hover:bg-secondary/20">
-                                                <td className="px-4 py-3 text-sm">{payment.id}</td>
+                                            <tr key={payment.id} className="transition hover:bg-secondary/20">
+                                                <td className="px-4 py-3 font-mono text-sm">#{payment.id}</td>
                                                 <td className="px-4 py-3 text-sm">
                                                     <div>
-                                                        <p className="font-medium">{payment.request.title}</p>
+                                                        <p className="font-medium text-foreground">
+                                                            {payment.request.title}
+                                                        </p>
                                                         <p className="text-xs text-muted-foreground">
                                                             {payment.request.type === 'reimbursement'
                                                                 ? 'Reimbursement'
@@ -132,7 +135,9 @@ export default function PaymentHistoryPage({ auth, payments }: HistoryPageProps)
                                                         </p>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm">{payment.request.user.name}</td>
+                                                <td className="px-4 py-3 text-sm text-foreground">
+                                                    {payment.request.user.name}
+                                                </td>
                                                 <td className="px-4 py-3 text-sm font-bold text-primary">
                                                     {formatCurrency(payment.amount)}
                                                 </td>
@@ -142,11 +147,13 @@ export default function PaymentHistoryPage({ auth, payments }: HistoryPageProps)
                                                         {payment.payment_method === 'transfer' ? 'Transfer' : 'Cash'}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm">{formatDate(payment.paid_at)}</td>
+                                                <td className="px-4 py-3 text-sm text-muted-foreground">
+                                                    {formatDate(payment.paid_at)}
+                                                </td>
                                                 <td className="px-4 py-3 text-sm">
                                                     <Link
                                                         href={`/expenses/request/${payment.request.id}`}
-                                                        className="text-primary hover:underline"
+                                                        className="inline-flex items-center rounded-lg bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition hover:bg-primary hover:text-primary-foreground"
                                                     >
                                                         Detail
                                                     </Link>
@@ -166,21 +173,32 @@ export default function PaymentHistoryPage({ auth, payments }: HistoryPageProps)
 
                         {/* Pagination */}
                         {payments.links.length > 3 && (
-                            <div className="flex justify-center px-4 py-3">
-                                <div className="flex gap-1">
-                                    {payments.links.map((link, index) => (
+                            <div className="flex justify-center gap-1 border-t border-border px-4 py-3">
+                                {payments.links.map((link, index) => {
+                                    // Skip if no URL (disabled button)
+                                    if (!link.url) {
+                                        return (
+                                            <span
+                                                key={index}
+                                                className="cursor-not-allowed rounded bg-secondary/30 px-3 py-1 text-sm text-muted-foreground opacity-50"
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        );
+                                    }
+
+                                    return (
                                         <Link
                                             key={index}
-                                            href={link.url || '#'}
-                                            className={`rounded px-3 py-1 text-sm ${
+                                            href={link.url}
+                                            className={`rounded px-3 py-1 text-sm transition ${
                                                 link.active
-                                                    ? 'bg-primary text-primary-foreground'
+                                                    ? 'bg-primary font-medium text-primary-foreground'
                                                     : 'bg-secondary/30 text-foreground hover:bg-secondary/50'
-                                            } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
+                                            }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
-                                    ))}
-                                </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

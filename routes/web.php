@@ -9,6 +9,8 @@ use App\Http\Controllers\Expense\RequestController;
 use App\Http\Controllers\Expense\ApprovalController;
 use App\Http\Controllers\Expense\PaymentController;
 use App\Http\Controllers\Expense\LPJController;
+use App\Http\Controllers\Expense\DashboardController as ExpenseDashboardController;
+use App\Http\Controllers\Expense\ReportsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -69,14 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // EXPENSE MANAGEMENT ROUTES
     // ========================================
     Route::prefix('expenses')->name('expense.')->group(function () {
-        // Dashboard
-        Route::get('/dashboard', function () {
-            return Inertia::render('expense/dashboard', [
-                'auth' => [
-                    'user' => auth()->user(),
-                ],
-            ]);
-        })->name('expenseDashboard');
+        // Dashboard - Updated to use controller instead of closure
+        Route::get('/dashboard', [ExpenseDashboardController::class, 'index'])->name('expenseDashboard');
 
         // Request routes
         Route::get('/request', [RequestController::class, 'index'])->name('requestIndex');
@@ -106,16 +102,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/lpj/{id}/submit', [LPJController::class, 'store'])->name('lpj.store');
         Route::post('/lpj/{id}/verify', [LPJController::class, 'verify'])->name('lpj.verify');
 
-        // Reports
-        Route::get('/reports', function () {
-            return Inertia::render('expense/reports/index', [
-                'auth' => [
-                    'user' => auth()->user(),
-                ],
-            ]);
-        })->name('reports');
+        // Reports - Updated to use controller instead of closure
+        Route::get('/reports', [ReportsController::class, 'index'])->name('reports');
     });
 
+    // ========================================
+    // CRM ROUTES
+    // ========================================
     Route::prefix('commissions')->group(function () {
         Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
     });

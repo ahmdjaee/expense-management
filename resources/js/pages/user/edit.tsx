@@ -227,7 +227,6 @@ export default function EditUserPage({ user, divisions }: EditUserProps) {
 
                                 {/* Login Codes Section */}
                                 <div className="space-y-4 rounded-lg border border-muted bg-muted/20 p-4">
-                                    <h3 className="text-sm font-semibold text-foreground">Login Codes</h3>
                                     <LoginCodeInput errors={errors} initialCodes={user.login_code || []} />
                                 </div>
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CRM\DealController;
+use App\Http\Controllers\CRM\LoginCodeController;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\RequestController;
@@ -13,14 +14,16 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('welcome', [
+            'canRegister' => Features::enabled(Features::registration()),
+        ]);
+    })->name('home');
+
+
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -118,6 +121,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('commissions')->group(function () {
         Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
+    });
+
+    Route::prefix('crm')->group(function () {
+        Route::get('/login-codes', [LoginCodeController::class, 'index'])->name('login-codes.index');
+        Route::get('/login-codes/create', [LoginCodeController::class, 'create'])->name('login-codes.create');
+        Route::post('/login-codes', [LoginCodeController::class, 'store'])->name('login-codes.store');
+        Route::get('/login-codes/{id}/edit', [LoginCodeController::class, 'edit'])->name('login-codes.edit');
+        Route::put('/login-codes/{id}', [LoginCodeController::class, 'update'])->name('login-codes.update');
+        Route::delete('/login-codes/{id}', [LoginCodeController::class, 'destroy'])->name('login-codes.destroy');
+        Route::post('/login-codes/bulk-delete', [LoginCodeController::class, 'bulkDestroy'])->name('login-codes.bulk-destroy');
     });
 });
 

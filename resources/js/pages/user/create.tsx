@@ -32,10 +32,12 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                   { value: 'superadmin', label: 'Superadmin' },
                   { value: 'admin', label: 'Admin' },
                   { value: 'user', label: 'User' },
+                  { value: 'marketing', label: 'Marketing' },
               ]
             : [
                   { value: 'admin', label: 'Admin' },
                   { value: 'user', label: 'User' },
+                  { value: 'marketing', label: 'Marketing' },
               ];
 
     // Position options

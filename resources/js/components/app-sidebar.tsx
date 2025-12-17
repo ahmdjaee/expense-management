@@ -11,7 +11,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, mytasks, tasks, users } from '@/routes';
-import { approvals, expenseDashboard, payments, reports, requestIndex, requestNew } from '@/routes/expense';
+import { approvals, expenseDashboard, payments, reports, requestIndex } from '@/routes/expense';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { CheckSquare, ClipboardCheck, FileText, LayoutGrid, User, Wallet, Workflow } from 'lucide-react';
@@ -73,6 +73,14 @@ const expenseNavItems: NavItem[] = [
     },
 ];
 
+const crmNavItems: NavItem[] = [
+    {
+        title: 'Login MT 5',
+        href: '/crm/login-codes',
+        icon: LayoutGrid,
+    },
+];
+
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
@@ -102,13 +110,23 @@ export function AppSidebar() {
         });
     }, [userRole]);
 
+    const filteredNavItemsCrm = useMemo(() => {
+        return crmNavItems.filter((item) => {
+            // Jika item tidak punya batasan role, tampilkan
+            if (!item.role) return true;
+
+            // Jika ada batasan role, cek apakah user role termasuk
+            return item.role.includes(userRole);
+        });
+    }, [userRole]);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={'/'} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -119,6 +137,7 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={filteredNavItemsTask} groupLabel="Task Management" />
                 <NavMain items={filteredNavItemsExpense} groupLabel="Expense Management" />
+                <NavMain items={filteredNavItemsCrm} groupLabel="CRM" />
             </SidebarContent>
 
             <SidebarFooter>

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginCode;
+use App\Models\User;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DealController extends Controller
@@ -20,6 +23,9 @@ class DealController extends Controller
         $dateRange = $request->get('dateRange', 'today');
         $from = $request->get('from');
         $to = $request->get('to');
+        $selectedUserId = $request->get('userId'); // Get selected user ID
+
+        Log::debug($request->all());
         
         // Get date range parameters
         $dateParams = $this->getDateRangeParams($dateRange, $from, $to);
@@ -30,83 +36,52 @@ class DealController extends Controller
         // Fetch user profile data
         $userProfileResponse = $this->fetchUserProfile($login);
         
-        // Prepare dummy user data for now
-        $dummyUsers = [
-            '5000311' => [
-                'id' => 1,
-                'name' => 'John Doe',
-                'loginId' => '5000311',
-                'email' => 'john.doe@example.com',
-                'role' => 'Trader',
-                'avatar' => null,
-            ],
-            '5000312' => [
-                'id' => 2,
-                'name' => 'Jane Smith',
-                'loginId' => '5000312',
-                'email' => 'jane.smith@example.com',
-                'role' => 'Trader',
-                'avatar' => null,
-            ],
-            '5000313' => [
-                'id' => 3,
-                'name' => 'Bob Johnson',
-                'loginId' => '5000313',
-                'email' => 'bob.johnson@example.com',
-                'role' => 'Trader',
-                'avatar' => null,
-            ],
-        ];
+        $loginCode = [];
+
+        if (auth()->user()->role === 'marketing') {
+            $loginCode = LoginCode::where('user_id', auth()->user()->id)->get();
+        }else {
+            $loginCode = LoginCode::all();
+        }
         
-        $currentUser = $dummyUsers[$login] ?? $dummyUsers['5000311'];
+        
+        // Get all users for the select dropdown
+        // You can add filters based on role or other criteria
+        $users = User::select('id', 'name', 'email')
+            // ->where('status', 'active') // Optional: filter by status
+            ->where('role', 'marketing')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'value' => $user->id,
+                    'label' => $user->name . ' (' . $user->email . ')',
+                ];
+            });
+        
+        // Get selected user details if userId is provided
+        $selectedUser = null;
+        if ($selectedUserId) {
+            $selectedUser = User::find($selectedUserId);
+            if ($selectedUser) {
+                $selectedUser = [
+                    'value' => $selectedUser->id,
+                    'label' => $selectedUser->name . ' (' . $selectedUser->email . ')',
+                ];
+            }
+        }
         
         return Inertia::render('crm/deal/index', [
             'deals' => $dealsResponse['data'] ?? [],
             'apiResponse' => $dealsResponse,
             'userProfile' => $userProfileResponse,
-            'currentUser' => $currentUser,
+            'loginCode' => $loginCode,
             'login' => $login,
             'dateRange' => $dateRange,
             'from' => $from,
             'to' => $to,
-            // Commission distribution settings (for future development)
-            'commissionSettings' => [
-                'layer1' => [
-                    'name' => 'BM – Business Manager',
-                    'rate' => 10.0, // $ per LOT
-                    'color' => 'indigo',
-                ],
-                'layer2' => [
-                    'name' => 'DM – Deputy Manager',
-                    'rate' => 8.0, // $ per LOT
-                    'color' => 'blue',
-                ],
-                'layer3' => [
-                    'name' => 'AM – Assistant Manager',
-                    'rate' => 6.0, // $ per LOT
-                    'color' => 'green',
-                ],
-                'layer4' => [
-                    'name' => 'SMT – Senior Marketing Team',
-                    'rate' => 4.0, // $ per LOT
-                    'color' => 'yellow',
-                ],
-                'layer5' => [
-                    'name' => 'STL – Senior Team Leader',
-                    'rate' => 3.0, // $ per LOT
-                    'color' => 'orange',
-                ],
-                'layer6' => [
-                    'name' => 'MT – Marketing Team / Marketing Officer',
-                    'rate' => 2.0, // $ per LOT
-                    'color' => 'red',
-                ],
-                'layer7' => [
-                    'name' => 'Freelance / IB – Introducing Broker',
-                    'rate' => 1.0, // $ per LOT
-                    'color' => 'purple',
-                ],
-            ],
+            'users' => $users, // Pass users list
+            'selectedUser' => $selectedUser, // Pass selected user
         ]);
     }
     

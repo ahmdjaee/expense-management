@@ -60,7 +60,7 @@ class UserController extends Controller
             'name' => 'required|string|max:150',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
-            'role' => 'required|in:superadmin,admin,user',
+            'role' => 'required|in:superadmin,admin,user,marketing',
             'position' => 'nullable|in:head,karyawan,direktur,finance',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
@@ -68,6 +68,7 @@ class UserController extends Controller
             'bank' => 'nullable|string|max:50',
             'rekening_name' => 'nullable|string|max:150',
             'divisions' => 'required|array|min:1',
+            'login_code' => 'nullable|string',
         ]);
 
         // Cegah admin membuat superadmin
@@ -99,6 +100,7 @@ class UserController extends Controller
         $user->bank = $validated['bank'] ?? null;
         $user->rekening_name = $validated['rekening_name'] ?? null;
         $user->email_verified_at = now();
+        $user->login_code = $validated['login_code'] ? json_decode($validated['login_code']) : null;
         $user->save();
 
         $user->divisions()->sync($validated['divisions']);
@@ -174,7 +176,7 @@ class UserController extends Controller
             'name' => 'required|string|max:150',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:6',
-            'role' => 'required|in:superadmin,admin,user',
+            'role' => 'required|in:superadmin,admin,user,marketing',
             'position' => 'nullable|in:head,karyawan,direktur,finance',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
@@ -182,6 +184,7 @@ class UserController extends Controller
             'bank' => 'nullable|string|max:50',
             'rekening_name' => 'nullable|string|max:150',
             'divisions' => 'required|array|min:1',
+            'login_code' => 'nullable|string', // JSON string
         ]);
 
         // Cegah admin membuat/mengubah jadi superadmin
@@ -222,6 +225,9 @@ class UserController extends Controller
         $user->rekening = $validated['rekening'] ?? null;
         $user->bank = $validated['bank'] ?? null;
         $user->rekening_name = $validated['rekening_name'] ?? null;
+        $user->login_code = $validated['login_code']
+            ? json_decode($validated['login_code'], true)
+            : null;
 
         $user->save();
 

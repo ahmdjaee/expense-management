@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'rekening',
         'bank',
         'rekening_name',
+        'login_code',
     ];
 
     protected $hidden = [
@@ -42,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'login_code' => 'array', // Otomatis convert array ↔ JSON
         ];
     }
 
@@ -171,5 +173,54 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canProcessPayment(): bool
     {
         return $this->position === 'finance';
+    }
+
+    /**
+     * Get the login codes for the user (Many-to-Many).
+     */
+    public function loginCodes(): BelongsToMany
+    {
+        return $this->belongsToMany(LoginCode::class, 'login_code_user')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the login codes as array of strings (for easy access).
+     */
+    public function getLoginCodesArrayAttribute()
+    {
+        return $this->loginCodes()->pluck('code')->toArray();
+    }
+
+    /**
+     * Check if user has a specific login code.
+     */
+    public function hasLoginCode($code): bool
+    {
+        return $this->loginCodes()->where('code', $code)->exists();
+    }
+
+    /**
+     * Attach a login code to the user.
+     */
+    public function attachLoginCode($loginCodeId): void
+    {
+        $this->loginCodes()->attach($loginCodeId);
+    }
+
+    /**
+     * Detach a login code from the user.
+     */
+    public function detachLoginCode($loginCodeId): void
+    {
+        $this->loginCodes()->detach($loginCodeId);
+    }
+
+    /**
+     * Sync login codes for the user.
+     */
+    public function syncLoginCodes(array $loginCodeIds): void
+    {
+        $this->loginCodes()->sync($loginCodeIds);
     }
 }

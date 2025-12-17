@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import LoginCodeInput from '@/components/login-code-input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,10 +32,12 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                   { value: 'superadmin', label: 'Superadmin' },
                   { value: 'admin', label: 'Admin' },
                   { value: 'user', label: 'User' },
+                  { value: 'marketing', label: 'Marketing' },
               ]
             : [
                   { value: 'admin', label: 'Admin' },
                   { value: 'user', label: 'User' },
+                  { value: 'marketing', label: 'Marketing' },
               ];
 
     // Position options
@@ -161,6 +164,27 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                     <InputError message={errors.address} />
                                 </div>
 
+                                {/* Divisions */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="divisions">Divisions</Label>
+                                    <ReactSelect
+                                        isMulti
+                                        name="divisions[]"
+                                        options={divisions.map((d) => ({
+                                            value: d.id,
+                                            label: d.name,
+                                        }))}
+                                        required
+                                        placeholder="Select divisions..."
+                                        className="basic-multi-select"
+                                        classNamePrefix="select"
+                                    />
+                                    <InputError message={errors.divisions} />
+                                </div>
+
+                                {/* Login Codes */}
+                                <LoginCodeInput errors={errors} />
+
                                 {/* Bank Information Section */}
                                 <div className="space-y-4 rounded-lg border border-muted bg-muted/20 p-4">
                                     <h3 className="text-sm font-semibold text-foreground">Bank Information</h3>
@@ -200,24 +224,6 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                         />
                                         <InputError message={errors.rekening_name} />
                                     </div>
-                                </div>
-
-                                {/* Divisions */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="divisions">Divisions</Label>
-                                    <ReactSelect
-                                        isMulti
-                                        name="divisions[]"
-                                        options={divisions.map((d) => ({
-                                            value: d.id,
-                                            label: d.name,
-                                        }))}
-                                        required
-                                        placeholder="Select divisions..."
-                                        className="basic-multi-select"
-                                        classNamePrefix="select"
-                                    />
-                                    <InputError message={errors.divisions} />
                                 </div>
 
                                 {/* Buttons */}

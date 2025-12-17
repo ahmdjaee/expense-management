@@ -1,9 +1,18 @@
 import AppLogo from '@/components/app-logo';
 import { Button } from '@/components/ui/button';
-import { Head, Link } from '@inertiajs/react';
-import { CheckCircle, DollarSign, MoreHorizontal, Wallet } from 'lucide-react';
+import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
+import { logout } from '@/routes';
+import { Head, Link, router } from '@inertiajs/react';
+import { CheckCircle, DollarSign, LogOut, MoreHorizontal, Wallet } from 'lucide-react';
 
 export default function Welcome({ canRegister = true, auth }) {
+    const cleanup = useMobileNavigation();
+
+    const handleLogout = () => {
+        cleanup();
+        router.flushAll();
+    };
+
     return (
         <>
             <Head title="GIB Super App">
@@ -24,9 +33,22 @@ export default function Welcome({ canRegister = true, auth }) {
                                 <AppLogo />
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-5">
                                 {auth.user ? (
-                                    <span className="text-sm text-zinc-400">Halo, {auth.user.name}!</span>
+                                    <>
+                                        <span className="text-sm text-zinc-400">Halo, {auth.user.name}!</span>
+                                        <Link
+                                            href={logout()}
+                                            as="button"
+                                            onClick={handleLogout}
+                                            data-test="logout-button"
+                                        >
+                                            <Button variant="secondary">
+                                                <LogOut className="mr-2" />
+                                                Log out
+                                            </Button>
+                                        </Link>
+                                    </>
                                 ) : (
                                     <>
                                         <Button variant="ghost" asChild className="text-zinc-400 hover:text-white">
@@ -59,25 +81,33 @@ export default function Welcome({ canRegister = true, auth }) {
 
                             {/* App Grid */}
                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                                {/* Menu Task Management */}
-                                <Link href="/tasks">
-                                    <div className="group flex flex-col items-center gap-3 rounded-2xl bg-zinc-800/30 p-6 transition-all hover:scale-105 hover:bg-zinc-800/50 hover:shadow-xl">
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-pink-500 shadow-lg group-hover:shadow-pink-500/50">
-                                            <CheckCircle className="h-8 w-8 text-white" />
-                                        </div>
-                                        <span className="text-sm font-medium text-zinc-300">Task Management</span>
-                                    </div>
-                                </Link>
+                                {auth.user.role !== 'marketing' && (
+                                    <>
+                                        {/* Menu Task Management */}
+                                        <Link href="/tasks">
+                                            <div className="group flex flex-col items-center gap-3 rounded-2xl bg-zinc-800/30 p-6 transition-all hover:scale-105 hover:bg-zinc-800/50 hover:shadow-xl">
+                                                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-pink-500 shadow-lg group-hover:shadow-pink-500/50">
+                                                    <CheckCircle className="h-8 w-8 text-white" />
+                                                </div>
+                                                <span className="text-sm font-medium text-zinc-300">
+                                                    Task Management
+                                                </span>
+                                            </div>
+                                        </Link>
 
-                                {/* Menu Expense Tracker */}
-                                <Link href="/expenses/dashboard">
-                                    <div className="group flex flex-col items-center gap-3 rounded-2xl bg-zinc-800/30 p-6 transition-all hover:scale-105 hover:bg-zinc-800/50 hover:shadow-xl">
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500 shadow-lg group-hover:shadow-blue-500/50">
-                                            <Wallet className="h-8 w-8 text-white" />
-                                        </div>
-                                        <span className="text-sm font-medium text-zinc-300">Expense Tracker</span>
-                                    </div>
-                                </Link>
+                                        {/* Menu Expense Tracker */}
+                                        <Link href="/expenses/dashboard">
+                                            <div className="group flex flex-col items-center gap-3 rounded-2xl bg-zinc-800/30 p-6 transition-all hover:scale-105 hover:bg-zinc-800/50 hover:shadow-xl">
+                                                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500 shadow-lg group-hover:shadow-blue-500/50">
+                                                    <Wallet className="h-8 w-8 text-white" />
+                                                </div>
+                                                <span className="text-sm font-medium text-zinc-300">
+                                                    Expense Management
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    </>
+                                )}
 
                                 {/* Menu Commision */}
                                 <Link href="/commissions/deals">

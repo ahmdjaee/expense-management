@@ -1,27 +1,21 @@
 // resources/js/pages/expense/reports/index.tsx
 
 import AppLayout from '@/layouts/app/app-sidebar-layout';
+import { ExpenseRequest, User } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { getMockAuthUser, MockRequest, mockRequests, MockUser, mockUsers } from '../mockExpenseData';
 
 interface ReportsPageProps {
-    auth?: {
-        user: MockUser;
+    auth: {
+        user: User;
     };
-    requests?: MockRequest[];
+    requests: ExpenseRequest[];
 }
 
-export default function ReportsPage({ auth, requests = mockRequests }: ReportsPageProps) {
-    // Use mock user if no auth provided
-    const user = auth?.user || getMockAuthUser('3'); // Default to director user
-
+export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [filterType, setFilterType] = useState<string>('all');
-
-    // Convert mock users to object for export
-    const usersMap = mockUsers.reduce((acc, u) => ({ ...acc, [u.id]: u }), {});
 
     const filtered = requests.filter((r) => {
         const statusMatch = filterStatus === 'all' || r.status === filterStatus;
@@ -33,16 +27,18 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
     const stats = {
         totalRequests: requests.length,
         totalAmount: requests.reduce((sum, r) => sum + r.amount, 0),
-        approved: requests.filter((r) => r.status.includes('approved') || r.status === 'paid').length,
+        approved: requests.filter((r) => r.status.includes('approved') || r.status === 'paid' || r.status === 'closed')
+            .length,
         pending: requests.filter((r) => r.status === 'submitted').length,
         rejected: requests.filter((r) => r.status === 'rejected').length,
     };
 
-    // By Division
+    // By Division - get division name from user's divisions or fall back to Unknown
     const byDivision = requests.reduce(
         (acc, req) => {
-            const requester = mockUsers.find((u) => u.id === req.userId);
-            const division = requester?.division || 'Unknown';
+            // Get division name from user's divisions array or use 'Unknown'
+            const division =
+                req.user?.divisions && req.user.divisions.length > 0 ? req.user.divisions[0].name : 'Unknown';
             if (!acc[division]) acc[division] = { count: 0, amount: 0 };
             acc[division].count += 1;
             acc[division].amount += req.amount;
@@ -66,7 +62,15 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
     // By Status
     const byStatus = requests.reduce(
         (acc, req) => {
-            const status = req.status;
+            const statusMap: Record<string, string> = {
+                submitted: 'Pending',
+                head_approved: 'Disetujui Head',
+                director_approved: 'Disetujui Direktur',
+                paid: 'Sudah Dibayar',
+                rejected: 'Ditolak',
+                closed: 'Selesai',
+            };
+            const status = statusMap[req.status] || req.status;
             if (!acc[status]) acc[status] = { count: 0, amount: 0 };
             acc[status].count += 1;
             acc[status].amount += req.amount;
@@ -79,15 +83,14 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
     const exportToCSV = () => {
         const headers = ['ID', 'Title', 'Requester', 'Type', 'Amount', 'Status', 'Date'];
         const rows = filtered.map((req) => {
-            const requester = mockUsers.find((u) => u.id === req.userId);
             return [
                 req.id,
                 req.title,
-                requester?.name || 'Unknown',
+                req.user?.name || 'Unknown',
                 req.type,
                 req.amount.toString(),
                 req.status,
-                formatDate(req.createdAt),
+                formatDate(req.created_at),
             ];
         });
 
@@ -97,7 +100,7 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'expense_reports.csv';
+        a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -178,6 +181,7 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
                                     <option value="director_approved">Disetujui Direktur</option>
                                     <option value="paid">Sudah Dibayar</option>
                                     <option value="rejected">Ditolak</option>
+                                    <option value="closed">Selesai</option>
                                 </select>
                             </div>
                         </div>
@@ -240,7 +244,7 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
                                 {Object.entries(byStatus).map(([status, data]) => (
                                     <div key={status}>
                                         <div className="mb-1 flex justify-between">
-                                            <p className="text-sm font-medium text-foreground capitalize">{status}</p>
+                                            <p className="text-sm font-medium text-foreground">{status}</p>
                                             <p className="text-sm text-muted-foreground">{data.count}</p>
                                         </div>
                                         <div className="h-2 w-full rounded-full bg-gray-200">
@@ -268,7 +272,7 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
                                             <div className="flex h-6 w-12 items-center justify-center rounded bg-linear-to-r from-primary to-primary/60 text-xs font-bold text-white">
                                                 {percentage}%
                                             </div>
-                                            <p className="text-sm text-foreground capitalize">{status}</p>
+                                            <p className="text-sm text-foreground">{status}</p>
                                         </div>
                                     );
                                 })}
@@ -283,6 +287,7 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
                             <thead>
                                 <tr className="border-b border-border">
                                     <th className="p-2 text-left font-semibold text-foreground">ID</th>
+                                    <th className="p-2 text-left font-semibold text-foreground">Judul</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Pemohon</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Tipe</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Nominal</th>
@@ -292,16 +297,24 @@ export default function ReportsPage({ auth, requests = mockRequests }: ReportsPa
                             </thead>
                             <tbody>
                                 {filtered.slice(0, 10).map((req) => {
-                                    const requester = mockUsers.find((u) => u.id === req.userId);
+                                    const statusMap: Record<string, string> = {
+                                        submitted: 'Pending',
+                                        head_approved: 'Disetujui Head',
+                                        director_approved: 'Disetujui Direktur',
+                                        paid: 'Sudah Dibayar',
+                                        rejected: 'Ditolak',
+                                        closed: 'Selesai',
+                                    };
                                     return (
                                         <tr key={req.id} className="border-b border-border transition hover:bg-accent">
                                             <td className="p-2 font-mono text-xs">{req.id}</td>
-                                            <td className="p-2 text-sm">{requester?.name}</td>
+                                            <td className="p-2 text-sm">{req.title}</td>
+                                            <td className="p-2 text-sm">{req.user?.name || 'Unknown'}</td>
                                             <td className="p-2 text-sm capitalize">{req.type}</td>
                                             <td className="p-2 font-bold text-primary">{formatCurrency(req.amount)}</td>
-                                            <td className="p-2 text-sm capitalize">{req.status}</td>
+                                            <td className="p-2 text-sm">{statusMap[req.status] || req.status}</td>
                                             <td className="p-2 text-sm text-muted-foreground">
-                                                {formatDate(req.createdAt)}
+                                                {formatDate(req.created_at)}
                                             </td>
                                         </tr>
                                     );

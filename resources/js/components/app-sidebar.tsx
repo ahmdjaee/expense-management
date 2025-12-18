@@ -35,11 +35,7 @@ const taskNavItems: NavItem[] = [
         href: mytasks(),
         icon: ClipboardCheck,
     },
-    {
-        title: 'User',
-        href: users(),
-        icon: User,
-    },
+    // Menu User telah dipindahkan dari sini
 ];
 
 const expenseNavItems: NavItem[] = [
@@ -57,19 +53,29 @@ const expenseNavItems: NavItem[] = [
         title: 'Persetujuan',
         href: approvals(),
         icon: CheckSquare,
-        role: ['admin', 'superadmin'], // Hanya untuk admin dan superadmin
+        position: ['head', 'direktur', 'finance'], // Hanya untuk head, direktur, dan finance
     },
     {
         title: 'Pembayaran',
         href: payments(),
         icon: Wallet,
-        role: ['superadmin'], // Hanya untuk superadmin
+        position: ['finance'], // Hanya untuk finance
     },
     {
         title: 'Laporan',
         href: reports(),
         icon: FileText,
-        role: ['superadmin'], // Hanya untuk superadmin
+        position: ['finance', 'direktur'], // Hanya untuk finance dan direktur
+    },
+];
+
+// Grup baru untuk menu User
+const userNavItems: NavItem[] = [
+    {
+        title: 'User',
+        href: users(),
+        icon: User,
+        // Tidak ada batasan role, semua user bisa melihatnya
     },
 ];
 
@@ -85,8 +91,9 @@ const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     // Ambil data user dari Inertia
-    const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
+    const { auth } = usePage<{ auth: { user: { role: string; position: string } } }>().props;
     const userRole = auth.user.role;
+    const userPosition = auth.user.position;
 
     // Filter menu Task Management berdasarkan role
     const filteredNavItemsTask = useMemo(() => {
@@ -99,16 +106,25 @@ export function AppSidebar() {
         });
     }, [userRole]);
 
-    // Filter menu Expense Management berdasarkan role
+    // Filter menu Expense Management berdasarkan role dan position
     const filteredNavItemsExpense = useMemo(() => {
         return expenseNavItems.filter((item) => {
-            // Jika item tidak punya batasan role, tampilkan
-            if (!item.role) return true;
+            // Filter berdasarkan role jika ada
+            if (item.role && !item.role.includes(userRole)) {
+                return false;
+            }
 
-            // Jika ada batasan role, cek apakah user role termasuk
-            return item.role.includes(userRole);
+            // Filter berdasarkan position jika ada
+            if (item.position && !item.position.includes(userPosition)) {
+                return false;
+            }
+
+            // Jika tidak ada batasan atau user memenuhi kriteria, tampilkan
+            return true;
         });
-    }, [userRole]);
+    }, [userRole, userPosition]);
+
+    // Tidak perlu filter userNavItems karena bisa diakses semua user
 
     const filteredNavItemsCrm = useMemo(() => {
         return crmNavItems.filter((item) => {
@@ -138,6 +154,8 @@ export function AppSidebar() {
                 <NavMain items={filteredNavItemsTask} groupLabel="Task Management" />
                 <NavMain items={filteredNavItemsExpense} groupLabel="Expense Management" />
                 <NavMain items={filteredNavItemsCrm} groupLabel="CRM" />
+                {/* Grup baru untuk menu User Management */}
+                <NavMain items={userNavItems} groupLabel="User Management" />
             </SidebarContent>
 
             <SidebarFooter>

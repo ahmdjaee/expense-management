@@ -22,6 +22,7 @@ export interface NavItem {
     isActive?: boolean;
     role?: string[];
     isCenter?: boolean;
+    position?: string[];
 }
 
 export interface SharedData {

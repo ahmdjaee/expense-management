@@ -1,48 +1,25 @@
+// resources/js/pages/expense/dashboard.tsx
+
 import { RequestCard } from '@/components/request/request-card';
 import AppLayout from '@/layouts/expense-app-layout';
 import { ExpenseRequest, User } from '@/lib/types';
 import { Head, Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 
-const userRequests: User[] = [
-    {
-        accountHolder: 'Budi Santoso',
-        bankAccount: '1234567890',
-        bankName: 'BCA',
-        createdAt: new Date('2023-01-15T10:00:00Z'),
-        division: 'IT',
-        email: 'budi@company.com',
-        id: '1',
-        name: 'Budi Santoso',
-        phone: '0812345678',
-        role: 'user',
-    },
-];
-
-const recentRequests: ExpenseRequest[] = [
-    {
-        id: 'req1',
-        userId: '1',
-        type: 'expense',
-        amount: 50000,
-        title: 'Belanja',
-        description: 'Belanja di toko online',
-        status: 'submitted',
-        paymentMethod: 'cash',
-        currency: 'IDR',
-        createdAt: new Date('2023-01-15T10:00:00Z'),
-        updatedAt: new Date('2023-01-15T10:00:00Z'),
-    },
-];
-
-export default function Dashboard() {
-    const stats = {
-        total: userRequests.length,
-        pending: userRequests.filter((r) => r.status === 'submitted').length,
-        approved: userRequests.filter((r) => r.status === 'director_approved' || r.status === 'paid').length,
-        rejected: userRequests.filter((r) => r.status === 'rejected').length,
+interface DashboardProps {
+    auth: {
+        user: User;
     };
+    recentRequests: ExpenseRequest[];
+    stats: {
+        total: number;
+        pending: number;
+        approved: number;
+        rejected: number;
+    };
+}
 
+export default function Dashboard({ auth, recentRequests, stats }: DashboardProps) {
     return (
         <AppLayout>
             <div className="flex flex-1 flex-col">
@@ -80,28 +57,28 @@ export default function Dashboard() {
                     {/* Quick Actions */}
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         <Link
-                            href="/requests/new"
+                            href="/expenses/request/new"
                             className="rounded-lg border-2 border-primary bg-primary p-4 text-center font-bold text-primary-foreground transition hover:shadow-lg"
                         >
                             <Plus size={42} className="mb-1 inline-block" />
                             <p className="text-sm font-bold">Buat Pengajuan</p>
                         </Link>
                         <Link
-                            href="/requests"
+                            href="/expenses/request"
                             className="rounded-lg border border-border bg-card p-4 text-center transition hover:shadow-md"
                         >
                             <p className="mb-2 text-3xl">📋</p>
                             <p className="text-sm font-medium text-foreground">Lihat Semua</p>
                         </Link>
                         <Link
-                            href="/reports"
+                            href="/expenses/reports"
                             className="rounded-lg border border-border bg-card p-4 text-center transition hover:shadow-md"
                         >
                             <p className="mb-2 text-3xl">📊</p>
                             <p className="text-sm font-medium text-foreground">Laporan</p>
                         </Link>
                         <Link
-                            href="/profile"
+                            href="/settings/profile"
                             className="rounded-lg border border-border bg-card p-4 text-center transition hover:shadow-md"
                         >
                             <p className="mb-2 text-3xl">👤</p>
@@ -113,7 +90,7 @@ export default function Dashboard() {
                     <div>
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-lg font-bold text-foreground">Pengajuan Terbaru</h2>
-                            <Link href="/requests" className="text-sm text-primary hover:underline">
+                            <Link href="/expenses/request" className="text-sm text-primary hover:underline">
                                 Lihat Semua
                             </Link>
                         </div>
@@ -126,7 +103,7 @@ export default function Dashboard() {
                         ) : (
                             <div className="rounded-lg border border-border bg-card py-12 text-center">
                                 <p className="mb-4 text-muted-foreground">Belum ada pengajuan</p>
-                                <Link href="/requests/new" className="font-medium text-primary hover:underline">
+                                <Link href="/expenses/request/new" className="font-medium text-primary hover:underline">
                                     Buat pengajuan sekarang
                                 </Link>
                             </div>

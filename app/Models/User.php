@@ -224,19 +224,50 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->loginCodes()->sync($loginCodeIds);
     }
 
-    // Tambahkan di Model User.php
+    /**
+     * Get commission layers for this user
+     */
     public function commissionLayers(): HasMany
     {
         return $this->hasMany(CommissionLayer::class);
     }
 
+    /**
+     * Get commission distributions for this user
+     */
     public function commissionDistributions(): HasMany
     {
         return $this->hasMany(CommissionDistribution::class);
     }
 
+    /**
+     * Get total commission for this user
+     */
     public function totalCommission()
     {
         return $this->commissionDistributions()->sum('commission_amount');
+    }
+    
+    /**
+     * Get total commission for this user by login code
+     */
+    public function totalCommissionByLoginCode($loginCode)
+    {
+        return $this->commissionDistributions()
+            ->where('login_code', $loginCode)
+            ->sum('commission_amount');
+    }
+    
+    /**
+     * Get commission history for this user by login code
+     */
+    public function commissionHistoryByLoginCode($loginCode, $limit = 50)
+    {
+        return $this->commissionDistributions()
+            ->where('login_code', $loginCode)
+            ->with('commissionLayer')
+            ->orderBy('deal_time', 'desc')
+            ->limit($limit)
+            ->get();
     }
 }

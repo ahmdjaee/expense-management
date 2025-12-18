@@ -30,7 +30,7 @@ import {
     User,
     X,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactSelect from 'react-select';
 
 interface Deal {
@@ -140,15 +140,14 @@ export default function GLORIDashboard() {
     const initialFrom = props.from || '';
     const initialTo = props.to || '';
     const user = props.auth.user || null;
-    
+
     // Get users list from props
     const usersList = props.users || [];
     const initialSelectedUser = props.selectedUser || null;
 
-    // Initialize with default layers if not provided
-    const initialLayers = props.commissionLayers || [
-        { id: 'layer1', name: 'Business Manager', rate: 10, color: 'indigo', userId: null },
-    ];
+    const initialLayers = props.commissionLayers || []; // Data dari DB
+    const [commissionLayers, setCommissionLayers] = useState<CommissionLayer[]>(initialLayers);
+    const [commissionDistributions, setCommissionDistributions] = useState(props.commissionDistributions || []); // Data dari DB
 
     const [deals, setDeals] = useState<Deal[]>(initialDeals);
     const [filteredDeals, setFilteredDeals] = useState<Deal[]>(initialDeals);
@@ -167,9 +166,6 @@ export default function GLORIDashboard() {
     const [loginCode, setLoginCode] = useState(initialLoginCode);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(initialUserProfile);
 
-    // Replace hardcoded layer states with dynamic layers array
-    const [commissionLayers, setCommissionLayers] = useState<CommissionLayer[]>(initialLayers);
-    
     // Add selected user state
     const [selectedUser, setSelectedUser] = useState<UserOption | null>(initialSelectedUser);
 
@@ -184,6 +180,57 @@ export default function GLORIDashboard() {
 
     // Debounced version of localRates
     const debouncedRates = useDebounce(localRates, 300);
+
+    // Fungsi untuk menyimpan commission layers ke database
+    const saveCommissionLayersToDb = () => {
+        setLoading(true);
+        router.post(
+            '/commissions/save-layers',
+            {
+                layers: commissionLayers,
+            },
+            {
+                onSuccess: () => {
+                    // Tampilkan pesan sukses
+                    // Inertia akan otomatis me-refresh props, termasuk commissionLayers
+                },
+                onError: (errors) => {
+                    setError('Failed to save commission layers');
+                    console.error(errors);
+                },
+                onFinish: () => {
+                    setLoading(false);
+                },
+            },
+        );
+    };
+
+    // Fungsi untuk menghitung dan menyimpan komisi
+    const calculateCommissions = () => {
+        setLoading(true);
+        const params: any = {
+            login: login,
+            dateRange: dateRange,
+        };
+        if (dateRange === 'custom' && customFromDate) params.from = customFromDate;
+        if (dateRange === 'custom' && customToDate) params.to = customToDate;
+
+        router.post('/commissions/calculate-commissions', params, {
+            onSuccess: (page) => {
+                // Refresh data distribusi komisi jika user marketing
+                if (user?.role === 'marketing') {
+                    setCommissionDistributions(page.props.commissionDistributions || []);
+                }
+                setError('');
+            },
+            onError: (errors) => {
+                setError('Failed to calculate commissions');
+            },
+            onFinish: () => {
+                setLoading(false);
+            },
+        });
+    };
 
     // Update commissionLayers when debounced rates change
     useEffect(() => {
@@ -477,7 +524,7 @@ export default function GLORIDashboard() {
     const updateLayerUser = (layerId: string, userOption: UserOption | null) => {
         setCommissionLayers(
             commissionLayers.map((layer) =>
-                layer.id === layerId ? { ...layer, userId: userOption?.value || null } : layer,
+                layer.id === layerId ? { ...layer, user_id: userOption?.value || null } : layer,
             ),
         );
     };
@@ -693,14 +740,14 @@ export default function GLORIDashboard() {
                             <div>
                                 <Label htmlFor="mobile-login">Login ID:</Label>
                                 <Select value={login} onValueChange={handleLoginChange}>
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-48">
                                         <SelectValue placeholder="Select Login ID" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {loginCode &&
                                             loginCode.map((code: any) => (
-                                                <SelectItem key={code} value={code}>
-                                                    {code}
+                                                <SelectItem key={code.id} value={code.code}>
+                                                    {code.code}
                                                 </SelectItem>
                                             ))}
                                     </SelectContent>
@@ -771,8 +818,8 @@ export default function GLORIDashboard() {
                                 <SelectContent>
                                     {loginCode &&
                                         loginCode.map((code: any) => (
-                                            <SelectItem key={code} value={code}>
-                                                {code}
+                                            <SelectItem key={code.id} value={code.code}>
+                                                {code.code}
                                             </SelectItem>
                                         ))}
                                 </SelectContent>
@@ -857,7 +904,7 @@ export default function GLORIDashboard() {
                                 </div>
 
                                 {/* Rate Source Info */}
-                                <div className="flex justify-between sm:col-span-2 rounded bg-blue-50 p-2">
+                                <div className="flex justify-between rounded bg-blue-50 p-2 sm:col-span-2">
                                     <span className="text-xs text-blue-700">Rate Source:</span>
                                     <span className="text-xs font-semibold text-blue-900">
                                         User Profile ID: {userProfile?.id || 'Default (10000)'}
@@ -962,9 +1009,7 @@ export default function GLORIDashboard() {
                             {formatCurrency(totalCommission)}
                         </div>
                         <div className="text-xs text-gray-600">Total Fees</div>
-                        <div className="text-xs font-semibold text-gray-600">
-                            {formatIDR(totalCommissionIDR)}
-                        </div>
+                        <div className="text-xs font-semibold text-gray-600">{formatIDR(totalCommissionIDR)}</div>
                         <div className="text-xs text-blue-600">
                             Rate: {rate.toLocaleString('id-ID')} (Profile ID: {userProfile?.id || 'Default'})
                         </div>
@@ -1047,7 +1092,7 @@ export default function GLORIDashboard() {
                 <Tabs defaultValue="deals" className="space-y-4">
                     <div className="relative -mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
                         <TabsList
-                            className={`inline-flex w-auto min-w-full lg:grid lg:w-full ${user?.role === 'admin' || user?.role === 'superadmin' ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}
+                            className={`inline-flex w-auto min-w-full lg:grid lg:w-full ${user?.role === 'admin' || user?.role === 'superadmin' ? 'lg:grid-cols-3' : 'lg:grid-cols-3'}`}
                         >
                             <TabsTrigger value="deals" className="flex-shrink-0 text-sm whitespace-nowrap">
                                 Transactions ({filteredDeals?.length || 0})
@@ -1055,9 +1100,16 @@ export default function GLORIDashboard() {
                             <TabsTrigger value="analysis" className="flex-shrink-0 text-sm whitespace-nowrap">
                                 Analysis
                             </TabsTrigger>
+                            {/* Tab "My Commissions" hanya untuk marketing */}
+                            {user?.role === 'marketing' && (
+                                <TabsTrigger value="my-commissions" className="flex-shrink-0 text-sm whitespace-nowrap">
+                                    My Commissions
+                                </TabsTrigger>
+                            )}
+                            {/* Tab "Distribution" hanya untuk admin */}
                             {(user?.role === 'admin' || user?.role === 'superadmin') && (
                                 <TabsTrigger value="distribution" className="flex-shrink-0 text-sm whitespace-nowrap">
-                                    Dynamic Commission Distribution
+                                    Commission Distribution
                                 </TabsTrigger>
                             )}
                         </TabsList>
@@ -1575,312 +1627,369 @@ export default function GLORIDashboard() {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="distribution">
-                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                            {/* Dynamic Layer Configuration - OPTIMIZED */}
+                    {/* TAB BARU: My Commissions (untuk Marketing) */}
+                    {user?.role === 'marketing' && (
+                        <TabsContent value="my-commissions">
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Calculator className="h-5 w-5" />
-                                            Dynamic Commission Configuration
-                                        </div>
-                                        <Button onClick={addLayer} size="sm" className="text-xs">
-                                            <Plus className="mr-1 h-4 w-4" />
-                                            Add Layer
+                                        <span>My Commissions</span>
+                                        <Button onClick={calculateCommissions} disabled={loading}>
+                                            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                                            Recalculate
                                         </Button>
                                     </CardTitle>
-                                    <CardDescription>
-                                        Configure commission layers dynamically (applied to 0.1 LOT and above, non-close
-                                        positions only)
-                                    </CardDescription>
+                                    <CardDescription>Detailed commission breakdown from all clients</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {/* Global User Selection */}
-                                        <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-                                            <Label htmlFor="global-user-select" className="mb-2 block text-sm font-semibold text-blue-900">
-                                                Select User (Global)
-                                            </Label>
-                                            <ReactSelect
-                                                id="global-user-select"
-                                                value={selectedUser}
-                                                onChange={handleUserChange}
-                                                options={usersList}
-                                                isClearable
-                                                placeholder="Select a user..."
-                                                className="react-select-container"
-                                                classNamePrefix="react-select"
-                                                styles={{
-                                                    control: (base) => ({
-                                                        ...base,
-                                                        minHeight: '38px',
-                                                        borderColor: '#93c5fd',
-                                                    }),
-                                                    menu: (base) => ({
-                                                        ...base,
-                                                        zIndex: 9999,
-                                                    }),
-                                                }}
-                                            />
-                                            <p className="mt-2 text-xs text-blue-700">
-                                                Selected user will be applied to all commission layers globally
-                                            </p>
+                                        {/* Total Commission Summary */}
+                                        <div className="rounded-lg bg-green-50 p-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-semibold text-green-900">
+                                                    Total Commission Earned:
+                                                </span>
+                                                <div className="text-right">
+                                                    <span className="block text-lg font-bold text-green-600">
+                                                        {formatCurrency(
+                                                            commissionDistributions.reduce(
+                                                                (sum, dist) => sum + parseFloat(dist.commission_amount),
+                                                                0,
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                    <span className="text-xs text-green-700">
+                                                        {formatIDR(
+                                                            commissionDistributions.reduce(
+                                                                (sum, dist) => sum + parseFloat(dist.commission_amount),
+                                                                0,
+                                                            ) * rate,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        {/* Individual Layer Configuration */}
-                                        {commissionLayers.map((layer, index) => (
-                                            <div key={layer.id} className="space-y-3 rounded-lg border p-4 shadow-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <Label htmlFor={`${layer.id}-name`} className="text-sm font-medium">
-                                                        Layer {index + 1}
-                                                    </Label>
-                                                    {commissionLayers.length > 1 && (
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => removeLayer(layer.id)}
-                                                            className="h-8 w-8 p-0 text-red-500 hover:bg-red-50"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                                
-                                                <div className="grid grid-cols-1 gap-3">
-                                                    {/* Layer Name */}
-                                                    <div>
-                                                        <Label htmlFor={`${layer.id}-name`} className="mb-1 text-xs text-gray-600">
-                                                            Layer Name
-                                                        </Label>
-                                                        <Select
-                                                            value={layer.name}
-                                                            onValueChange={(value) => updateLayerName(layer.id, value)}
-                                                        >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Select layer name" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {LAYER_OPTIONS.map((option) => (
-                                                                    <SelectItem key={option} value={option}>
-                                                                        {option}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-
-                                                    {/* User Assignment for this Layer */}
-                                                    <div>
-                                                        <Label htmlFor={`${layer.id}-user`} className="mb-1 text-xs text-gray-600">
-                                                            Assign User (Optional)
-                                                        </Label>
-                                                        <ReactSelect
-                                                            id={`${layer.id}-user`}
-                                                            value={
-                                                                layer.userId
-                                                                    ? usersList.find((u) => u.value === layer.userId)
-                                                                    : null
-                                                            }
-                                                            onChange={(option) => updateLayerUser(layer.id, option)}
-                                                            options={usersList}
-                                                            isClearable
-                                                            placeholder="Select user for this layer..."
-                                                            className="react-select-container"
-                                                            classNamePrefix="react-select"
-                                                            styles={{
-                                                                control: (base) => ({
-                                                                    ...base,
-                                                                    minHeight: '38px',
-                                                                    fontSize: '0.875rem',
-                                                                }),
-                                                                menu: (base) => ({
-                                                                    ...base,
-                                                                    zIndex: 9999,
-                                                                }),
-                                                            }}
-                                                        />
-                                                        <p className="mt-1 text-xs text-gray-500">
-                                                            Overrides global user selection for this layer
-                                                        </p>
-                                                    </div>
-
-                                                    {/* Rate Input */}
-                                                    <div>
-                                                        <Label htmlFor={`${layer.id}-rate`} className="mb-1 text-xs text-gray-600">
-                                                            Rate ($/LOT)
-                                                        </Label>
-                                                        <Input
-                                                            id={`${layer.id}-rate`}
-                                                            type="number"
-                                                            value={localRates[layer.id] || '0'}
-                                                            onChange={(e) =>
-                                                                updateLayerRateLocal(layer.id, e.target.value)
-                                                            }
-                                                            className="w-full"
-                                                            placeholder="0"
-                                                            min="0"
-                                                            step="0.5"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {/* Layer Summary */}
-                                                {layer.userId && (
-                                                    <div className="mt-2 rounded bg-gray-50 p-2">
-                                                        <p className="text-xs text-gray-600">
-                                                            <span className="font-semibold">Assigned to:</span>{' '}
-                                                            {usersList.find((u) => u.value === layer.userId)?.label ||
-                                                                'Unknown User'}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-
-                                        {/* Total Summary */}
-                                        <div className="mt-4 rounded-lg bg-gray-50 p-3">
-                                            <div className="text-sm font-semibold text-gray-700">
-                                                Total per LOT: ${' '}
-                                                {commissionLayers
-                                                    .reduce((sum, layer) => sum + layer.rate, 0)
-                                                    .toFixed(2)}
-                                            </div>
-                                            <div className="mt-1 text-xs text-gray-600">
-                                                Dollar amount per LOT (0.1 LOT+, non-close positions only)
-                                            </div>
-                                            {selectedUser && (
-                                                <div className="mt-2 text-xs font-medium text-blue-600">
-                                                    Global User: {selectedUser.label}
-                                                </div>
-                                            )}
+                                        {/* Commission Details Table */}
+                                        <div className="overflow-x-auto">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead className="text-xs">Client Login</TableHead>
+                                                        <TableHead className="text-xs">Deal ID</TableHead>
+                                                        <TableHead className="text-xs">Symbol</TableHead>
+                                                        <TableHead className="text-xs">LOT</TableHead>
+                                                        <TableHead className="text-xs">Commission</TableHead>
+                                                        <TableHead className="text-xs">Date</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {commissionDistributions.map((dist: any) => (
+                                                        <TableRow key={dist.id} className="hover:bg-gray-50">
+                                                            <TableCell className="font-mono text-xs">
+                                                                {dist.login_code}
+                                                            </TableCell>
+                                                            <TableCell className="font-mono text-xs">
+                                                                {dist.deal_id}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-medium">
+                                                                {dist.symbol}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs">{dist.lot_size}</TableCell>
+                                                            <TableCell className="text-xs font-semibold text-green-600">
+                                                                {formatCurrency(dist.commission_amount)}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs">
+                                                                {new Date(dist.deal_time).toLocaleDateString()}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
+                        </TabsContent>
+                    )}
 
-                            {/* Dynamic Distribution Results */}
+                    {/* PERBARUI TAB: Distribution (untuk Admin) */}
+                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                        <TabsContent value="distribution">
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                                {/* Dynamic Layer Configuration */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Calculator className="h-5 w-5" />
+                                                Commission Configuration
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button onClick={addLayer} size="sm" className="text-xs">
+                                                    <Plus className="mr-1 h-4 w-4" />
+                                                    Add Layer
+                                                </Button>
+                                                <Button
+                                                    onClick={saveCommissionLayersToDb}
+                                                    disabled={loading}
+                                                    size="sm"
+                                                    className="text-xs"
+                                                >
+                                                    <RefreshCw
+                                                        className={`mr-1 h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+                                                    />
+                                                    Save
+                                                </Button>
+                                            </div>
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Configure commission layers. (Applied to 0.1 LOT+ and non-close positions)
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            {/* Individual Layer Configuration */}
+                                            {commissionLayers.map((layer, index) => (
+                                                <div
+                                                    key={layer.id}
+                                                    className="space-y-3 rounded-lg border p-4 shadow-sm"
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <Label className="text-sm font-medium">Layer {index + 1}</Label>
+                                                        {commissionLayers.length > 1 && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => removeLayer(layer.id)}
+                                                                className="h-8 w-8 p-0 text-red-500 hover:bg-red-50"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 gap-3">
+                                                        <div>
+                                                            <Label className="mb-1 text-xs text-gray-600">
+                                                                Layer Name
+                                                            </Label>
+                                                            <Select
+                                                                value={layer.name}
+                                                                onValueChange={(value) =>
+                                                                    updateLayerName(layer.id, value)
+                                                                }
+                                                            >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select name" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {LAYER_OPTIONS.map((o) => (
+                                                                        <SelectItem key={o} value={o}>
+                                                                            {o}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+
+                                                        <div>
+                                                            <Label className="mb-1 text-xs text-gray-600">
+                                                                Assign User
+                                                            </Label>
+                                                            <ReactSelect
+                                                                // PERBAIKAN ADA DI BARIS INI: gunakan layer.userId
+                                                                value={
+                                                                    usersList.find((u) => u.value === layer.user_id) ||
+                                                                    null
+                                                                }
+                                                                onChange={(option) => updateLayerUser(layer.id, option)}
+                                                                options={usersList}
+                                                                isClearable
+                                                                placeholder="Select user..."
+                                                                className="react-select-container"
+                                                                classNamePrefix="react-select"
+                                                                styles={{
+                                                                    control: (base) => ({
+                                                                        ...base,
+                                                                        minHeight: '38px',
+                                                                        fontSize: '0.875rem',
+                                                                    }),
+                                                                    menu: (base) => ({
+                                                                        ...base,
+                                                                        zIndex: 9999,
+                                                                    }),
+                                                                }}
+                                                            />
+                                                        </div>
+
+                                                        <div>
+                                                            <Label className="mb-1 text-xs text-gray-600">
+                                                                Rate ($/LOT)
+                                                            </Label>
+                                                            <Input
+                                                                type="number"
+                                                                value={localRates[layer.id] || '0'}
+                                                                onChange={(e) =>
+                                                                    updateLayerRateLocal(layer.id, e.target.value)
+                                                                }
+                                                                className="w-full"
+                                                                min="0"
+                                                                step="0.5"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Distribution Results & Calculation Trigger */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center justify-between">
+                                            <span>Distribution Results</span>
+                                            <Button onClick={calculateCommissions} disabled={loading}>
+                                                <RefreshCw
+                                                    className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+                                                />
+                                                Calculate & Save
+                                            </Button>
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Total commission distribution across {commissionLayers.length} layers.
+                                            <br />
+                                            <span className="text-xs font-semibold text-blue-600">
+                                                Rate: 1 USD = {rate.toLocaleString('id-ID')} IDR
+                                            </span>
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-3">
+                                            {commissionLayers.map((layer) => (
+                                                <div
+                                                    key={layer.id}
+                                                    className={`flex items-center justify-between rounded-lg border bg-${layer.color}-50 p-3 transition-colors hover:bg-gray-50`}
+                                                >
+                                                    <span className={`text-sm font-medium text-${layer.color}-700`}>
+                                                        {layer.name}
+                                                    </span>
+                                                    <div className="text-right">
+                                                        <span
+                                                            className={`block text-sm font-semibold text-${layer.color}-600`}
+                                                        >
+                                                            {formatCurrency(totalLayerDistribution[layer.id] || 0)}
+                                                        </span>
+                                                        <span className="text-xs text-gray-600">
+                                                            {formatIDR((totalLayerDistribution[layer.id] || 0) * rate)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            <div className="mt-4 border-t pt-3">
+                                                <div className="flex items-center justify-between rounded-lg border bg-gray-100 p-3">
+                                                    <span className="text-sm font-bold text-gray-700">
+                                                        Total Commission
+                                                    </span>
+                                                    <div className="text-right">
+                                                        <span className="block text-sm font-bold text-gray-800">
+                                                            {formatCurrency(totalCommission)}
+                                                        </span>
+                                                        <span className="text-xs text-gray-600">
+                                                            {formatIDR(totalCommissionIDR)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </TabsContent>
+                    )}
+
+                    {user?.role === 'marketing' && (
+                        <TabsContent value="my-commissions">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="text-lg">Distribution Results</CardTitle>
-                                    <CardDescription>
-                                        Total commission distribution across {commissionLayers.length} layers
-                                        <br />
-                                        <span className="text-xs font-semibold text-blue-600">
-                                            Rate: 1 USD = {rate.toLocaleString('id-ID')} IDR (User Profile ID: {userProfile?.id || 'Default'})
-                                        </span>
-                                    </CardDescription>
+                                    <CardTitle className="text-lg">My Commissions</CardTitle>
+                                    <CardDescription>Commission details from all clients</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-3">
-                                        {commissionLayers.map((layer) => (
-                                            <div
-                                                key={layer.id}
-                                                className={`flex items-center justify-between rounded-lg border bg-${layer.color}-50 p-3 transition-colors hover:bg-gray-50`}
-                                            >
-                                                <span className={`text-sm font-medium text-${layer.color}-700`}>
-                                                    {layer.name}
+                                    <div className="space-y-4">
+                                        {/* Total Commission Summary */}
+                                        <div className="rounded-lg bg-blue-50 p-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-semibold text-blue-900">
+                                                    Total Commission:
                                                 </span>
                                                 <div className="text-right">
-                                                    <span
-                                                        className={`block text-sm font-semibold text-${layer.color}-600`}
-                                                    >
-                                                        {formatCurrency(totalLayerDistribution[layer.id] || 0)}
+                                                    <span className="block text-lg font-bold text-blue-600">
+                                                        {formatCurrency(
+                                                            commissionDistributions.reduce(
+                                                                (sum, dist) => sum + dist.commission_amount,
+                                                                0,
+                                                            ),
+                                                        )}
                                                     </span>
-                                                    <span className="text-xs text-gray-600">
-                                                        {formatIDR((totalLayerDistribution[layer.id] || 0) * rate)}
+                                                    <span className="text-xs text-blue-700">
+                                                        {formatIDR(
+                                                            commissionDistributions.reduce(
+                                                                (sum, dist) => sum + dist.commission_amount,
+                                                                0,
+                                                            ) * rate,
+                                                        )}
                                                     </span>
                                                 </div>
                                             </div>
-                                        ))}
+                                        </div>
 
-                                        <div className="mt-4 border-t pt-3">
-                                            <div className="flex items-center justify-between rounded-lg border bg-gray-100 p-3">
-                                                <span className="text-sm font-bold text-gray-700">
-                                                    Total Commission
-                                                </span>
-                                                <div className="text-right">
-                                                    <span className="block text-sm font-bold text-gray-800">
-                                                        {formatCurrency(totalCommission)}
-                                                    </span>
-                                                    <span className="text-xs text-gray-600">
-                                                        {formatIDR(totalCommissionIDR)}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                        {/* Commission Details Table */}
+                                        <div className="overflow-x-auto">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead className="text-xs">Client Login</TableHead>
+                                                        <TableHead className="text-xs">Deal ID</TableHead>
+                                                        <TableHead className="text-xs">Symbol</TableHead>
+                                                        <TableHead className="text-xs">LOT</TableHead>
+                                                        <TableHead className="text-xs">Commission</TableHead>
+                                                        <TableHead className="text-xs">Date</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {commissionDistributions.map((dist) => (
+                                                        <TableRow key={dist.id} className="hover:bg-gray-50">
+                                                            <TableCell className="font-mono text-xs">
+                                                                {dist.login_code}
+                                                            </TableCell>
+                                                            <TableCell className="font-mono text-xs">
+                                                                {dist.deal_id}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-medium">
+                                                                {dist.symbol}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs">
+                                                                {parseFloat(dist.lot_size).toFixed(1)}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-semibold text-green-600">
+                                                                {formatCurrency(dist.commission_amount)}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs">
+                                                                {new Date(dist.deal_time).toLocaleDateString()}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
-                        </div>
-
-                        {/* Per-Transaction Distribution Table */}
-                        <Card className="mt-6">
-                            <CardHeader>
-                                <CardTitle className="text-lg">Per-Transaction Layer Distribution</CardTitle>
-                                <CardDescription>Detailed commission distribution for each transaction</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="text-xs">Deal ID</TableHead>
-                                                <TableHead className="text-xs">Symbol</TableHead>
-                                                <TableHead className="text-xs">LOT</TableHead>
-                                                <TableHead className="text-xs">Total Comm</TableHead>
-                                                {commissionLayers.map((layer) => (
-                                                    <TableHead key={layer.id} className="text-xs">
-                                                        {layer.name.split(' ')[0]}
-                                                    </TableHead>
-                                                ))}
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {safeFilteredDeals.slice(0, 10).map((deal) => {
-                                                const distribution = getLayerDistribution(
-                                                    deal.commission,
-                                                    deal.volume,
-                                                    deal.entry,
-                                                );
-                                                return (
-                                                    <TableRow key={deal.deal} className="hover:bg-gray-50">
-                                                        <TableCell className="font-mono text-xs">{deal.deal}</TableCell>
-                                                        <TableCell className="text-xs font-medium">
-                                                            {deal.symbol}
-                                                        </TableCell>
-                                                        <TableCell className="text-xs">
-                                                            {deal.entry === 1
-                                                                ? '0'
-                                                                : ((deal.volume / 100000) * 10).toFixed(1)}
-                                                        </TableCell>
-                                                        <TableCell
-                                                            className={`text-xs font-semibold ${deal.commission < 0 ? 'text-red-600' : 'text-gray-600'}`}
-                                                        >
-                                                            {formatCurrency(deal.commission)}
-                                                        </TableCell>
-                                                        {commissionLayers.map((layer) => (
-                                                            <TableCell
-                                                                key={layer.id}
-                                                                className={`text-xs font-semibold text-${layer.color}-600`}
-                                                            >
-                                                                {formatCurrency(distribution[layer.id] || 0)}
-                                                            </TableCell>
-                                                        ))}
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                    {safeFilteredDeals.length > 10 && (
-                                        <div className="mt-4 text-center text-sm text-gray-600">
-                                            Showing first 10 transactions of {safeFilteredDeals.length} total
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                        </TabsContent>
+                    )}
                 </Tabs>
             </div>
         </div>

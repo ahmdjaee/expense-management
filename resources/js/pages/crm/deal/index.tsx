@@ -91,6 +91,24 @@ interface UserOption {
     label: string;
 }
 
+// Interface for login code options
+interface LoginCodeOption {
+    value: string;
+    label: string;
+}
+
+// Interface for commission history periods
+interface CommissionPeriod {
+    id: string;
+    loginCode: string;
+    dateRange: string;
+    fromDate: string;
+    toDate: string;
+    totalCommission: number;
+    totalCommissionIDR: number;
+    dealCount: number;
+}
+
 type DateRange = 'today' | 'week' | 'month' | 'year' | 'all' | 'custom';
 
 // Dummy data for layer options
@@ -145,6 +163,13 @@ export default function GLORIDashboard() {
     const usersList = props.users || [];
     const initialSelectedUser = props.selectedUser || null;
 
+    // Get login codes list from props
+    const loginCodesList = props.loginCodes || [];
+    const initialSelectedLoginCode = props.selectedLoginCode || null;
+
+    // Get commission periods from props
+    const commissionPeriods = props.commissionPeriods || [];
+
     const initialLayers = props.commissionLayers || []; // Data dari DB
     const [commissionLayers, setCommissionLayers] = useState<CommissionLayer[]>(initialLayers);
     const [commissionDistributions, setCommissionDistributions] = useState(props.commissionDistributions || []); // Data dari DB
@@ -168,6 +193,9 @@ export default function GLORIDashboard() {
 
     // Add selected user state
     const [selectedUser, setSelectedUser] = useState<UserOption | null>(initialSelectedUser);
+    
+    // Add selected login code state for marketing
+    const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
     // Local state for rate inputs to provide immediate feedback
     const [localRates, setLocalRates] = useState<{ [key: string]: string }>(() => {
@@ -180,6 +208,18 @@ export default function GLORIDashboard() {
 
     // Debounced version of localRates
     const debouncedRates = useDebounce(localRates, 300);
+
+    // Calculate total commission for all periods
+    const totalCommissionAllPeriods = useMemo(() => {
+        return commissionPeriods.reduce((sum, period) => sum + period.totalCommission, 0);
+    }, [commissionPeriods]);
+
+    // Calculate total commission for current login code
+    const totalCommissionForLoginCode = useMemo(() => {
+        return commissionPeriods
+            .filter(period => period.loginCode === selectedLoginCode?.value)
+            .reduce((sum, period) => sum + period.totalCommission, 0);
+    }, [commissionPeriods, selectedLoginCode]);
 
     // Fungsi untuk menyimpan commission layers ke database
     const saveCommissionLayersToDb = () => {
@@ -262,6 +302,7 @@ export default function GLORIDashboard() {
             dateRange: dateRange,
             commissionLayers: commissionLayers, // Pass the current layers configuration
             userId: selectedUser?.value || null, // Pass selected user ID
+            loginCode: selectedLoginCode?.value || null, // Pass selected login code for marketing
         };
 
         if (dateRange === 'custom' && customFromDate) {
@@ -543,6 +584,7 @@ export default function GLORIDashboard() {
             dateRange: dateRange,
             commissionLayers: commissionLayers,
             userId: userOption?.value || null,
+            loginCode: selectedLoginCode?.value || null, // Keep selected login code
         };
 
         if (dateRange === 'custom' && customFromDate) {
@@ -566,6 +608,47 @@ export default function GLORIDashboard() {
                 setError('Failed to update data');
             },
         });
+    };
+
+    // Handle login code change for marketing
+    const handleLoginCodeChange = (loginCodeOption: LoginCodeOption | null) => {
+        setSelectedLoginCode(loginCodeOption);
+        
+        // Update the login value with the selected login code
+        if (loginCodeOption) {
+            setLogin(loginCodeOption.value);
+            
+            // Use Inertia.js to navigate with new parameters
+            const params: any = {
+                login: loginCodeOption.value,
+                dateRange: dateRange,
+                commissionLayers: commissionLayers,
+                userId: selectedUser?.value || null,
+                loginCode: loginCodeOption.value,
+            };
+
+            if (dateRange === 'custom' && customFromDate) {
+                params.from = customFromDate;
+            }
+
+            if (dateRange === 'custom' && customToDate) {
+                params.to = customToDate;
+            }
+
+            router.get('/commissions/deals', params, {
+                preserveState: false,
+                onSuccess: (page) => {
+                    setDeals(page.props.deals || []);
+                    setFilteredDeals(page.props.deals || []);
+                    setApiResponse(page.props.apiResponse || null);
+                    setUserProfile(page.props.userProfile || null);
+                    setError('');
+                },
+                onError: (errors) => {
+                    setError('Failed to update data');
+                },
+            });
+        }
     };
 
     const exportToCSV = () => {
@@ -638,6 +721,8 @@ export default function GLORIDashboard() {
             login: login,
             dateRange: range,
             commissionLayers: commissionLayers, // Pass the current layers configuration
+            userId: selectedUser?.value || null,
+            loginCode: selectedLoginCode?.value || null, // Pass selected login code
         };
 
         if (dateRange === 'custom' && customFromDate) {
@@ -677,6 +762,8 @@ export default function GLORIDashboard() {
             login: newLogin,
             dateRange: dateRange,
             commissionLayers: commissionLayers, // Pass the current layers configuration
+            userId: selectedUser?.value || null,
+            loginCode: selectedLoginCode?.value || null, // Pass selected login code
         };
 
         if (dateRange === 'custom' && customFromDate) {
@@ -736,23 +823,52 @@ export default function GLORIDashboard() {
                         </div>
 
                         <div className="space-y-6">
-                            {/* Login ID */}
-                            <div>
-                                <Label htmlFor="mobile-login">Login ID:</Label>
-                                <Select value={login} onValueChange={handleLoginChange}>
-                                    <SelectTrigger className="w-48">
-                                        <SelectValue placeholder="Select Login ID" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {loginCode &&
-                                            loginCode.map((code: any) => (
+                            {/* Login Code Selection for Marketing */}
+                            {user?.role === 'marketing' && (
+                                <div>
+                                    <Label htmlFor="mobile-login-code">Login Code:</Label>
+                                    <Select 
+                                        value={selectedLoginCode?.value || login} 
+                                        onValueChange={(value) => {
+                                            const option = loginCodesList.find((code: any) => code.code === value);
+                                            if (option) {
+                                                handleLoginCodeChange({ value: option.code, label: option.code });
+                                            }
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-48">
+                                            <SelectValue placeholder="Select Login Code" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {loginCodesList.map((code: any) => (
                                                 <SelectItem key={code.id} value={code.code}>
                                                     {code.code}
                                                 </SelectItem>
                                             ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+
+                            {/* Login ID for Admin */}
+                            {user?.role !== 'marketing' && (
+                                <div>
+                                    <Label htmlFor="mobile-login">Login ID:</Label>
+                                    <Select value={login} onValueChange={handleLoginChange}>
+                                        <SelectTrigger className="w-48">
+                                            <SelectValue placeholder="Select Login ID" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {loginCode &&
+                                                loginCode.map((code: any) => (
+                                                    <SelectItem key={code.id} value={code.code}>
+                                                        {code.code}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
 
                             {/* IDR Rate */}
                             <div>
@@ -809,22 +925,53 @@ export default function GLORIDashboard() {
                         <AppLogo />
                     </Link>
                     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                        <div className="flex items-center space-x-2">
-                            <Label htmlFor="login">Login ID:</Label>
-                            <Select value={login} onValueChange={handleLoginChange}>
-                                <SelectTrigger className="w-48">
-                                    <SelectValue placeholder="Select Login ID" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {loginCode &&
-                                        loginCode.map((code: any) => (
+                        {/* Login Code Selection for Marketing */}
+                        {user?.role === 'marketing' && (
+                            <div className="flex items-center space-x-2">
+                                <Label htmlFor="login-code">Login Code:</Label>
+                                <Select 
+                                    value={selectedLoginCode?.value || login} 
+                                    onValueChange={(value) => {
+                                        const option = loginCodesList.find((code: any) => code.code === value);
+                                        if (option) {
+                                            handleLoginCodeChange({ value: option.code, label: option.code });
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger className="w-48">
+                                        <SelectValue placeholder="Select Login Code" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {loginCodesList.map((code: any) => (
                                             <SelectItem key={code.id} value={code.code}>
                                                 {code.code}
                                             </SelectItem>
                                         ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {/* Login ID for Admin */}
+                        {user?.role !== 'marketing' && (
+                            <div className="flex items-center space-x-2">
+                                <Label htmlFor="login">Login ID:</Label>
+                                <Select value={login} onValueChange={handleLoginChange}>
+                                    <SelectTrigger className="w-48">
+                                        <SelectValue placeholder="Select Login ID" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {loginCode &&
+                                            loginCode.map((code: any) => (
+                                                <SelectItem key={code.id} value={code.code}>
+                                                    {code.code}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                        
                         <div className="flex items-center space-x-2">
                             <Label htmlFor="rate">Rate:</Label>
                             <Input
@@ -1630,86 +1777,123 @@ export default function GLORIDashboard() {
                     {/* TAB BARU: My Commissions (untuk Marketing) */}
                     {user?.role === 'marketing' && (
                         <TabsContent value="my-commissions">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center justify-between">
-                                        <span>My Commissions</span>
-                                        <Button onClick={calculateCommissions} disabled={loading}>
-                                            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                                            Recalculate
-                                        </Button>
-                                    </CardTitle>
-                                    <CardDescription>Detailed commission breakdown from all clients</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {/* Total Commission Summary */}
-                                        <div className="rounded-lg bg-green-50 p-4">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-semibold text-green-900">
-                                                    Total Commission Earned:
-                                                </span>
-                                                <div className="text-right">
-                                                    <span className="block text-lg font-bold text-green-600">
-                                                        {formatCurrency(
-                                                            commissionDistributions.reduce(
-                                                                (sum, dist) => sum + parseFloat(dist.commission_amount),
-                                                                0,
-                                                            ),
-                                                        )}
-                                                    </span>
-                                                    <span className="text-xs text-green-700">
-                                                        {formatIDR(
-                                                            commissionDistributions.reduce(
-                                                                (sum, dist) => sum + parseFloat(dist.commission_amount),
-                                                                0,
-                                                            ) * rate,
-                                                        )}
-                                                    </span>
-                                                </div>
+                            <div className="space-y-6">
+                                {/* Commission Statistics Cards */}
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                                        <CardHeader className="pb-2">
+                                            <CardTitle className="text-lg flex items-center">
+                                                <DollarSign className="mr-2 h-5 w-5" />
+                                                Total Commission (All Periods)
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold">
+                                                {formatCurrency(totalCommissionAllPeriods)}
                                             </div>
-                                        </div>
+                                            <div className="text-sm opacity-90">
+                                                {formatIDR(totalCommissionAllPeriods * rate)}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    
+                                    <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+                                        <CardHeader className="pb-2">
+                                            <CardTitle className="text-lg flex items-center">
+                                                <DollarSign className="mr-2 h-5 w-5" />
+                                                Total Commission ({selectedLoginCode?.value || 'All Login Codes'})
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold">
+                                                {formatCurrency(totalCommissionForLoginCode)}
+                                            </div>
+                                            <div className="text-sm opacity-90">
+                                                {formatIDR(totalCommissionForLoginCode * rate)}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    
+                                    <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                                        <CardHeader className="pb-2">
+                                            <CardTitle className="text-lg flex items-center">
+                                                <Activity className="mr-2 h-5 w-5" />
+                                                Total Periods
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold">
+                                                {commissionPeriods.length}
+                                            </div>
+                                            <div className="text-sm opacity-90">
+                                                Commission periods recorded
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
 
-                                        {/* Commission Details Table */}
-                                        <div className="overflow-x-auto">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead className="text-xs">Client Login</TableHead>
-                                                        <TableHead className="text-xs">Deal ID</TableHead>
-                                                        <TableHead className="text-xs">Symbol</TableHead>
-                                                        <TableHead className="text-xs">LOT</TableHead>
-                                                        <TableHead className="text-xs">Commission</TableHead>
-                                                        <TableHead className="text-xs">Date</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {commissionDistributions.map((dist: any) => (
-                                                        <TableRow key={dist.id} className="hover:bg-gray-50">
-                                                            <TableCell className="font-mono text-xs">
-                                                                {dist.login_code}
-                                                            </TableCell>
-                                                            <TableCell className="font-mono text-xs">
-                                                                {dist.deal_id}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs font-medium">
-                                                                {dist.symbol}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs">{dist.lot_size}</TableCell>
-                                                            <TableCell className="text-xs font-semibold text-green-600">
-                                                                {formatCurrency(dist.commission_amount)}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs">
-                                                                {new Date(dist.deal_time).toLocaleDateString()}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                {/* Commission Periods List */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">Commission History by Period</CardTitle>
+                                        <CardDescription>
+                                            View your commission earnings for each period
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {commissionPeriods.length === 0 ? (
+                                            <div className="text-center py-8 text-gray-500">
+                                                No commission periods found
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                                {commissionPeriods.map((period) => (
+                                                    <Card key={period.id} className="overflow-hidden">
+                                                        <CardHeader className="pb-2">
+                                                            <div className="flex items-center justify-between">
+                                                                <CardTitle className="text-base">
+                                                                    {period.loginCode}
+                                                                </CardTitle>
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    {period.dateRange}
+                                                                </Badge>
+                                                            </div>
+                                                        </CardHeader>
+                                                        <CardContent>
+                                                            <div className="space-y-2">
+                                                                <div className="flex justify-between text-sm">
+                                                                    <span className="text-gray-600">Period:</span>
+                                                                    <span className="font-medium">
+                                                                        {new Date(period.fromDate).toLocaleDateString()} - {new Date(period.toDate).toLocaleDateString()}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex justify-between text-sm">
+                                                                    <span className="text-gray-600">Commission:</span>
+                                                                    <span className="font-medium text-green-600">
+                                                                        {formatCurrency(period.totalCommission)}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex justify-between text-sm">
+                                                                    <span className="text-gray-600">IDR:</span>
+                                                                    <span className="font-medium text-green-600">
+                                                                        {formatIDR(period.totalCommissionIDR)}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex justify-between text-sm">
+                                                                    <span className="text-gray-600">Deals:</span>
+                                                                    <span className="font-medium">
+                                                                        {period.dealCount}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </div>
                         </TabsContent>
                     )}
 
@@ -1798,7 +1982,6 @@ export default function GLORIDashboard() {
                                                                 Assign User
                                                             </Label>
                                                             <ReactSelect
-                                                                // PERBAIKAN ADA DI BARIS INI: gunakan layer.userId
                                                                 value={
                                                                     usersList.find((u) => u.value === layer.user_id) ||
                                                                     null
@@ -1907,87 +2090,6 @@ export default function GLORIDashboard() {
                                     </CardContent>
                                 </Card>
                             </div>
-                        </TabsContent>
-                    )}
-
-                    {user?.role === 'marketing' && (
-                        <TabsContent value="my-commissions">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">My Commissions</CardTitle>
-                                    <CardDescription>Commission details from all clients</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {/* Total Commission Summary */}
-                                        <div className="rounded-lg bg-blue-50 p-4">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-semibold text-blue-900">
-                                                    Total Commission:
-                                                </span>
-                                                <div className="text-right">
-                                                    <span className="block text-lg font-bold text-blue-600">
-                                                        {formatCurrency(
-                                                            commissionDistributions.reduce(
-                                                                (sum, dist) => sum + dist.commission_amount,
-                                                                0,
-                                                            ),
-                                                        )}
-                                                    </span>
-                                                    <span className="text-xs text-blue-700">
-                                                        {formatIDR(
-                                                            commissionDistributions.reduce(
-                                                                (sum, dist) => sum + dist.commission_amount,
-                                                                0,
-                                                            ) * rate,
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Commission Details Table */}
-                                        <div className="overflow-x-auto">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead className="text-xs">Client Login</TableHead>
-                                                        <TableHead className="text-xs">Deal ID</TableHead>
-                                                        <TableHead className="text-xs">Symbol</TableHead>
-                                                        <TableHead className="text-xs">LOT</TableHead>
-                                                        <TableHead className="text-xs">Commission</TableHead>
-                                                        <TableHead className="text-xs">Date</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {commissionDistributions.map((dist) => (
-                                                        <TableRow key={dist.id} className="hover:bg-gray-50">
-                                                            <TableCell className="font-mono text-xs">
-                                                                {dist.login_code}
-                                                            </TableCell>
-                                                            <TableCell className="font-mono text-xs">
-                                                                {dist.deal_id}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs font-medium">
-                                                                {dist.symbol}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs">
-                                                                {parseFloat(dist.lot_size).toFixed(1)}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs font-semibold text-green-600">
-                                                                {formatCurrency(dist.commission_amount)}
-                                                            </TableCell>
-                                                            <TableCell className="text-xs">
-                                                                {new Date(dist.deal_time).toLocaleDateString()}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
                         </TabsContent>
                     )}
                 </Tabs>

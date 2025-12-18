@@ -11,6 +11,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DealController extends Controller
@@ -26,6 +27,7 @@ class DealController extends Controller
         $from = $request->get('from');
         $to = $request->get('to');
         $selectedUserId = $request->get('userId'); // Get selected user ID
+        $selectedLoginCode = $request->get('loginCode'); // Get selected login code
 
         Log::debug($request->all());
 
@@ -38,22 +40,25 @@ class DealController extends Controller
         // Fetch user profile data
         $userProfileResponse = $this->fetchUserProfile($login);
 
-        // Ganti bagian ini di method index()
-        $loginCode = [];
-
+        // Get login codes based on user role
+        $loginCodes = [];
+        
         if (auth()->user()->role === 'marketing') {
-            // Gunakan hubungan many-to-many yang sudah didefinisikan di model User
-            $loginCode = auth()->user()->loginCodes;
+            // Get login codes assigned to this marketing user
+            $loginCodes = auth()->user()->loginCodes;
+            
+            // If no specific login code selected, use the first one
+            if (!$selectedLoginCode && $loginCodes->isNotEmpty()) {
+                $selectedLoginCode = $loginCodes->first()->code;
+                $login = $selectedLoginCode;
+            }
         } else {
-            // Untuk superadmin dan admin, tampilkan semua login code
-            $loginCode = LoginCode::all();
+            // For admin and superadmin, get all login codes
+            $loginCodes = LoginCode::all();
         }
 
-
-        // Get all users for the select dropdown
-        // You can add filters based on role or other criteria
+        // Get all users for the select dropdown (only marketing users)
         $users = User::select('id', 'name', 'email')
-            // ->where('status', 'active') // Optional: filter by status
             ->where('role', 'marketing')
             ->orderBy('name')
             ->get()
@@ -76,36 +81,85 @@ class DealController extends Controller
             }
         }
 
-        // Ambil commission layers dari database
+        // Get selected login code details
+        $selectedLoginCodeOption = null;
+        if ($selectedLoginCode) {
+            $selectedLoginCodeOption = [
+                'value' => $selectedLoginCode,
+                'label' => $selectedLoginCode,
+            ];
+        }
+
+        // Get commission layers from database
         $commissionLayers = CommissionLayer::with('user')->get();
 
-        // Jika user adalah marketing, hanya tampilkan commission layers miliknya
+        // If user is marketing, only show commission layers assigned to them
         if (auth()->user()->role === 'marketing') {
             $commissionLayers = $commissionLayers->where('user_id', auth()->user()->id);
         }
 
-        // Ambil commission distributions jika user adalah marketing
+        // Get commission distributions if user is marketing
         $commissionDistributions = [];
         if (auth()->user()->role === 'marketing') {
-            $commissionDistributions = CommissionDistribution::where('user_id', auth()->user()->id)
+            $query = CommissionDistribution::where('user_id', auth()->user()->id)
                 ->with('commissionLayer')
-                ->orderBy('deal_time', 'desc')
-                ->get();
+                ->orderBy('deal_time', 'desc');
+                
+            // If a specific login code is selected, filter by it
+            if ($selectedLoginCode) {
+                $query->where('login_code', $selectedLoginCode);
+            }
+                
+            $commissionDistributions = $query->get();
+        }
+
+        // Get commission periods for marketing users
+        $commissionPeriods = [];
+        if (auth()->user()->role === 'marketing') {
+            // Group commission distributions by date range and login code
+            $commissionPeriods = DB::table('commission_distributions')
+                ->select(
+                    'login_code',
+                    DB::raw('MIN(deal_time) as from_date'),
+                    DB::raw('MAX(deal_time) as to_date'),
+                    DB::raw('SUM(commission_amount) as total_commission'),
+                    DB::raw('COUNT(*) as deal_count'),
+                    DB::raw('CONCAT(MIN(deal_time), " - ", MAX(deal_time)) as date_range')
+                )
+                ->where('user_id', auth()->user()->id)
+                ->groupBy('login_code')
+                ->orderBy('from_date', 'desc')
+                ->get()
+                ->map(function ($period) {
+                    return [
+                        'id' => $period->login_code . '_' . $period->from_date,
+                        'loginCode' => $period->login_code,
+                        'fromDate' => $period->from_date,
+                        'toDate' => $period->to_date,
+                        'dateRange' => $period->date_range,
+                        'totalCommission' => (float) $period->total_commission,
+                        'totalCommissionIDR' => (float) $period->total_commission * 10000, // Assuming rate is 10000
+                        'dealCount' => $period->deal_count,
+                    ];
+                });
         }
 
         return Inertia::render('crm/deal/index', [
             'deals' => $dealsResponse['data'] ?? [],
             'apiResponse' => $dealsResponse,
             'userProfile' => $userProfileResponse,
-            'loginCode' => $loginCode,
+            'loginCode' => $loginCodes,
+            'loginCodes' => $loginCodes, // Pass login codes list
             'login' => $login,
             'dateRange' => $dateRange,
             'from' => $from,
             'to' => $to,
             'users' => $users, // Pass users list
             'selectedUser' => $selectedUser, // Pass selected user
+            'selectedLoginCode' => $selectedLoginCodeOption, // Pass selected login code
             'commissionLayers' => $commissionLayers,
             'commissionDistributions' => $commissionDistributions,
+            'commissionPeriods' => $commissionPeriods, // Pass commission periods
         ]);
     }
 
@@ -114,8 +168,6 @@ class DealController extends Controller
      */
     public function saveCommissionLayers(Request $request)
     {
-
-        // dd($request->all());
         $validated = $request->validate([
             'layers' => 'required|array',
             'layers.*.name' => 'required|string|max:255',
@@ -124,7 +176,7 @@ class DealController extends Controller
             'layers.*.user_id' => 'nullable|exists:users,id',
         ]);
 
-        // Ambil ID dari layer yang akan disimpan
+        // Get IDs of layers that will be saved
         $newLayerIds = [];
         foreach ($validated['layers'] as $layer) {
             if (isset($layer['id'])) {
@@ -132,18 +184,18 @@ class DealController extends Controller
             }
         }
 
-        // Hapus distribusi komisi yang terkait dengan layer yang akan dihapus
+        // Delete commission distributions related to layers that will be removed
         if (!empty($newLayerIds)) {
             CommissionDistribution::whereNotIn('commission_layer_id', $newLayerIds)->delete();
         } else {
-            // Jika semua layer akan dihapus, hapus semua distribusi komisi
+            // If all layers will be removed, delete all commission distributions
             CommissionDistribution::query()->delete();
         }
 
-        // Hapus semua commission layers yang ada untuk diganti dengan yang baru
+        // Delete all existing commission layers to replace with new ones
         CommissionLayer::query()->delete();
 
-        // Simpan commission layers baru
+        // Save new commission layers
         foreach ($validated['layers'] as $layer) {
             CommissionLayer::create($layer);
         }
@@ -169,7 +221,7 @@ class DealController extends Controller
         // Get all commission layers
         $commissionLayers = CommissionLayer::all();
 
-        // Hapus distribusi komisi yang ada untuk login dan rentang tanggal ini
+        // Delete existing commission distributions for this login and date range
         $fromDate = $dateParams['from'] ? date('Y-m-d H:i:s', $dateParams['from']) : null;
         $toDate = $dateParams['to'] ? date('Y-m-d H:i:s', $dateParams['to']) : null;
 
@@ -182,26 +234,26 @@ class DealController extends Controller
             })
             ->delete();
 
-        // Hitung dan simpan distribusi komisi baru
+        // Calculate and save new commission distributions
         foreach ($deals as $deal) {
-            // Skip jika ini adalah transaksi close
+            // Skip if this is a close transaction
             if ($deal['entry'] == 1)
                 continue;
 
-            // Hitung LOT size
+            // Calculate LOT size
             $lotSize = ($deal['volume'] / 100000) * 10;
 
-            // Skip jika LOT kurang dari 0.1
+            // Skip if LOT is less than 0.1
             if ($lotSize < 0.1)
                 continue;
 
             $dealTime = date('Y-m-d H:i:s', $deal['time']);
 
-            // Untuk setiap commission layer, hitung komisi
+            // For each commission layer, calculate commission
             foreach ($commissionLayers as $layer) {
                 $commissionAmount = $layer->rate * $lotSize;
 
-                // Simpan distribusi komisi
+                // Save commission distribution
                 CommissionDistribution::create([
                     'commission_layer_id' => $layer->id,
                     'user_id' => $layer->user_id,

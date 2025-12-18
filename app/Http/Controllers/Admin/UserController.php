@@ -7,6 +7,7 @@ use App\Models\Division;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -40,12 +41,24 @@ class UserController extends Controller
     {
         $authUser = auth()->user();
 
+        // Get divisions based on role
         $divisions = $authUser->role === 'superadmin'
             ? Division::all()
             : $authUser->divisions;
 
+        // Get all available login codes for dropdown
+        $loginCodes = \App\Models\LoginCode::orderBy('code')
+            ->get()
+            ->map(function ($loginCode) {
+                return [
+                    'value' => $loginCode->id,
+                    'label' => $loginCode->code,
+                ];
+            });
+
         return inertia('user/create', [
             'divisions' => $divisions,
+            'loginCodes' => $loginCodes,
         ]);
     }
 
@@ -68,7 +81,8 @@ class UserController extends Controller
             'bank' => 'nullable|string|max:50',
             'rekening_name' => 'nullable|string|max:150',
             'divisions' => 'required|array|min:1',
-            'login_code' => 'nullable|string',
+            'login_code_ids' => 'nullable|array', // Array of login code IDs
+            'login_code_ids.*' => 'nullable|exists:login_codes,id', // Validate each ID exists
         ]);
 
         // Cegah admin membuat superadmin
@@ -88,6 +102,7 @@ class UserController extends Controller
             }
         }
 
+        // Create user
         $user = new User();
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -100,10 +115,15 @@ class UserController extends Controller
         $user->bank = $validated['bank'] ?? null;
         $user->rekening_name = $validated['rekening_name'] ?? null;
         $user->email_verified_at = now();
-        $user->login_code = $validated['login_code'] ? json_decode($validated['login_code']) : null;
         $user->save();
 
+        // Sync divisions
         $user->divisions()->sync($validated['divisions']);
+
+        // Attach login codes using many-to-many relationship
+        if (!empty($validated['login_code_ids'])) {
+            $user->loginCodes()->attach($validated['login_code_ids']);
+        }
 
         flash()->success('User berhasil dibuat');
         return redirect()->route('users');
@@ -115,7 +135,7 @@ class UserController extends Controller
     public function edit(string $id)
     {
         $authUser = auth()->user();
-        $user = User::with('divisions')->findOrFail($id);
+        $user = User::with(['divisions', 'loginCodes'])->findOrFail($id);
 
         // Cek authorization
         if ($authUser->role === 'admin') {
@@ -140,41 +160,44 @@ class UserController extends Controller
             ? Division::all()
             : $authUser->divisions;
 
+        // Get all available login codes for dropdown
+        $allLoginCodes = \App\Models\LoginCode::orderBy('code')
+            ->get()
+            ->map(function ($loginCode) {
+                return [
+                    'value' => $loginCode->id,
+                    'label' => $loginCode->code,
+                ];
+            });
+
+        // Format user's assigned login codes for React Select
+        $userLoginCodes = $user->loginCodes->map(function ($loginCode) {
+            return [
+                'value' => $loginCode->id,
+                'label' => $loginCode->code,
+            ];
+        })->toArray();  
+
         return inertia('user/edit', [
             'user' => $user,
             'divisions' => $divisions,
+            'loginCodes' => $allLoginCodes,
+            'userLoginCodes' => $userLoginCodes,
         ]);
     }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
         $authUser = auth()->user();
-        $user = User::findOrFail($id);
-
-        // Cek authorization
-        if ($authUser->role === 'admin') {
-            // Admin hanya bisa edit user di divisinya
-            $authDivisionIds = $authUser->divisions->pluck('id')->toArray();
-            $userDivisionIds = $user->divisions->pluck('id')->toArray();
-
-            if (empty(array_intersect($authDivisionIds, $userDivisionIds))) {
-                flash()->error('Kamu tidak berhak mengedit user ini');
-                return redirect()->route('users');
-            }
-
-            // Admin tidak bisa edit superadmin
-            if ($user->role === 'superadmin') {
-                flash()->error('Admin tidak dapat mengedit superadmin');
-                return redirect()->route('users');
-            }
-        }
-
-        $validated = $request->validate([
+        
+        // Build validation rules dynamically
+        $rules = [
             'name' => 'required|string|max:150',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => 'nullable|min:6',
             'role' => 'required|in:superadmin,admin,user,marketing',
             'position' => 'nullable|in:head,karyawan,direktur,finance',
@@ -184,13 +207,16 @@ class UserController extends Controller
             'bank' => 'nullable|string|max:50',
             'rekening_name' => 'nullable|string|max:150',
             'divisions' => 'required|array|min:1',
-            'login_code' => 'nullable|string', // JSON string
-        ]);
+            'login_code_ids' => 'nullable|array',
+            'login_code_ids.*' => 'nullable|exists:login_codes,id',
+        ];
 
-        // Cegah admin membuat/mengubah jadi superadmin
+        $validated = $request->validate($rules);
+
+        // Cegah admin mengubah role menjadi superadmin
         if ($authUser->role === 'admin' && $validated['role'] === 'superadmin') {
             flash()->error('Admin tidak dapat mengubah role menjadi superadmin');
-            return redirect()->back();
+            return redirect()->back()->withInput();
         }
 
         // Jika admin, pastikan hanya memilih divisi miliknya
@@ -199,41 +225,43 @@ class UserController extends Controller
             foreach ($validated['divisions'] as $divisionId) {
                 if (!in_array($divisionId, $validDivisions)) {
                     flash()->error('Kamu tidak berhak menambahkan user ke divisi ini');
-                    return redirect()->back();
+                    return redirect()->back()->withInput();
                 }
             }
         }
 
+        // Update user data - Only update fields that are present
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-
-        // Update password hanya jika diisi
-        if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
-        }
-
         $user->role = $validated['role'];
-
-        // Hanya superadmin yang bisa mengubah position
-        if ($authUser->role === 'superadmin') {
-            $user->position = $validated['position'] ?? 'karyawan';
-        }
-
-        // Update informasi tambahan
+        $user->position = $validated['position'] ?? 'karyawan';
         $user->phone = $validated['phone'] ?? null;
         $user->address = $validated['address'] ?? null;
         $user->rekening = $validated['rekening'] ?? null;
         $user->bank = $validated['bank'] ?? null;
         $user->rekening_name = $validated['rekening_name'] ?? null;
-        $user->login_code = $validated['login_code']
-            ? json_decode($validated['login_code'], true)
-            : null;
+
+        // Only update password if provided and not empty
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+        // If password is empty/null, don't update it at all (keeps existing password)
 
         $user->save();
 
+        // Sync divisions
         $user->divisions()->sync($validated['divisions']);
 
-        flash()->success('User berhasil diupdate');
+        // Sync login codes using many-to-many relationship
+        if (isset($validated['login_code_ids']) && is_array($validated['login_code_ids']) && count($validated['login_code_ids']) > 0) {
+            // Sync (replace all existing with new ones)
+            $user->loginCodes()->sync($validated['login_code_ids']);
+        } else {
+            // If no codes provided or empty array, detach all
+            $user->loginCodes()->detach();
+        }
+
+        flash()->success('User berhasil diperbarui');
         return redirect()->route('users');
     }
 

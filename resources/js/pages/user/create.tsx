@@ -1,5 +1,4 @@
 import InputError from '@/components/input-error';
-import LoginCodeInput from '@/components/login-code-input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,9 +9,16 @@ import { users as usersRoute } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Form, Head, router, usePage } from '@inertiajs/react';
 import ReactSelect from 'react-select';
+import { useState } from 'react';
+
+interface LoginCodeOption {
+    value: number;
+    label: string;
+}
 
 interface CreateUserProps {
     divisions: Array<{ id: number; name: string }>;
+    loginCodes: LoginCodeOption[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,10 +26,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create User', href: '' },
 ];
 
-export default function CreateUser({ divisions }: CreateUserProps) {
+export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
     // Ambil data auth user
     const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
     const authRole = auth.user.role;
+
+    // State for selected login codes
+    const [selectedLoginCodes, setSelectedLoginCodes] = useState<LoginCodeOption[]>([]);
 
     // Role options tergantung siapa yang login
     const roleOptions =
@@ -182,8 +191,49 @@ export default function CreateUser({ divisions }: CreateUserProps) {
                                     <InputError message={errors.divisions} />
                                 </div>
 
-                                {/* Login Codes */}
-                                <LoginCodeInput errors={errors} />
+                                {/* Login Codes - Using React Select */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="login_codes">Login Codes MT5</Label>
+                                    <ReactSelect
+                                        isMulti
+                                        id="login_codes"
+                                        value={selectedLoginCodes}
+                                        onChange={(options) => setSelectedLoginCodes(options as LoginCodeOption[])}
+                                        options={loginCodes}
+                                        placeholder="Select login codes..."
+                                        className="react-select-container"
+                                        classNamePrefix="react-select"
+                                        isClearable
+                                        styles={{
+                                            control: (base) => ({
+                                                ...base,
+                                                minHeight: '38px',
+                                                backgroundColor: 'hsl(var(--muted) / 0.5)',
+                                                borderColor: errors.login_code_ids
+                                                    ? '#ef4444'
+                                                    : 'hsl(var(--muted))',
+                                            }),
+                                            menu: (base) => ({
+                                                ...base,
+                                                zIndex: 9999,
+                                            }),
+                                        }}
+                                    />
+                                    {/* Hidden inputs for selected login code IDs */}
+                                    {selectedLoginCodes.map((loginCode, index) => (
+                                        <input
+                                            key={loginCode.value}
+                                            type="hidden"
+                                            name={`login_code_ids[${index}]`}
+                                            value={loginCode.value}
+                                        />
+                                    ))}
+                                    <InputError message={errors.login_code_ids} />
+                                    <p className="text-xs text-muted-foreground">
+                                        Select login codes from existing codes in the system. Multiple codes can be
+                                        assigned to this user.
+                                    </p>
+                                </div>
 
                                 {/* Bank Information Section */}
                                 <div className="space-y-4 rounded-lg border border-muted bg-muted/20 p-4">

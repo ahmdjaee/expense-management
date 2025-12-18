@@ -66,7 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [UserController::class, 'create'])->name('.create');
         Route::post('/', [UserController::class, 'store'])->name('.store');
         Route::get('/{id}/edit', [UserController::class, 'edit'])->name('.edit');
-        Route::put('/{id}', [UserController::class, 'update'])->name('.update');
+        Route::put('/{user}', [UserController::class, 'update'])->name('.update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('.destroy');
     });
 
@@ -114,6 +114,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ========================================
     Route::prefix('commissions')->group(function () {
         Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
+    });
+
+    Route::prefix('commissions')->name('commissions.')->group(function () {
+        Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
+        Route::post('/save-layers', [DealController::class, 'saveCommissionLayers'])->name('layers.save');
+        Route::post('/calculate-commissions', [DealController::class, 'calculateAndSaveCommissions'])->name('calculate');
     });
 
     Route::prefix('crm')->group(function () {

@@ -129,7 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/login-codes/{id}/edit', [LoginCodeController::class, 'edit'])->name('login-codes.edit');
         Route::put('/login-codes/{id}', [LoginCodeController::class, 'update'])->name('login-codes.update');
         Route::delete('/login-codes/{id}', [LoginCodeController::class, 'destroy'])->name('login-codes.destroy');
-        Route::post('/login-codes/bulk-delete', [LoginCodeController::class, 'bulkDestroy'])->name('login-codes.bulk-destroy');
+        Route::post('/login-codes/bulk-destroy', [LoginCodeController::class, 'bulkDestroy'])->name('login-codes.bulk-destroy');
     });
 });
 

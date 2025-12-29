@@ -184,9 +184,8 @@ export default function GLORIDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSymbol, setSelectedSymbol] = useState<string>('all');
     const [dateRange, setDateRange] = useState<DateRange>(initialDateRange);
-    const [customFromDate, setCustomFromDate] = useState(initialFrom);
-    const [customToDate, setCustomToDate] = useState(initialTo);
-
+    const [customTransactionFromDate, setCustomTransactionFromDate] = useState(initialFrom);
+    const [customTransactionToDate, setCustomTransactionToDate] = useState(initialTo);
     const [customCommissionFromDate, setCustomCommissionFromDate] = useState(initialFrom);
     const [customCommissionToDate, setCustomCommissionToDate] = useState(initialTo);
     const [filteredCommissions, setFilteredCommissions] = useState([]);
@@ -244,6 +243,9 @@ export default function GLORIDashboard() {
         return filteredCommissions.reduce((sum, period) => sum + period.totalCommission, 0);
     }, [filteredCommissions]); // Hanya jalan ulang jika hasi
 
+    // Commissions History to displau
+    const commissionHistory = filteredCommissions || commissionPeriods;
+
     // Fungsi untuk menyimpan commission layers ke database
     const saveCommissionLayersToDb = () => {
         setLoading(true);
@@ -275,8 +277,8 @@ export default function GLORIDashboard() {
             login: login,
             dateRange: dateRange,
         };
-        if (dateRange === 'custom' && customFromDate) params.from = customFromDate;
-        if (dateRange === 'custom' && customToDate) params.to = customToDate;
+        if (dateRange === 'custom' && customTransactionFromDate) params.from = customTransactionFromDate;
+        if (dateRange === 'custom' && customTransactionToDate) params.to = customTransactionToDate;
 
         router.post('/commissions/calculate-commissions', params, {
             onSuccess: (page) => {
@@ -328,12 +330,12 @@ export default function GLORIDashboard() {
             loginCode: selectedLoginCode?.value || null, // Pass selected login code for marketing
         };
 
-        if (dateRange === 'custom' && customFromDate) {
-            params.from = customFromDate;
+        if (dateRange === 'custom' && customTransactionFromDate) {
+            params.from = customTransactionFromDate;
         }
 
-        if (dateRange === 'custom' && customToDate) {
-            params.to = customToDate;
+        if (dateRange === 'custom' && customTransactionToDate) {
+            params.to = customTransactionToDate;
         }
 
         router.get('/commissions/deals', params, {
@@ -610,12 +612,12 @@ export default function GLORIDashboard() {
             loginCode: selectedLoginCode?.value || null, // Keep selected login code
         };
 
-        if (dateRange === 'custom' && customFromDate) {
-            params.from = customFromDate;
+        if (dateRange === 'custom' && customTransactionFromDate) {
+            params.from = customTransactionFromDate;
         }
 
-        if (dateRange === 'custom' && customToDate) {
-            params.to = customToDate;
+        if (dateRange === 'custom' && customTransactionToDate) {
+            params.to = customTransactionToDate;
         }
 
         router.get('/commissions/deals', params, {
@@ -650,12 +652,12 @@ export default function GLORIDashboard() {
                 loginCode: loginCodeOption.value,
             };
 
-            if (dateRange === 'custom' && customFromDate) {
-                params.from = customFromDate;
+            if (dateRange === 'custom' && customTransactionFromDate) {
+                params.from = customTransactionFromDate;
             }
 
-            if (dateRange === 'custom' && customToDate) {
-                params.to = customToDate;
+            if (dateRange === 'custom' && customTransactionToDate) {
+                params.to = customTransactionToDate;
             }
 
             router.get('/commissions/deals', params, {
@@ -735,8 +737,8 @@ export default function GLORIDashboard() {
     const handleDateRangeChange = (range: DateRange) => {
         setDateRange(range);
         if (range !== 'custom') {
-            setCustomFromDate('');
-            setCustomToDate('');
+            setCustomTransactionFromDate('');
+            setCustomTransactionToDate('');
         }
 
         // Use Inertia.js to navigate with new parameters
@@ -748,12 +750,12 @@ export default function GLORIDashboard() {
             loginCode: selectedLoginCode?.value || null, // Pass selected login code
         };
 
-        if (dateRange === 'custom' && customFromDate) {
-            params.from = customFromDate;
+        if (dateRange === 'custom' && customTransactionFromDate) {
+            params.from = customTransactionFromDate;
         }
 
-        if (dateRange === 'custom' && customToDate) {
-            params.to = customToDate;
+        if (dateRange === 'custom' && customTransactionToDate) {
+            params.to = customTransactionToDate;
         }
 
         router.get('/commissions/deals', params, {
@@ -772,7 +774,7 @@ export default function GLORIDashboard() {
     };
 
     const handleCustomDateSearch = () => {
-        if (customFromDate || customToDate) {
+        if (customTransactionFromDate || customTransactionToDate) {
             handleDateRangeChange('custom');
         }
     };
@@ -789,12 +791,12 @@ export default function GLORIDashboard() {
             loginCode: selectedLoginCode?.value || null, // Pass selected login code
         };
 
-        if (dateRange === 'custom' && customFromDate) {
-            params.from = customFromDate;
+        if (dateRange === 'custom' && customTransactionFromDate) {
+            params.from = customTransactionFromDate;
         }
 
-        if (dateRange === 'custom' && customToDate) {
-            params.to = customToDate;
+        if (dateRange === 'custom' && customTransactionToDate) {
+            params.to = customTransactionToDate;
         }
 
         router.get('/commissions/deals', params, {
@@ -1396,8 +1398,8 @@ export default function GLORIDashboard() {
                                                 <Input
                                                     id="fromDate"
                                                     type="date"
-                                                    value={customFromDate}
-                                                    onChange={(e) => setCustomFromDate(e.target.value)}
+                                                    value={customTransactionFromDate}
+                                                    onChange={(e) => setCustomTransactionFromDate(e.target.value)}
                                                     className="w-full text-base"
                                                 />
                                             </div>
@@ -1406,14 +1408,14 @@ export default function GLORIDashboard() {
                                                 <Input
                                                     id="toDate"
                                                     type="date"
-                                                    value={customToDate}
-                                                    onChange={(e) => setCustomToDate(e.target.value)}
+                                                    value={customTransactionToDate}
+                                                    onChange={(e) => setCustomTransactionToDate(e.target.value)}
                                                     className="w-full text-base"
                                                 />
                                             </div>
                                             <Button
                                                 onClick={handleCustomDateSearch}
-                                                disabled={!customFromDate && !customToDate}
+                                                disabled={!customTransactionFromDate && !customTransactionToDate}
                                                 className="w-full sm:w-auto"
                                             >
                                                 <Search className="mr-2 h-4 w-4" />
@@ -1870,7 +1872,7 @@ export default function GLORIDashboard() {
                                             </div>
                                             <Button
                                                 onClick={handleCustomCommisionPeriod}
-
+                                                disabled={!customCommissionFromDate && !customCommissionToDate}
                                                 className="w-full sm:w-auto"
                                             >
                                                 <Search className="mr-2 h-4 w-4" />
@@ -1889,13 +1891,13 @@ export default function GLORIDashboard() {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        {commissionPeriods.length === 0 ? (
+                                        {commissionHistory.length === 0 ? (
                                             <div className="text-center py-8 text-gray-500">
                                                 No commission periods found
                                             </div>
                                         ) : (
                                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                                {commissionPeriods.map((period) => (
+                                                {commissionHistory.map((period) => (
                                                     <Card key={period.id} className="overflow-hidden">
                                                         <CardHeader className="pb-2">
                                                             <div className="flex items-center justify-between">

@@ -186,6 +186,11 @@ export default function GLORIDashboard() {
     const [dateRange, setDateRange] = useState<DateRange>(initialDateRange);
     const [customFromDate, setCustomFromDate] = useState(initialFrom);
     const [customToDate, setCustomToDate] = useState(initialTo);
+
+    const [customCommissionFromDate, setCustomCommissionFromDate] = useState(initialFrom);
+    const [customCommissionToDate, setCustomCommissionToDate] = useState(initialTo);
+    const [filteredCommissions, setFilteredCommissions] = useState([]);
+
     const [idrRate, setIdrRate] = useState<string>('10000');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [loginCode, setLoginCode] = useState(initialLoginCode);
@@ -214,12 +219,30 @@ export default function GLORIDashboard() {
         return commissionPeriods.reduce((sum, period) => sum + period.totalCommission, 0);
     }, [commissionPeriods]);
 
+    // Handle custom commission period
+    const handleCustomCommisionPeriod = () => {
+        const result = commissionPeriods.filter(period => {
+
+            // Date check
+            const itemDate = new Date(period.fromDate).setHours(0, 0, 0, 0);
+
+            const start = customCommissionFromDate ? new Date(customCommissionFromDate).setHours(0, 0, 0, 0) : null;
+            const end = customCommissionToDate ? new Date(customCommissionToDate).setHours(0, 0, 0, 0) : null;
+
+            const isAfterStart = start ? itemDate >= start : true;
+            const isBeforeEnd = end ? itemDate <= end : true;
+
+            return isAfterStart && isBeforeEnd;
+        });
+
+        // Filtred data array
+        setFilteredCommissions(result);
+    };
+
     // Calculate total commission for current login code
-    const totalCommissionForLoginCode = useMemo(() => {
-        return commissionPeriods
-            .filter(period => period.loginCode === selectedLoginCode?.value)
-            .reduce((sum, period) => sum + period.totalCommission, 0);
-    }, [commissionPeriods, selectedLoginCode]);
+    const totalCommissionThisPeriod = useMemo(() => {
+        return filteredCommissions.reduce((sum, period) => sum + period.totalCommission, 0);
+    }, [filteredCommissions]); // Hanya jalan ulang jika hasi
 
     // Fungsi untuk menyimpan commission layers ke database
     const saveCommissionLayersToDb = () => {
@@ -1779,12 +1802,12 @@ export default function GLORIDashboard() {
                         <TabsContent value="my-commissions">
                             <div className="space-y-6">
                                 {/* Commission Statistics Cards */}
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
                                     <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-lg flex items-center">
                                                 <DollarSign className="mr-2 h-5 w-5" />
-                                                Total Commission (All Periods)
+                                                Total Commission All Period ({selectedLoginCode?.value || 'All Login Codes'})
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -1801,36 +1824,61 @@ export default function GLORIDashboard() {
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-lg flex items-center">
                                                 <DollarSign className="mr-2 h-5 w-5" />
-                                                Total Commission ({selectedLoginCode?.value || 'All Login Codes'})
+                                                Total Commission This Period ({selectedLoginCode?.value || 'All Login Codes'})
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
                                             <div className="text-2xl font-bold">
-                                                {formatCurrency(totalCommissionForLoginCode)}
+                                                {formatCurrency(totalCommissionThisPeriod)}
                                             </div>
                                             <div className="text-sm opacity-90">
-                                                {formatIDR(totalCommissionForLoginCode * rate)}
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                    
-                                    <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-                                        <CardHeader className="pb-2">
-                                            <CardTitle className="text-lg flex items-center">
-                                                <Activity className="mr-2 h-5 w-5" />
-                                                Total Periods
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold">
-                                                {commissionPeriods.length}
-                                            </div>
-                                            <div className="text-sm opacity-90">
-                                                Commission periods recorded
+                                                {formatIDR(totalCommissionThisPeriod * rate)}
                                             </div>
                                         </CardContent>
                                     </Card>
                                 </div>
+
+                                {/* Custom Period Date */}
+                                <Card>
+                                    <CardHeader>
+                                         <CardTitle className="text-lg">Custom Date Period</CardTitle>
+                                         <CardDescription>
+                                            Customize your date period
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-end">
+                                            <div className="flex-1">
+                                                <Label htmlFor="fromDate">From Date:</Label>
+                                                <Input
+                                                    id="fromDate"
+                                                    type="date"
+                                                    value={customCommissionFromDate}
+                                                    onChange={(e) => setCustomCommissionFromDate(e.target.value)}
+                                                    className="w-full text-base"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Label htmlFor="toDate">To Date:</Label>
+                                                <Input
+                                                    id="toDate"
+                                                    type="date"
+                                                    value={customCommissionToDate}
+                                                    onChange={(e) => setCustomCommissionToDate(e.target.value)}
+                                                    className="w-full text-base"
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={handleCustomCommisionPeriod}
+
+                                                className="w-full sm:w-auto"
+                                            >
+                                                <Search className="mr-2 h-4 w-4" />
+                                                Set Period
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
                                 {/* Commission Periods List */}
                                 <Card>

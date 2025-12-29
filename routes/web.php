@@ -112,10 +112,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ========================================
     // CRM ROUTES
     // ========================================
-    Route::prefix('commissions')->group(function () {
-        Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
-    });
-
     Route::prefix('commissions')->name('commissions.')->group(function () {
         Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
         Route::post('/save-layers', [DealController::class, 'saveCommissionLayers'])->name('layers.save');

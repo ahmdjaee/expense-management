@@ -1804,7 +1804,7 @@ export default function GLORIDashboard() {
                         <TabsContent value="my-commissions">
                             <div className="space-y-6">
                                 {/* Commission Statistics Cards */}
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-4 text-center md:grid-cols-2 lg:grid-cols-2">
                                     <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-lg flex items-center">
@@ -1896,13 +1896,13 @@ export default function GLORIDashboard() {
                                                 No commission periods found
                                             </div>
                                         ) : (
-                                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1">
                                                 {commissionHistory.map((period) => (
                                                     <Card key={period.id} className="overflow-hidden">
                                                         <CardHeader className="pb-2">
                                                             <div className="flex items-center justify-between">
                                                                 <CardTitle className="text-base">
-                                                                    {period.loginCode}
+                                                                   Login Code: {period.loginCode}
                                                                 </CardTitle>
                                                                 <Badge variant="outline" className="text-xs">
                                                                     {period.dateRange}

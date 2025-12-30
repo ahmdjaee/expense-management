@@ -84,6 +84,7 @@ const crmNavItems: NavItem[] = [
         title: 'Login MT 5',
         href: '/crm/login-codes',
         icon: LayoutGrid,
+        role: ['superadmin'],
     },
 ];
 

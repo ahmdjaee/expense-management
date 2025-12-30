@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('request_id');
-            $table->enum('approver_position', ['head', 'director', 'finance']);
+            $table->enum('approver_position', ['head', 'direktur', 'finance']);
             $table->foreignId('approver_id');
             $table->enum('status', ['pending', 'approved', 'rejected']);
             $table->text('notes')->nullable();

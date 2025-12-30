@@ -283,7 +283,7 @@ export default function GLORIDashboard() {
         router.post('/commissions/calculate-commissions', params, {
             onSuccess: (page) => {
                 // Refresh data distribusi komisi jika user marketing
-                if (user?.role === 'marketing') {
+                if (user?.role === 'marketing' || user?.role === 'user') {
                     setCommissionDistributions(page.props.commissionDistributions || []);
                 }
                 setError('');
@@ -849,7 +849,7 @@ export default function GLORIDashboard() {
 
                         <div className="space-y-6">
                             {/* Login Code Selection for Marketing */}
-                            {user?.role === 'marketing' && (
+                            {(user?.role === 'marketing' || user?.role === 'user') && (
                                 <div>
                                     <Label htmlFor="mobile-login-code">Login Code:</Label>
                                     <Select 
@@ -876,7 +876,7 @@ export default function GLORIDashboard() {
                             )}
 
                             {/* Login ID for Admin */}
-                            {user?.role !== 'marketing' && (
+                            {(user?.role !== 'marketing' && user?.role !== 'user') && (
                                 <div>
                                     <Label htmlFor="mobile-login">Login ID:</Label>
                                     <Select value={login} onValueChange={handleLoginChange}>
@@ -1272,8 +1272,8 @@ export default function GLORIDashboard() {
                             <TabsTrigger value="analysis" className="flex-shrink-0 text-sm whitespace-nowrap">
                                 Analysis
                             </TabsTrigger>
-                            {/* Tab "My Commissions" hanya untuk marketing */}
-                            {user?.role === 'marketing' && (
+                            {/* Tab "My Commissions" hanya untuk marketing dan user*/}
+                            {(user?.role === 'marketing' || user?.role === 'user') && (
                                 <TabsTrigger value="my-commissions" className="flex-shrink-0 text-sm whitespace-nowrap">
                                     My Commissions
                                 </TabsTrigger>
@@ -1800,7 +1800,7 @@ export default function GLORIDashboard() {
                     </TabsContent>
 
                     {/* TAB BARU: My Commissions (untuk Marketing) */}
-                    {user?.role === 'marketing' && (
+                    {(user?.role === 'marketing' || user?.role === 'user')  && (
                         <TabsContent value="my-commissions">
                             <div className="space-y-6">
                                 {/* Commission Statistics Cards */}

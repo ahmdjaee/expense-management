@@ -43,7 +43,7 @@ class DealController extends Controller
         // Get login codes based on user role
         $loginCodes = [];
         
-        if (auth()->user()->role === 'marketing') {
+        if (auth()->user()->role === 'marketing' || auth()->user()->role === 'user') {
             // Get login codes assigned to this marketing user
             $loginCodes = auth()->user()->loginCodes;
             
@@ -59,7 +59,7 @@ class DealController extends Controller
 
         // Get all users for the select dropdown (only marketing users)
         $users = User::select('id', 'name', 'email')
-            ->where('role', 'marketing')
+            ->whereIn('role', ['marketing', 'user'])
             ->orderBy('name')
             ->get()
             ->map(function ($user) {
@@ -94,13 +94,13 @@ class DealController extends Controller
         $commissionLayers = CommissionLayer::with('user')->get();
 
         // If user is marketing, only show commission layers assigned to them
-        if (auth()->user()->role === 'marketing') {
+        if (auth()->user()->role === 'marketing' || auth()->user()->role === 'user') {
             $commissionLayers = $commissionLayers->where('user_id', auth()->user()->id);
         }
 
         // Get commission distributions if user is marketing
         $commissionDistributions = [];
-        if (auth()->user()->role === 'marketing') {
+        if (auth()->user()->role === 'marketing' || auth()->user()->role === 'user') {
             $query = CommissionDistribution::where('user_id', auth()->user()->id)
                 ->with('commissionLayer')
                 ->orderBy('deal_time', 'desc');
@@ -115,7 +115,7 @@ class DealController extends Controller
 
         // Get commission periods for marketing users
         $commissionPeriods = [];
-        if (auth()->user()->role === 'marketing') {
+        if (auth()->user()->role === 'marketing' || auth()->user()->role === 'user') {
             // Group commission distributions by date range and login code
             $commissionPeriods = DB::table('commission_distributions')
                 ->select(

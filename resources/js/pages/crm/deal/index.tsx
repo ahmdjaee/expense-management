@@ -526,6 +526,11 @@ export default function GLORIDashboard() {
 
     // Update the totalLayerDistribution calculation to work with dynamic layers
     const totalLayerDistribution = useMemo(() => {
+
+        if (!Array.isArray(commissionLayers)) {
+            return {};
+        }
+        
         return safeDeals.reduce(
             (acc, deal) => {
                 const distribution = getLayerDistribution(deal.commission, deal.volume, deal.entry);

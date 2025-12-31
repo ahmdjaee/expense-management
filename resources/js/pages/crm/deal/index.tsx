@@ -823,9 +823,9 @@ export default function GLORIDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
             {/* Mobile Header */}
-            <div className="bg-white p-4 shadow-sm lg:hidden">
+            <div className="p-4 shadow-sm lg:hidden">
                 <div className="flex items-center justify-between">
                     <Link href="/">
                         <AppLogo />
@@ -839,7 +839,7 @@ export default function GLORIDashboard() {
             {/* Mobile Menu */}
             {mobileMenuOpen && (
                 <div className="bg-opacity-50 fixed inset-0 z-50 bg-black lg:hidden">
-                    <div className="h-full w-80 overflow-y-auto bg-white p-4 shadow-xl">
+                    <div className="h-full w-80 overflow-y-auto p-4 shadow-xl">
                         <div className="mb-6 flex items-center justify-between">
                             <h2 className="text-lg font-semibold">Menu</h2>
                             <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(false)}>
@@ -944,7 +944,7 @@ export default function GLORIDashboard() {
             )}
 
             {/* Desktop Header */}
-            <div className="hidden bg-white p-6 shadow-sm lg:block">
+            <div className="hidden p-6 shadow-sm lg:block">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <Link href="/">
                         <AppLogo />
@@ -1064,19 +1064,20 @@ export default function GLORIDashboard() {
                     </CardHeader>
                     <CardContent>
                         {/* Results/Summary Section */}
-                        <div className="rounded-lg border bg-gray-50 p-4">
-                            <h4 className="mb-3 text-sm font-semibold text-gray-700">Fee Calculations Summary</h4>
+                        <div className="rounded-lg border p-4">
+                            <h4 className="mb-3 text-sm font-semibold">Fee Calculations Summary</h4>
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 {/* Current Rate */}
                                 <div className="flex justify-between sm:col-span-2">
-                                    <span className="text-sm text-gray-600">Current Rate:</span>
+                                    <span className="text-sm text-gray-300">Current Rate:</span>
                                     <span className="text-sm font-medium">
                                         1 USD = {rate.toLocaleString('id-ID')} IDR
                                     </span>
                                 </div>
 
                                 {/* Rate Source Info */}
-                                <div className="flex justify-between rounded bg-blue-50 p-2 sm:col-span-2">
+                                <div className="flex justify-between rounded p-2 sm:col-span-2
+                                    bg-blue-50 dark:bg-blue-900/30 shadow-inset dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
                                     <span className="text-xs text-blue-700">Rate Source:</span>
                                     <span className="text-xs font-semibold text-blue-900">
                                         User Profile ID: {userProfile?.id || 'Default (10000)'}

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->double('amount');
             $table->string('title', 255);
             $table->text('description');
-            $table->enum('status', ['draft', 'submitted', 'head_approved', 'director_approved', 'rejected', 'paid'])->default('draft');
+            $table->enum('status', ['draft', 'submitted', 'head_approved', 'director_approved', 'rejected', 'closed', 'paid'])->default('draft');
             $table->enum('payment_method', ['cash', 'transfer']);
             $table->string('attachment', 255)->nullable();
             $table->date('head_approved_at')->nullable();
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->date('director_approved_by')->nullable();
             $table->date('paid_at')->nullable();
             $table->date('paid_by')->nullable();
-            $table->date('rejected_reason')->nullable();
+            $table->string('rejected_reason')->nullable();
             $table->timestamps();
         });
     }

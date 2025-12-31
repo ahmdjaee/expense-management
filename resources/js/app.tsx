@@ -20,9 +20,11 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(
-            <ErrorBoundary>
-                <App {...props} />
-            </ErrorBoundary>,
+            <StrictMode>
+                <ErrorBoundary>
+                    <App {...props} />
+                </ErrorBoundary>
+            </StrictMode>
         );
     },
     progress: {

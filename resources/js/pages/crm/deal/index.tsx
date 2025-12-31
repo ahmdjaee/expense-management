@@ -202,13 +202,20 @@ export default function GLORIDashboard() {
     const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
     // Local state for rate inputs to provide immediate feedback
-    const [localRates, setLocalRates] = useState<{ [key: string]: string }>(() => {
-        const initial: { [key: string]: string } = {};
-        initialLayers.forEach((layer) => {
-            initial[layer.id] = layer.rate.toString();
-        });
-        return initial;
-    });
+    // const [localRates, setLocalRates] = useState<{ [key: string]: string }>(() => {
+    //     const initial: { [key: string]: string } = {};
+    //     initialLayers.forEach((layer) => {
+    //         initial[layer.id] = layer.rate.toString();
+    //     });
+    //     return initial;
+    // });
+    const [localRates, setLocalRates] = useState<Record<string, string>>(() => {
+    if (!Array.isArray(initialLayers)) return {};
+
+    return Object.fromEntries(
+        initialLayers.map(layer => [layer.id, String(layer.rate)])
+    );
+});
 
     // Debounced version of localRates
     const debouncedRates = useDebounce(localRates, 300);
@@ -298,14 +305,24 @@ export default function GLORIDashboard() {
     };
 
     // Update commissionLayers when debounced rates change
+    // useEffect(() => {
+    //     const updatedLayers = commissionLayers.map((layer) => {
+    //         const newRate = parseFloat(debouncedRates[layer.id]) || 0;
+    //         if (newRate !== layer.rate) {
+    //             return { ...layer, rate: newRate };
+    //         }
+    //         return layer;
+    //     });
     useEffect(() => {
-        const updatedLayers = commissionLayers.map((layer) => {
-            const newRate = parseFloat(debouncedRates[layer.id]) || 0;
-            if (newRate !== layer.rate) {
-                return { ...layer, rate: newRate };
-            }
-            return layer;
-        });
+    if (!Array.isArray(commissionLayers)) return;
+
+    const updatedLayers = commissionLayers.map((layer) => {
+        const newRate = parseFloat(debouncedRates[layer.id]) || 0;
+        if (newRate !== layer.rate) {
+            return { ...layer, rate: newRate };
+        }
+        return layer;
+    });
 
         // Only update if there are actual changes
         const hasChanges = updatedLayers.some((layer, index) => layer.rate !== commissionLayers[index].rate);
@@ -1704,7 +1721,10 @@ export default function GLORIDashboard() {
                                                 Dynamic Commission Distribution ({commissionLayers.length} layers)
                                             </h4>
                                             <div className="space-y-2">
-                                                {commissionLayers.map((layer) => (
+                                                {(Array.isArray(commissionLayers)
+                                                    ? commissionLayers
+                                                    : commissionLayers?.data ?? []
+                                                    ).map((layer) => (
                                                     <div
                                                         key={layer.id}
                                                         className={`flex items-center justify-between rounded-lg border bg-${layer.color}-50 p-3 transition-colors hover:bg-gray-50`}

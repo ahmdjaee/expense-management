@@ -267,6 +267,7 @@ export default function EditUserPage({ user, divisions, loginCodes, userLoginCod
                                                 }),
                                                 menu: (base) => ({
                                                     ...base,
+                                                    color: 'black',
                                                     zIndex: 9999,
                                                 }),
                                             }}

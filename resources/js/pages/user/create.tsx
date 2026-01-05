@@ -215,6 +215,7 @@ export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
                                             }),
                                             menu: (base) => ({
                                                 ...base,
+                                                color: 'black',
                                                 zIndex: 9999,
                                             }),
                                         }}

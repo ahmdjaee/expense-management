@@ -860,7 +860,7 @@ export default function GLORIDashboard() {
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="bg-opacity-50 fixed inset-0 z-50 bg-black lg:hidden">
+                <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm lg:hidden">
                     <div className="h-full w-80 overflow-y-auto p-4 shadow-xl">
                         <div className="mb-6 flex items-center justify-between">
                             <h2 className="text-lg font-semibold">Menu</h2>
@@ -2076,6 +2076,7 @@ export default function GLORIDashboard() {
                                                                     }),
                                                                     menu: (base) => ({
                                                                         ...base,
+                                                                        color: 'black',
                                                                         zIndex: 9999,
                                                                     }),
                                                                 }}

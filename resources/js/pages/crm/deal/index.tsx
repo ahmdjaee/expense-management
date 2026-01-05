@@ -188,7 +188,7 @@ export default function GLORIDashboard() {
     const [customTransactionToDate, setCustomTransactionToDate] = useState(initialTo);
     const [customCommissionFromDate, setCustomCommissionFromDate] = useState(initialFrom);
     const [customCommissionToDate, setCustomCommissionToDate] = useState(initialTo);
-    const [filteredCommissions, setFilteredCommissions] = useState([]);
+    const [filteredCommissions, setFilteredCommissions] = useState(null);
 
     const [idrRate, setIdrRate] = useState<string>('10000');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -241,12 +241,18 @@ export default function GLORIDashboard() {
             return isAfterStart && isBeforeEnd;
         });
 
+        if (result.length === 0) {
+            alert("No commissions found in this period");
+        }
+
         // Filtred data array
         setFilteredCommissions(result);
     };
 
     // Calculate total commission for current login code
     const totalCommissionThisPeriod = useMemo(() => {
+        if (filteredCommissions === null) return null;
+    
         return filteredCommissions.reduce((sum, period) => sum + period.totalCommission, 0);
     }, [filteredCommissions]); // Hanya jalan ulang jika hasi
 
@@ -1857,10 +1863,16 @@ export default function GLORIDashboard() {
                                         </CardHeader>
                                         <CardContent>
                                             <div className="text-2xl font-bold">
-                                                {formatCurrency(totalCommissionThisPeriod)}
+                                                {totalCommissionThisPeriod === null 
+                                                    ? "Unspecified" 
+                                                    : formatCurrency(totalCommissionThisPeriod)
+                                                }
                                             </div>
                                             <div className="text-sm opacity-90">
-                                                {formatIDR(totalCommissionThisPeriod * rate)}
+                                                {totalCommissionThisPeriod === null 
+                                                    ? "-" 
+                                                    : formatIDR(totalCommissionThisPeriod * rate)
+                                                }
                                             </div>
                                         </CardContent>
                                     </Card>

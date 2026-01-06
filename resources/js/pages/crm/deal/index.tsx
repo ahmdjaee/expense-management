@@ -150,27 +150,30 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function GLORIDashboard() {
     const { props } = usePage<SharedData>();
-    const initialDeals = props.deals || [];
-    const initialUserProfile = props.userProfile || null;
+    const initialDeals = Array.isArray(props.deals) ? props.deals as Deal[] : []; // Defensive: Ensure deals is always an array
+    const initialUserProfile = (props.userProfile as UserProfile) || null;
     const initialLoginCode = props.loginCode || null;
     const initialLogin = props.login || '5000311';
     const initialDateRange = props.dateRange || 'today';
     const initialFrom = props.from || '';
     const initialTo = props.to || '';
     const user = props.auth.user || null;
+    const initialApiResponse = (props.apiResponse && typeof props.apiResponse === 'object')
+  ? (props.apiResponse as ApiResponse)
+  : null;
 
     // Get users list from props
     const usersList = props.users || [];
-    const initialSelectedUser = props.selectedUser || null;
+    const initialSelectedUser = (props.selectedUser as UserOption) || null;
 
     // Get login codes list from props
     const loginCodesList = props.loginCodes || [];
-    const initialSelectedLoginCode = props.selectedLoginCode || null;
+    const initialSelectedLoginCode = (props.selectedLoginCode as LoginCodeOption) || null;
 
     // Get commission periods from props
     const commissionPeriods = props.commissionPeriods || [];
 
-    const initialLayers = props.commissionLayers || []; // Data dari DB
+    const initialLayers = Array.isArray(props.commissionLayers) ? props.commissionLayers as CommissionLayer[] : []; // Data dari DB
     const [commissionLayers, setCommissionLayers] = useState<CommissionLayer[]>(initialLayers);
     const [commissionDistributions, setCommissionDistributions] = useState(props.commissionDistributions || []); // Data dari DB
 
@@ -179,7 +182,7 @@ export default function GLORIDashboard() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>('');
     const [login, setLogin] = useState(initialLogin);
-    const [apiResponse, setApiResponse] = useState<ApiResponse | null>(props.apiResponse || null);
+    const [apiResponse, setApiResponse] = useState<ApiResponse | null>(initialApiResponse);
     const [showAllColumns, setShowAllColumns] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSymbol, setSelectedSymbol] = useState<string>('all');
@@ -294,7 +297,7 @@ export default function GLORIDashboard() {
         if (dateRange === 'custom' && customTransactionToDate) params.to = customTransactionToDate;
 
         router.post('/commissions/calculate-commissions', params, {
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 // Refresh data distribusi komisi jika user marketing
                 if (user?.role === 'marketing' || user?.role === 'user') {
                     setCommissionDistributions(page.props.commissionDistributions || []);
@@ -363,7 +366,7 @@ export default function GLORIDashboard() {
 
         router.get('/commissions/deals', params, {
             preserveState: false,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setDeals(page.props.deals || []);
                 setFilteredDeals(page.props.deals || []);
                 setApiResponse(page.props.apiResponse || null);
@@ -650,7 +653,7 @@ export default function GLORIDashboard() {
 
         router.get('/commissions/deals', params, {
             preserveState: false,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setDeals(page.props.deals || []);
                 setFilteredDeals(page.props.deals || []);
                 setApiResponse(page.props.apiResponse || null);
@@ -690,7 +693,7 @@ export default function GLORIDashboard() {
 
             router.get('/commissions/deals', params, {
                 preserveState: false,
-                onSuccess: (page) => {
+                onSuccess: (page: any) => {
                     setDeals(page.props.deals || []);
                     setFilteredDeals(page.props.deals || []);
                     setApiResponse(page.props.apiResponse || null);
@@ -788,7 +791,7 @@ export default function GLORIDashboard() {
 
         router.get('/commissions/deals', params, {
             preserveState: false,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setDeals(page.props.deals || []);
                 setFilteredDeals(page.props.deals || []);
                 setApiResponse(page.props.apiResponse || null);
@@ -829,7 +832,7 @@ export default function GLORIDashboard() {
 
         router.get('/commissions/deals', params, {
             preserveState: false,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setDeals(page.props.deals || []);
                 setFilteredDeals(page.props.deals || []);
                 setApiResponse(page.props.apiResponse || null);
@@ -2149,7 +2152,7 @@ export default function GLORIDashboard() {
                                                     </span>
                                                     <div className="text-right">
                                                         <span
-                                                            className={`block text-sm font-semibold text-${layer.color}-600`}
+                                                            className={`block text-sm font-semibold text-black text-${layer.color}-600`}
                                                         >
                                                             {formatCurrency(totalLayerDistribution[layer.id] || 0)}
                                                         </span>

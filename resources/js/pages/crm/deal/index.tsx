@@ -204,6 +204,19 @@ export default function GLORIDashboard() {
     // Add selected login code state for marketing
     const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
+    useEffect(() => {
+        // Cek apakah props memiliki data baru
+        if (props.selectedLoginCode && props.selectedLoginCode.value !== selectedLoginCode?.value) {
+            setSelectedLoginCode(props.selectedLoginCode);
+        }
+
+        if (props.selectedUser && props.selectedUser.value !== selectedUser?.value) {
+            setSelectedUser(props.selectedUser);
+        }
+
+    // Tambahkan 'selectedLoginCode?.value' ke dalam array dependency
+    }, [props.selectedLoginCode, selectedLoginCode?.value, props.selectedUser, selectedUser?.value]);
+
     // Local state for rate inputs to provide immediate feedback
     // const [localRates, setLocalRates] = useState<{ [key: string]: string }>(() => {
     //     const initial: { [key: string]: string } = {};
@@ -223,10 +236,17 @@ export default function GLORIDashboard() {
     // Debounced version of localRates
     const debouncedRates = useDebounce(localRates, 300);
 
-    // Calculate total commission for all periods
+    // Calculate total commission for all periods 
     const totalCommissionAllPeriods = useMemo(() => {
-        return commissionPeriods.reduce((sum, period) => sum + period.totalCommission, 0);
-    }, [commissionPeriods]);
+        return commissionPeriods.reduce((sum, period) => {
+     
+            const isLoginCodeMatch = selectedLoginCode 
+                ? period.loginCode === selectedLoginCode.value 
+                : true;
+
+            return isLoginCodeMatch ? sum + period.totalCommission : sum;
+        }, 0);
+    }, [commissionPeriods, selectedLoginCode]); 
 
     // Handle custom commission period
     const handleCustomCommisionPeriod = () => {
@@ -241,7 +261,14 @@ export default function GLORIDashboard() {
             const isAfterStart = start ? itemDate >= start : true;
             const isBeforeEnd = end ? itemDate <= end : true;
 
-            return isAfterStart && isBeforeEnd;
+            // Login code match
+            const isLoginCodeMatch = selectedLoginCode 
+                ? period.loginCode === selectedLoginCode.value 
+                : true;
+
+            return isAfterStart && isBeforeEnd && isLoginCodeMatch
+
+            // return isAfterStart && isBeforeEnd;
         });
 
         if (result.length === 0) {
@@ -372,6 +399,7 @@ export default function GLORIDashboard() {
                 setApiResponse(page.props.apiResponse || null);
                 setUserProfile(page.props.userProfile || null);
                 setLoginCode(page.props.loginCode || null);
+                setSelectedUser(page.props.selectedUser || null);
                 setError('');
             },
             onError: (errors) => {

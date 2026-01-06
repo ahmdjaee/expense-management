@@ -158,6 +158,8 @@ export default function UserPage({ users }: { users: UserWithPosition[] }) {
                                                     </span>
                                                 ) : user.role === 'admin' ? (
                                                     <span className="text-sm font-medium text-blue-600">Admin</span>
+                                                ) : user.role === 'marketing' ? (
+                                                    <span className="text-sm font-medium text-yellow-600">Marketing</span>
                                                 ) : (
                                                     <span className="text-sm font-medium text-gray-600">User</span>
                                                 )}

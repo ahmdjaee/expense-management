@@ -26,7 +26,7 @@ class DealController extends Controller
         $dateRange = $request->get('dateRange', 'today');
         $from = $request->get('from');
         $to = $request->get('to');
-        $selectedUserId = $request->get('userId'); // Get selected user ID
+        $selectedUserId = $request->get('selectedUser'); // Get selected user ID
         $selectedLoginCode = $request->get('loginCode'); // Get selected login code
 
         Log::debug($request->all());

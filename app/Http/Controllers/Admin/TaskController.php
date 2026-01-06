@@ -25,12 +25,12 @@ class TaskController extends Controller
         // Base query
         $query = Task::with(['division', 'assignedTo']);
 
-        // 🔹 Superadmin → lihat semua task
+        //Superadmin → lihat semua task
         if ($user->role === 'superadmin') {
             $tasks = $query->latest()->get();
         }
 
-        // 🔹 Admin → task dari divisinya saja
+        //Admin → task dari divisinya saja
         elseif ($user->role === 'admin' || $user->role === 'user') {
             $divisionIds = $user->divisions()->pluck('divisions.id');
             $tasks = $query
@@ -63,7 +63,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        // 🔹 1. Validasi input
+        //1. Validasi input
         $validated = $request->validate([
             'division_id' => 'required|exists:divisions,id',
             'title' => 'required|string|max:150',
@@ -75,7 +75,7 @@ class TaskController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
-        // 🔹 2. Simpan ke database dan kirim email
+        //2. Simpan ke database dan kirim email
         $createdTasks = [];
 
         foreach ($validated['users'] as $userId) {
@@ -92,7 +92,7 @@ class TaskController extends Controller
 
             $createdTasks[] = $task;
 
-            // 🔹 3. Kirim email ke user yang ditugaskan
+            //3. Kirim email ke user yang ditugaskan
             try {
                 $user = User::find($userId);
 
@@ -107,7 +107,7 @@ class TaskController extends Controller
 
         flash()->success('Task berhasil dibuat dan email notifikasi telah dikirim!');
 
-        // 🔹 4. Redirect atau kembalikan response
+        //4. Redirect atau kembalikan response
         return redirect()->route('tasks');
     }
 
@@ -145,7 +145,7 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
 
-        // 🔹 1. Validasi input
+        //1. Validasi input
         $validated = $request->validate([
             'division_id' => 'required|exists:divisions,id',
             'title' => 'required|string|max:150',
@@ -156,7 +156,7 @@ class TaskController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
-        // 🔹 2. Update task
+        //2. Update task
         $task->update([
             'division_id' => $validated['division_id'],
             'title' => $validated['title'],
@@ -171,7 +171,7 @@ class TaskController extends Controller
 
         flash()->success('Task berhasil ditambahkan!');
 
-        // 🔹 3. Redirect
+        //3. Redirect
         return redirect()->route('tasks');
     }
 

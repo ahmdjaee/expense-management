@@ -888,10 +888,11 @@ export default function GLORIDashboard() {
         router.flushAll();
     };
 
-    console.log("activeLoginCode:", activeLoginCode);
-    console.log("commissionDistributions:", commissionDistributions);
-    console.log("hasDistributionForLogin:", hasDistributionForLogin);
+    console.log("Component mounted");
+    console.log("selectedLoginCode:", selectedLoginCode);
+    console.log("login:", login);
     console.log("commissionLayers:", commissionLayers);
+    console.log("commissionDistributions:", commissionDistributions);
 
     return (
         <div className="min-h-screen">
@@ -1132,7 +1133,7 @@ export default function GLORIDashboard() {
                         <CardDescription className="text-sm">
                             USD to IDR conversion rate from user profile (Rate ID: {userProfile?.id || 'N/A'})
                         </CardDescription>
-                        {commissionLayers.length > 0 && hasDistributionForLogin && (
+                        {Array.isarray(commissionLayers) && commissionLayers.length > 0 && hasDistributionForLogin && (
                             <CardDescription className="mt-2 text-sm">
                                 Active Layers:{" "}
                                 {commissionLayers.map(layer => `${layer.name} (${layer.rate}$/LOT)`).join(', ')}

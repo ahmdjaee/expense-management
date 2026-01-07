@@ -148,11 +148,6 @@ function useDebounce<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
-console.log("activeLoginCode:", activeLoginCode);
-console.log("commissionDistributions:", commissionDistributions);
-console.log("hasDistributionForLogin:", hasDistributionForLogin);
-console.log("commissionLayers:", commissionLayers);
-
 export default function GLORIDashboard() {
     const { props } = usePage<SharedData>();
     const initialDeals = Array.isArray(props.deals) ? props.deals as Deal[] : []; // Defensive: Ensure deals is always an array
@@ -892,6 +887,11 @@ export default function GLORIDashboard() {
         cleanup();
         router.flushAll();
     };
+
+    console.log("activeLoginCode:", activeLoginCode);
+    console.log("commissionDistributions:", commissionDistributions);
+    console.log("hasDistributionForLogin:", hasDistributionForLogin);
+    console.log("commissionLayers:", commissionLayers);
 
     return (
         <div className="min-h-screen">

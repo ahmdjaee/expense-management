@@ -148,11 +148,6 @@ function useDebounce<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
-console.log("activeLoginCode:", activeLoginCode);
-console.log("commissionDistributions:", commissionDistributions);
-console.log("hasDistributionForLogin:", hasDistributionForLogin);
-console.log("commissionLayers:", commissionLayers);
-
 export default function GLORIDashboard() {
     const { props } = usePage<SharedData>();
     const initialDeals = Array.isArray(props.deals) ? props.deals as Deal[] : []; // Defensive: Ensure deals is always an array
@@ -209,11 +204,11 @@ export default function GLORIDashboard() {
     // Add selected login code state for marketing
     const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
-    const activeLoginCode = selectedLoginCode?.value ?? login;
+//    const activeLoginCode = selectedLoginCode?.value ?? login;
 
-    const hasDistributionForLogin = commissionDistributions?.some(
-        dist => String(dist.login_code) === String(activeLoginCode)
-);
+//     const hasDistributionForLogin = commissionDistributions?.some(
+//         dist => String(dist.login_code) === String(activeLoginCode)
+// );
 
     useEffect(() => {
         // Cek apakah props memiliki data baru
@@ -1132,12 +1127,48 @@ export default function GLORIDashboard() {
                         <CardDescription className="text-sm">
                             USD to IDR conversion rate from user profile (Rate ID: {userProfile?.id || 'N/A'})
                         </CardDescription>
-                        {commissionLayers.length > 0 && hasDistributionForLogin && (
+                        {/* {Array.isArray(commissionLayers) && commissionLayers.length > 0 && hasDistributionForLogin && (
+                        {Array.isarray(commissionLayers) && commissionLayers.length > 0 && hasDistributionForLogin && (
                             <CardDescription className="mt-2 text-sm">
                                 Active Layers:{" "}
                                 {commissionLayers.map(layer => `${layer.name} (${layer.rate}$/LOT)`).join(', ')}
                             </CardDescription>
-                            )}
+                            )} */}
+                        
+                        <CardDescription className="mt-2 text-sm">
+                        {(() => {
+                        // DEBUGGING: will always log in console
+                        console.log("Component mounted");
+                        console.log("selectedLoginCode:", selectedLoginCode);
+                        console.log("login:", login);
+                        console.log("commissionLayers:", commissionLayers);
+                        console.log("commissionDistributions:", commissionDistributions);
+
+                        const activeLoginCode = selectedLoginCode?.value ?? login;
+
+                        // Make sure commissionDistributions is an array
+                        const hasDistributionForLogin = Array.isArray(commissionDistributions)
+                            ? commissionDistributions.some(
+                                dist => String(dist.login_code) === String(activeLoginCode)
+                            )
+                            : false;
+
+                        if (!Array.isArray(commissionLayers) || commissionLayers.length === 0) {
+                            return <span>No active layers available.</span>;
+                        }
+
+                        if (!hasDistributionForLogin) {
+                            return <span>No distribution found for login code {activeLoginCode}.</span>;
+                        }
+
+                        // Map each layer to a span to avoid returning a raw array
+                        return commissionLayers.map(layer => (
+                            <span key={layer.id}>
+                            {layer.name ?? "Unnamed"} ({layer.rate ?? "0"}$/LOT){", "}
+                            </span>
+                        ));
+                        })()}
+                    </CardDescription>
                     </CardHeader>
                     <CardContent>
                         {/* Results/Summary Section */}

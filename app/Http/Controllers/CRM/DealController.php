@@ -353,7 +353,7 @@ class DealController extends Controller
     /**
      * Get date range parameters based on selected range
      */
-    private function getDateRangeParams($range, $from = null, $to = null)
+    private function getDateRangeParams($range, $from, $to)
     {
         $now = new DateTime();
         $today = new DateTime($now->format('Y-m-d'));

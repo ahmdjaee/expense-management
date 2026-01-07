@@ -804,6 +804,7 @@ export default function GLORIDashboard() {
         if (range !== 'custom') {
             setCustomTransactionFromDate('');
             setCustomTransactionToDate('');
+            alert("Ini bukan custom woiii!")
         }
 
         // Use Inertia.js to navigate with new parameters
@@ -814,12 +815,12 @@ export default function GLORIDashboard() {
             userId: selectedUser?.value || null,
             loginCode: selectedLoginCode?.value || null, // Pass selected login code
         };
-
-        if (dateRange === 'custom' && customTransactionFromDate) {
+        
+        if (range === 'custom' && customTransactionFromDate) {
             params.from = customTransactionFromDate;
         }
 
-        if (dateRange === 'custom' && customTransactionToDate) {
+        if (range === 'custom' && customTransactionToDate) {
             params.to = customTransactionToDate;
         }
 
@@ -1957,7 +1958,7 @@ export default function GLORIDashboard() {
                                                 className="w-full sm:w-auto"
                                             >
                                                 <Search className="mr-2 h-4 w-4" />
-                                                Set Period
+                                                Search
                                             </Button>
                                         </div>
                                     </CardContent>

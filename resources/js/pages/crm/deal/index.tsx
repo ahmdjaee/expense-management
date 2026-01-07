@@ -204,7 +204,7 @@ export default function GLORIDashboard() {
     // Add selected login code state for marketing
     const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
-    const activeLoginCode = selectedLoginCode?.value ?? login;
+ //   const activeLoginCode = selectedLoginCode?.value ?? login;
 
 //     const hasDistributionForLogin = commissionDistributions?.some(
 //         dist => String(dist.login_code) === String(activeLoginCode)
@@ -1128,6 +1128,7 @@ export default function GLORIDashboard() {
                             USD to IDR conversion rate from user profile (Rate ID: {userProfile?.id || 'N/A'})
                         </CardDescription>
                         {/* {Array.isArray(commissionLayers) && commissionLayers.length > 0 && hasDistributionForLogin && (
+                        {Array.isarray(commissionLayers) && commissionLayers.length > 0 && hasDistributionForLogin && (
                             <CardDescription className="mt-2 text-sm">
                                 Active Layers:{" "}
                                 {commissionLayers.map(layer => `${layer.name} (${layer.rate}$/LOT)`).join(', ')}

@@ -206,9 +206,9 @@ export default function GLORIDashboard() {
 
     const activeLoginCode = selectedLoginCode?.value ?? login;
 
-    const hasDistributionForLogin = commissionDistributions?.some(
-        dist => String(dist.login_code) === String(activeLoginCode)
-);
+//     const hasDistributionForLogin = commissionDistributions?.some(
+//         dist => String(dist.login_code) === String(activeLoginCode)
+// );
 
     useEffect(() => {
         // Cek apakah props memiliki data baru
@@ -1127,12 +1127,45 @@ export default function GLORIDashboard() {
                         <CardDescription className="text-sm">
                             USD to IDR conversion rate from user profile (Rate ID: {userProfile?.id || 'N/A'})
                         </CardDescription>
-                        {commissionLayers.length > 0 && hasDistributionForLogin && (
+                        {/* {Array.isArray(commissionLayers) && commissionLayers.length > 0 && hasDistributionForLogin && (
                             <CardDescription className="mt-2 text-sm">
                                 Active Layers:{" "}
                                 {commissionLayers.map(layer => `${layer.name} (${layer.rate}$/LOT)`).join(', ')}
                             </CardDescription>
-                            )}
+                            )} */}
+                        
+                        <CardDescription className="mt-2 text-sm">
+                        {(() => {
+                        // Log for debugging
+                        console.log("Component mounted");
+                        console.log("selectedLoginCode:", selectedLoginCode);
+                        console.log("login:", login);
+                        console.log("commissionLayers:", commissionLayers);
+                        console.log("commissionDistributions:", commissionDistributions);
+
+                        const activeLoginCode = selectedLoginCode?.value ?? login;
+
+                        // Safe check for distributions
+                        const hasDistributionForLogin = Array.isArray(commissionDistributions)
+                            ? commissionDistributions.some(
+                                dist => String(dist.login_code) === String(activeLoginCode)
+                            )
+                            : false;
+
+                        if (!Array.isArray(commissionLayers) || commissionLayers.length === 0) {
+                            return "No active layers available.";
+                        }
+
+                        if (!hasDistributionForLogin) {
+                            return `No distribution found for login code ${activeLoginCode}.`;
+                        }
+
+                        // Safe mapping
+                        return `Active Layers: ${commissionLayers
+                            .map(layer => `${layer.name ?? "Unnamed"} (${layer.rate ?? "0"}/$LOT)`)
+                            .join(", ")}`;
+                        })()}
+                    </CardDescription>
                     </CardHeader>
                     <CardContent>
                         {/* Results/Summary Section */}

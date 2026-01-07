@@ -106,7 +106,7 @@ class DealController extends Controller
                 $query->select('commission_layer_id')
                     ->from('commission_distributions')
                     ->where('user_id', auth()->id())
-                    ->where('login_code', $loginCode);
+                    ->where('login_code', (string)$loginCode);
             })
             ->get();
 

@@ -101,14 +101,28 @@ class DealController extends Controller
         // Get commission layers from database
         $loginCode = $selectedLoginCode ?? $login;
 
+        // $commissionLayers = CommissionLayer::query()
+        //     ->whereIn('id', function ($query) use ($loginCode) {
+        //         $query->select('commission_layer_id')
+        //             ->from('commission_distributions')
+        //             ->where('user_id', auth()->id())
+        //             ->where('login_code', (string)$loginCode);
+        //     })
+
         $commissionLayers = CommissionLayer::query()
             ->whereIn('id', function ($query) use ($loginCode) {
                 $query->select('commission_layer_id')
                     ->from('commission_distributions')
                     ->where('user_id', auth()->id())
-                    ->where('login_code', $loginCode);
+                    ->when(is_array($loginCode), function ($q) use ($loginCode) {
+                        $q->whereIn('login_code', $loginCode);
+                    }, function ($q) use ($loginCode) {
+                        $q->where('login_code', (string)$loginCode);
+                    });
             })
-            ->get();
+            ->get()
+            ->values()
+            ->all();
 
         // Get commission distributions if user is marketing
         $commissionDistributions = [];

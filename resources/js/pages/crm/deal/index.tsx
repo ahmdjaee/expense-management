@@ -204,6 +204,12 @@ export default function GLORIDashboard() {
     // Add selected login code state for marketing
     const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
+    const activeLoginCode = selectedLoginCode?.value ?? login;
+
+    const hasDistributionForLogin = commissionDistributions?.some(
+        dist => String(dist.login_code) === String(activeLoginCode)
+);
+
     useEffect(() => {
         // Cek apakah props memiliki data baru
         if (props.selectedLoginCode && props.selectedLoginCode.value !== selectedLoginCode?.value) {
@@ -1010,7 +1016,7 @@ export default function GLORIDashboard() {
                     </Link>
                     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                         {/* Login Code Selection for Marketing */}
-                        {user?.role === 'marketing' && (
+                        {(user?.role === 'marketing' || user?.role === 'user') && (
                             <div className="flex items-center space-x-2">
                                 <Label htmlFor="login-code">Login Code:</Label>
                                 <Select 
@@ -1037,7 +1043,7 @@ export default function GLORIDashboard() {
                         )}
 
                         {/* Login ID for Admin */}
-                        {user?.role !== 'marketing' && (
+                        {(user?.role !== 'marketing' && user?.role !== 'user') && (
                             <div className="flex items-center space-x-2">
                                 <Label htmlFor="login">Login ID:</Label>
                                 <Select value={login} onValueChange={handleLoginChange}>
@@ -1120,6 +1126,12 @@ export default function GLORIDashboard() {
                         <CardDescription className="text-sm">
                             USD to IDR conversion rate from user profile (Rate ID: {userProfile?.id || 'N/A'})
                         </CardDescription>
+                        {commissionLayers.length > 0 && hasDistributionForLogin && (
+                            <CardDescription className="mt-2 text-sm">
+                                Active Layers:{" "}
+                                {commissionLayers.map(layer => `${layer.name} (${layer.rate}$/LOT)`).join(', ')}
+                            </CardDescription>
+                            )}
                     </CardHeader>
                     <CardContent>
                         {/* Results/Summary Section */}

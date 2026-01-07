@@ -90,13 +90,25 @@ class DealController extends Controller
             ];
         }
 
-        // Get commission layers from database
-        $commissionLayers = CommissionLayer::with('user')->get();
+        // // Get commission layers from database
+        // $commissionLayers = CommissionLayer::with('user')->get();
 
-        // If user is marketing, only show commission layers assigned to them
-        if (auth()->user()->role === 'marketing' || auth()->user()->role === 'user') {
-            $commissionLayers = $commissionLayers->where('user_id', auth()->user()->id);
-        }
+        // // If user is marketing, only show commission layers assigned to them
+        // if (auth()->user()->role === 'marketing' || auth()->user()->role === 'user') {
+        //     $commissionLayers = $commissionLayers->where('user_id', auth()->user()->id);
+        // }
+
+        // Get commission layers from database
+        $loginCode = $selectedLoginCode ?? $login;
+
+        $commissionLayers = CommissionLayer::query()
+            ->whereIn('id', function ($query) use ($loginCode) {
+                $query->select('commission_layer_id')
+                    ->from('commission_distributions')
+                    ->where('user_id', auth()->id())
+                    ->where('login_code', $loginCode);
+            })
+            ->get();
 
         // Get commission distributions if user is marketing
         $commissionDistributions = [];

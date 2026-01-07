@@ -204,7 +204,7 @@ export default function GLORIDashboard() {
     // Add selected login code state for marketing
     const [selectedLoginCode, setSelectedLoginCode] = useState<LoginCodeOption | null>(initialSelectedLoginCode);
 
- //   const activeLoginCode = selectedLoginCode?.value ?? login;
+//    const activeLoginCode = selectedLoginCode?.value ?? login;
 
 //     const hasDistributionForLogin = commissionDistributions?.some(
 //         dist => String(dist.login_code) === String(activeLoginCode)
@@ -1137,7 +1137,7 @@ export default function GLORIDashboard() {
                         
                         <CardDescription className="mt-2 text-sm">
                         {(() => {
-                        // Log for debugging
+                        // DEBUGGING: will always log in console
                         console.log("Component mounted");
                         console.log("selectedLoginCode:", selectedLoginCode);
                         console.log("login:", login);
@@ -1146,7 +1146,7 @@ export default function GLORIDashboard() {
 
                         const activeLoginCode = selectedLoginCode?.value ?? login;
 
-                        // Safe check for distributions
+                        // Make sure commissionDistributions is an array
                         const hasDistributionForLogin = Array.isArray(commissionDistributions)
                             ? commissionDistributions.some(
                                 dist => String(dist.login_code) === String(activeLoginCode)
@@ -1154,17 +1154,19 @@ export default function GLORIDashboard() {
                             : false;
 
                         if (!Array.isArray(commissionLayers) || commissionLayers.length === 0) {
-                            return "No active layers available.";
+                            return <span>No active layers available.</span>;
                         }
 
                         if (!hasDistributionForLogin) {
-                            return `No distribution found for login code ${activeLoginCode}.`;
+                            return <span>No distribution found for login code {activeLoginCode}.</span>;
                         }
 
-                        // Safe mapping
-                        return `Active Layers: ${commissionLayers
-                            .map(layer => `${layer.name ?? "Unnamed"} (${layer.rate ?? "0"}/$LOT)`)
-                            .join(", ")}`;
+                        // Map each layer to a span to avoid returning a raw array
+                        return commissionLayers.map(layer => (
+                            <span key={layer.id}>
+                            {layer.name ?? "Unnamed"} ({layer.rate ?? "0"}$/LOT){", "}
+                            </span>
+                        ));
                         })()}
                     </CardDescription>
                     </CardHeader>

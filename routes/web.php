@@ -115,13 +115,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ========================================
     // CRM ROUTES (Admin and superadmin)
     // ========================================
-    Route::middleware(['role:admin,superadmin'])->group(function () {
         Route::prefix('commissions')->name('commissions.')->group(function () {
             Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
             Route::post('/save-layers', [DealController::class, 'saveCommissionLayers'])->name('layers.save');
             Route::post('/calculate-commissions', [DealController::class, 'calculateAndSaveCommissions'])->name('calculate');
         });
-
+    Route::middleware(['role:admin,superadmin'])->group(function () {
         Route::prefix('crm')->group(function () {
             Route::get('/login-codes', [LoginCodeController::class, 'index'])->name('login-codes.index');
             Route::get('/login-codes/create', [LoginCodeController::class, 'create'])->name('login-codes.create');

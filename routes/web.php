@@ -26,8 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('home');
 
 
-    // Dashboard
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // ========================================
+    // TASK MANAGER DASHBOARD ROUTE (Superadmin only) 
+    // ========================================
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    });
 
     // ========================================
     // ADMIN TASK ROUTES
@@ -71,10 +75,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ========================================
-    // EXPENSE MANAGEMENT ROUTES
+    // EXPENSE MANAGEMENT ROUTES 
     // ========================================
     Route::prefix('expenses')->name('expense.')->group(function () {
-        // Dashboard - Updated to use controller instead of closure
         Route::get('/dashboard', [ExpenseDashboardController::class, 'index'])->name('expenseDashboard');
 
         // Request routes
@@ -110,22 +113,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ========================================
-    // CRM ROUTES
+    // CRM ROUTES (Admin and superadmin)
     // ========================================
-    Route::prefix('commissions')->name('commissions.')->group(function () {
-        Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
-        Route::post('/save-layers', [DealController::class, 'saveCommissionLayers'])->name('layers.save');
-        Route::post('/calculate-commissions', [DealController::class, 'calculateAndSaveCommissions'])->name('calculate');
-    });
+    Route::middleware(['role:admin,superadmin'])->group(function () {
+        Route::prefix('commissions')->name('commissions.')->group(function () {
+            Route::get('/deals', [DealController::class, 'index'])->name('deals.index');
+            Route::post('/save-layers', [DealController::class, 'saveCommissionLayers'])->name('layers.save');
+            Route::post('/calculate-commissions', [DealController::class, 'calculateAndSaveCommissions'])->name('calculate');
+        });
 
-    Route::prefix('crm')->group(function () {
-        Route::get('/login-codes', [LoginCodeController::class, 'index'])->name('login-codes.index');
-        Route::get('/login-codes/create', [LoginCodeController::class, 'create'])->name('login-codes.create');
-        Route::post('/login-codes', [LoginCodeController::class, 'store'])->name('login-codes.store');
-        Route::get('/login-codes/{id}/edit', [LoginCodeController::class, 'edit'])->name('login-codes.edit');
-        Route::put('/login-codes/{id}', [LoginCodeController::class, 'update'])->name('login-codes.update');
-        Route::delete('/login-codes/{id}', [LoginCodeController::class, 'destroy'])->name('login-codes.destroy');
-        Route::post('/login-codes/bulk-destroy', [LoginCodeController::class, 'bulkDestroy'])->name('login-codes.bulk-destroy');
+        Route::prefix('crm')->group(function () {
+            Route::get('/login-codes', [LoginCodeController::class, 'index'])->name('login-codes.index');
+            Route::get('/login-codes/create', [LoginCodeController::class, 'create'])->name('login-codes.create');
+            Route::post('/login-codes', [LoginCodeController::class, 'store'])->name('login-codes.store');
+            Route::get('/login-codes/{id}/edit', [LoginCodeController::class, 'edit'])->name('login-codes.edit');
+            Route::put('/login-codes/{id}', [LoginCodeController::class, 'update'])->name('login-codes.update');
+            Route::delete('/login-codes/{id}', [LoginCodeController::class, 'destroy'])->name('login-codes.destroy');
+            Route::post('/login-codes/bulk-destroy', [LoginCodeController::class, 'bulkDestroy'])->name('login-codes.bulk-destroy');
+        });
     });
 });
 

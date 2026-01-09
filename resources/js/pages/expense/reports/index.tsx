@@ -16,11 +16,36 @@ interface ReportsPageProps {
 export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [filterType, setFilterType] = useState<string>('all');
+    const [filterStartDate, setFilterStartDate] = useState<string>('');
+    const [filterEndDate, setFilterEndDate] = useState<string>('');
 
     const filtered = requests.filter((r) => {
         const statusMatch = filterStatus === 'all' || r.status === filterStatus;
         const typeMatch = filterType === 'all' || r.type === filterType;
-        return statusMatch && typeMatch;
+
+        // Logika Filter Tanggal
+        const reqDate = new Date(r.created_at);
+        // Set jam ke 0 agar perbandingan tanggal akurat tanpa pengaruh jam
+        reqDate.setHours(0, 0, 0, 0);
+
+        const start = filterStartDate ? new Date(filterStartDate) : null;
+        const end = filterEndDate ? new Date(filterEndDate) : null;
+
+        let periodMatch = true;
+
+        if (start) {
+            start.setHours(0, 0, 0, 0);
+            // Jika tanggal request lebih kecil dari tanggal mulai, maka false
+            if (reqDate < start) periodMatch = false;
+        }
+
+        if (end) {
+            end.setHours(0, 0, 0, 0);
+            // Jika tanggal request lebih besar dari tanggal akhir, maka false
+            if (reqDate > end) periodMatch = false;
+        }
+
+        return statusMatch && typeMatch && periodMatch;
     });
 
     // Calculate statistics
@@ -164,8 +189,8 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                                 >
                                     <option value="all">Semua</option>
-                                    <option value="reimbursement">Reimbursement</option>
-                                    <option value="advance">Advance/Kasbon</option>
+                                    <option value="reimbursement">Tagihan</option>
+                                    <option value="advance">Pengajuan</option>
                                 </select>
                             </div>
                             <div>
@@ -183,6 +208,26 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     <option value="rejected">Ditolak</option>
                                     <option value="closed">Selesai</option>
                                 </select>
+                            </div>
+                            {/* Filter From Date */}
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-muted-foreground">Dari Tanggal</label>
+                                <input
+                                    type="date"
+                                    value={filterStartDate}
+                                    onChange={(e) => setFilterStartDate(e.target.value)}
+                                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                                />
+                            </div>
+                            {/* Filter To Date */}
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-muted-foreground">Sampai Tanggal</label>
+                                <input
+                                    type="date"
+                                    value={filterEndDate}
+                                    onChange={(e) => setFilterEndDate(e.target.value)}
+                                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                                />
                             </div>
                         </div>
                     </div>

@@ -69,7 +69,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-                                    Reimbursement
+                                    Tagihan
                                 </h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     Pengembalian dana yang sudah Anda keluarkan untuk kebutuhan perusahaan
@@ -86,7 +86,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-                                    Advance / Kasbon
+                                    Pengajuan
                                 </h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     Dana dimuka untuk keperluan bisnis yang akan dilaporkan kemudian
@@ -123,8 +123,8 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                             {isEdit
                                 ? 'Edit Pengajuan'
                                 : type === 'reimbursement'
-                                  ? 'Pengajuan Reimbursement'
-                                  : 'Pengajuan Advance / Kasbon'}
+                                  ? 'Tagihan'
+                                  : 'Pengajuan'}
                         </h1>
                         <p className="text-muted-foreground">
                             {isEdit ? 'Perbarui detail pengajuan Anda' : 'Lengkapi semua detail pengajuan Anda'}

@@ -95,8 +95,15 @@ class RequestController extends Controller
 
         // Check if current user can take action
         $currentUser = auth()->user();
-        $canApprove = $request->canBeApprovedBy($currentUser->position);
-        $canPay = $currentUser->position === 'finance' && $request->canBePaid();
+        $position = $currentUser->position;
+        $canApprove = false;
+        if ($position) {
+            $canApprove = $request->canBeApprovedBy($position);
+        }
+        $canPay = $position === 'finance' && $request->canBePaid();
+        // $currentUser = auth()->user();
+        // $canApprove = $request->canBeApprovedBy($currentUser->position);
+        // $canPay = $currentUser->position === 'finance' && $request->canBePaid();
 
         // Additional check for head
         if ($canApprove && $currentUser->position === 'head') {

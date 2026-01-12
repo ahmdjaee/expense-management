@@ -69,7 +69,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-                                    Reimbursement
+                                    Tagihan
                                 </h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     Pengembalian dana yang sudah Anda keluarkan untuk kebutuhan perusahaan
@@ -86,7 +86,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-                                    Advance / Kasbon
+                                    Pengajuan
                                 </h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     Dana dimuka untuk keperluan bisnis yang akan dilaporkan kemudian
@@ -123,8 +123,8 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                             {isEdit
                                 ? 'Edit Pengajuan'
                                 : type === 'reimbursement'
-                                  ? 'Pengajuan Reimbursement'
-                                  : 'Pengajuan Advance / Kasbon'}
+                                  ? 'Tagihan'
+                                  : 'Pengajuan'}
                         </h1>
                         <p className="text-muted-foreground">
                             {isEdit ? 'Perbarui detail pengajuan Anda' : 'Lengkapi semua detail pengajuan Anda'}
@@ -155,15 +155,19 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                                     <SelectValue placeholder="Pilih Kategori" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="travel">Travel</SelectItem>
-                                    <SelectItem value="entertainment">Entertainment</SelectItem>
-                                    <SelectItem value="office_supplies">Office Supplies</SelectItem>
-                                    <SelectItem value="utilities">Utilities</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
+                                    <SelectItem value="kantor">Kantor</SelectItem>
+                                    <SelectItem value="sumber daya manusia">Sumber Daya Manusia</SelectItem>
+                                    <SelectItem value="operasional umum">Operasional Umum</SelectItem>
+                                    <SelectItem value="pemasaran">Pemasaran</SelectItem>
+                                    <SelectItem value="it dan sistem">IT dan Sistem</SelectItem>
+                                    <SelectItem value="pembelian asset, inventaris, & aksesories">Pembelian Asset, Inventaris, & Aksesories</SelectItem>
+                                    <SelectItem value="keuangan & pajak">Keuangan & Pajak</SelectItem>
+                                    <SelectItem value="komisi & bonus marketing">Komisi & Bonus Marketing</SelectItem>
+                                    <SelectItem value="lainya">Lainya</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Pilih kategori yang sesuai dengan pengajuan Anda
+                                Pilih kategori yang sesuai
                             </p>
                             <InputError message={errors.category} />
                         </div>

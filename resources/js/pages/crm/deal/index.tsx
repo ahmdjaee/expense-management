@@ -1137,6 +1137,12 @@ export default function GLORIDashboard() {
                         
                         <CardDescription className="mt-2 text-sm">
                         {(() => {
+
+                        // Hide for admins
+                        if (user?.role === "admin" || user?.role === "superadmin") {
+                        return null;
+                        }
+
                         // DEBUGGING: will always log in console
                         console.log("Component mounted");
                         console.log("selectedLoginCode:", selectedLoginCode);

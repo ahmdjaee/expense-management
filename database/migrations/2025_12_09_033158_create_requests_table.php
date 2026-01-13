@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->enum('type', ['reimbursement', 'advance']);
-            $table->enum('category', ['travel', 'office_supplies', 'entertainment', 'utilities', 'other']);
+            $table->enum('category', ['kantor', 'sumber daya manusia', 'operasional umum', 'pemasaran', 'it dan sistem', 'pembelian asset, inventaris, & aksesories', 'keuangan & pajak', 'komisi & bonus marketing', 'lainya']);
             $table->double('amount');
             $table->string('title', 255);
             $table->text('description');

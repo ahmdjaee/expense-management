@@ -145,6 +145,10 @@ class Request extends Model
      */
     public function canBeApprovedBy(string $position): bool
     {
+        if (!$position) {
+            return false;
+        }
+
         if (in_array($this->status, ['rejected', 'paid', 'closed'])) {
             return false;
         }

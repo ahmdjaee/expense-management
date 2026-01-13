@@ -15,7 +15,20 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->enum('type', ['reimbursement', 'advance']);
-            $table->enum('category', ['kantor', 'sumber daya manusia', 'operasional umum', 'pemasaran', 'it dan sistem', 'pembelian asset, inventaris, & aksesories', 'keuangan & pajak', 'komisi & bonus marketing', 'lainya']);
+            $table->enum('category', [
+                'biaya allowance',
+                'biaya gaji',
+                'biaya komisi',
+                'biaya sewa',
+                'biaya utilitas',
+                'biaya service charge',
+                'biaya operasional',
+                'biaya promosi',
+                'biaya reward',
+                'biaya pajak',
+                'biaya bpjs',
+                'biaya lainya'
+            ]);
             $table->double('amount');
             $table->string('title', 255);
             $table->text('description');

@@ -102,15 +102,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/payments-history', [PaymentController::class, 'history'])->name('payments.history');
 
         // // LPJ routes
-        Route::prefix('lpj')
-        ->name('lpj.')
-        ->controller(LPJController::class)
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('{lpj}', 'show')->name('show');
-            Route::get('{lpj}/create', 'create')->name('create');
-            Route::post('{lpj}/submit', 'store')->name('store');
-            Route::post('{lpj}/verify', 'verify')->name('verify');
+        Route::middleware(['role:finance'])->group(function () {
+            Route::prefix('lpj')
+            ->name('lpj.')
+            ->controller(LPJController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('{lpj}', 'show')->name('show');
+                Route::get('{lpj}/create', 'create')->name('create');
+                Route::post('{lpj}/submit', 'store')->name('store');
+                Route::post('{lpj}/verify', 'verify')->name('verify');
+            });
         });
 
         // Reports - Updated to use controller instead of closure

@@ -110,7 +110,7 @@ class Request extends Model
             case 'karyawan':
                 return ['head', 'finance', 'direktur'];
             case 'head':
-                return ['direktur', 'finance'];
+                return ['finance', 'direktur'];
             case 'direktur':
                 return ['finance'];
             case 'finance':

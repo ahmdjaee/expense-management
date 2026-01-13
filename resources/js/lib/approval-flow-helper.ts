@@ -29,7 +29,7 @@ export function getApprovalFlowSteps(requesterPosition: string, approvals: Appro
             flowPositions = ['head', 'finance', 'direktur'];
             break;
         case 'head':
-            flowPositions = ['direktur', 'finance'];
+            flowPositions = ['finance', 'direktur'];
             break;
         case 'direktur':
             flowPositions = ['finance'];

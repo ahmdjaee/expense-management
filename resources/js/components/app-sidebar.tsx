@@ -11,10 +11,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, mytasks, tasks, users } from '@/routes';
-import { approvals, expenseDashboard, payments, reports, requestIndex } from '@/routes/expense';
+import { approvals, expenseDashboard, payments, reports, requestIndex, } from '@/routes/expense';
+import lpj from '@/routes/expense/lpj';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { CheckSquare, ClipboardCheck, FileText, LayoutGrid, User, Wallet, Workflow } from 'lucide-react';
+import { CheckSquare, ClipboardCheck, FileText, LayoutGrid, User, Wallet, Workflow, BookCheck } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
@@ -59,6 +60,12 @@ const expenseNavItems: NavItem[] = [
         title: 'Pembayaran',
         href: payments(),
         icon: Wallet,
+        position: ['finance'], // Hanya untuk finance
+    },
+    {
+        title: 'Verifikasi LPJ',
+        href: lpj(),
+        icon: BookCheck,
         position: ['finance'], // Hanya untuk finance
     },
     {

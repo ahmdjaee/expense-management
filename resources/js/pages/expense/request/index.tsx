@@ -56,8 +56,8 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                                 >
                                     <option value="all">Semua</option>
-                                    <option value="reimbursement">Tagihan</option>
-                                    <option value="advance">Pengajuan</option>
+                                    <option value="reimbursement">Reimbursement</option>
+                                    <option value="advance">Advance</option>
                                 </select>
                             </div>
                             <div>
@@ -79,13 +79,13 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                             <Link className="mt-auto" href="/expenses/request/new?type=reimbursement">
                                 <Button className="w-full">
                                     <Plus />
-                                    Tagihan
+                                    Reimbursement
                                 </Button>
                             </Link>
                             <Link className="mt-auto" href="/expenses/request/new?type=advance">
                                 <Button className="w-full">
                                     <Plus />
-                                    Pengajuan
+                                    Advance
                                 </Button>
                             </Link>
                         </div>
@@ -103,14 +103,14 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                         href="/expenses/request/new?type=reimbursement"
                                         className="text-sm font-medium text-primary hover:underline"
                                     >
-                                        Buat Tagihan
+                                        Buat Reimbursement
                                     </Link>
                                     <span className="text-muted-foreground">atau</span>
                                     <Link
                                         href="/expenses/request/new?type=advance"
                                         className="text-sm font-medium text-primary hover:underline"
                                     >
-                                        Buat Pengajuan
+                                        Buat Advance
                                     </Link>
                                 </div>
                             </div>

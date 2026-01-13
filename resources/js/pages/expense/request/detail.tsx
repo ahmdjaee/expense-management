@@ -110,7 +110,7 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
 
     const handleReject = () => {
         if (!rejectionReason.trim()) {
-            alert('Alasan penolakan harus diisi');
+            alert('Alasan penolakan harus diisi!');
             return;
         }
 

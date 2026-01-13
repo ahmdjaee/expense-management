@@ -26,7 +26,7 @@ export function getApprovalFlowSteps(requesterPosition: string, approvals: Appro
 
     switch (requesterPosition) {
         case 'karyawan':
-            flowPositions = ['head', 'direktur', 'finance'];
+            flowPositions = ['head', 'finance', 'direktur'];
             break;
         case 'head':
             flowPositions = ['direktur', 'finance'];

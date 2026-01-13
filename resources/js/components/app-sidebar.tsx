@@ -64,7 +64,7 @@ const expenseNavItems: NavItem[] = [
     },
     {
         title: 'Verifikasi LPJ',
-        href: lpj(),
+        href: lpj.index(),
         icon: BookCheck,
         position: ['finance'], // Hanya untuk finance
     },

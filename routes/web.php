@@ -101,12 +101,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/payments/{id}/process', [PaymentController::class, 'process'])->name('payments.process');
         Route::get('/payments-history', [PaymentController::class, 'history'])->name('payments.history');
 
-        // LPJ routes
-        Route::get('/lpj', [LPJController::class, 'index'])->name('lpj.index');
-        Route::get('/lpj/{id}', [LPJController::class, 'show'])->name('lpj.show');
-        Route::get('/lpj/{id}/create', [LPJController::class, 'create'])->name('lpj.create');
-        Route::post('/lpj/{id}/submit', [LPJController::class, 'store'])->name('lpj.store');
-        Route::post('/lpj/{id}/verify', [LPJController::class, 'verify'])->name('lpj.verify');
+        // // LPJ routes
+        Route::prefix('lpj')
+        ->name('lpj.')
+        ->controller(LPJController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('{lpj}', 'show')->name('show');
+            Route::get('{lpj}/create', 'create')->name('create');
+            Route::post('{lpj}/submit', 'store')->name('store');
+            Route::post('{lpj}/verify', 'verify')->name('verify');
+        });
 
         // Reports - Updated to use controller instead of closure
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports');

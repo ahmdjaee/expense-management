@@ -6,72 +6,10 @@ interface PrintFormProps {
 }
 
 export function PrintForm({ request }: PrintFormProps) {
-    const handlePrint = () => {
-        // Content Element Id
-        const contentElement = document.getElementById('print-content');
-        
-        if (!contentElement) {
-            alert('Konten tidak ditemukan.');
-            return;
-        }
-
-        // New window
-        const printWindow = window.open('', '', 'height=800,width=800');
-        
-        if (!printWindow) {
-            alert('Mohon izinkan popup browser untuk fitur print ini.');
-            return;
-        }
-
-        // HTML structure
-        printWindow.document.write('<html><head><title>Cetak Form Pengajuan</title>');
-
-        // Copy styling to new window
-        const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
-        styles.forEach((styleNode) => {
-            printWindow?.document.head.appendChild(styleNode.cloneNode(true));
-        });
-
-        // Write style
-        printWindow.document.write(`
-            <style>
-                @page {
-                    size: A4;
-                    margin: 0; 
-                }
-                
-                body {
-                    padding: 20px; 
-                    background: white; 
-                    color: black;
-                    /* Pastikan background color tercetak */
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }
-
-                /* Opsional: Sembunyikan elemen lain jika ada yang terbawa */
-                .no-print { display: none; }
-            </style>
-        `);
-
-        printWindow.document.write('</head><body>');
-
-        // Injecting inner HTML to new window 
-        printWindow.document.write(contentElement.innerHTML);
-
-        printWindow.document.write('</body></html>');
-        printWindow.document.close(); 
-
-        // Timeout to load
-        setTimeout(() => {
-            printWindow.focus();
-            printWindow.print();
-        }, 500);
-    };
 
     return (
         <div className="mx-auto max-w-3xl">
-            <div id="print-content" className="mb-6 rounded-lg bg-white p-8 text-black shadow-md ring-1 ring-gray-900/5">
+            <div id="print-content" className="print-area rounded-lg bg-white p-8 text-black print:p-0">
                 <div className="mb-6 text-center">
                     <h1 className="text-2xl font-bold">
                         Form Pengajuan {request.type === 'reimbursement' ? 'Reimbursement' : 'Advance'}
@@ -175,7 +113,7 @@ export function PrintForm({ request }: PrintFormProps) {
             {/* Print Button */}
             <div className="mt-4 flex justify-end gap-3">
                 <button
-                    onClick={handlePrint}
+                    onClick={() => window.print()}
                     className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                     <svg

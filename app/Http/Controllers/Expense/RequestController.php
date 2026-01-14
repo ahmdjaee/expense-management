@@ -44,7 +44,7 @@ class RequestController extends Controller
             'category' => 'required',
             'description' => 'nullable|string',
             'payment_method' => 'required|in:cash,transfer',
-            'type' => 'required|in:reimbursement,advance',
+            'type' => 'required|in:reimbursement,advance,bill',
             'attachment' => 'required|file|max:10240',
         ]);
 
@@ -163,7 +163,7 @@ class RequestController extends Controller
             'category' => 'required',
             'description' => 'nullable|string',
             'payment_method' => 'required|in:cash,transfer',
-            'type' => 'required|in:reimbursement,advance',
+            'type' => 'required|in:reimbursement,advance,bill',
             'attachment' => 'nullable|file|max:10240',
         ]);
 

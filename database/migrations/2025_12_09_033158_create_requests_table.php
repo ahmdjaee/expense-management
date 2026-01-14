@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
-            $table->enum('type', ['reimbursement', 'advance']);
+            $table->enum('type', ['reimbursement', 'advance', 'bill']);
             $table->enum('category', [
                 'biaya allowance',
                 'biaya gaji',

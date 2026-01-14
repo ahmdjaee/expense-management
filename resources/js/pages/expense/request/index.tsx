@@ -47,7 +47,7 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
 
                     {/* Filters */}
                     <div className="space-y-4 rounded-lg border border-border bg-card p-4">
-                        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-muted-foreground">Tipe</label>
                                 <select
@@ -88,6 +88,12 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                     Advance
                                 </Button>
                             </Link>
+                            <Link className="mt-auto" href="/expenses/request/new?type=bill">
+                                <Button className="w-full">
+                                    <Plus />
+                                    Bill
+                                </Button>
+                            </Link>
                         </div>
                     </div>
 
@@ -111,6 +117,13 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                         className="text-sm font-medium text-primary hover:underline"
                                     >
                                         Buat Advance
+                                    </Link>
+                                    <span className="text-muted-foreground">atau</span>
+                                    <Link
+                                        href="/expenses/request/new?type=bill"
+                                        className="text-sm font-medium text-primary hover:underline"
+                                    >
+                                        Buat Bill
                                     </Link>
                                 </div>
                             </div>

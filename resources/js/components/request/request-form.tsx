@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 
 // Komponen untuk menampilkan error
 function InputError({ message }: { message?: string }) {
@@ -22,8 +24,18 @@ interface RequestFormProps {
 }
 
 export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
-    const [type, setType] = useState<'reimbursement' | 'advance' | null>(
-        initialData ? (initialData.type as 'reimbursement' | 'advance') : null,
+    const { props } = usePage<SharedData>();
+    const user = props.auth.user || null;
+    const titleMap = {
+    reimbursement: 'Reimbursement',
+    advance: 'Advance',
+    bill: 'Bill',
+};
+
+
+
+    const [type, setType] = useState<'reimbursement' | 'advance' | 'bill' | null>(
+        initialData ? (initialData.type as 'reimbursement' | 'advance' | 'bill') : null,
     );
     const [amount, setAmount] = useState(initialData ? initialData.amount.toString() : '');
     const [method, setMethod] = useState<'transfer' | 'cash'>(
@@ -38,7 +50,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
             // Set initial values
             setAmount(initialData.amount.toString());
             setMethod(initialData.payment_method as 'transfer' | 'cash');
-            setType(initialData.type as 'reimbursement' | 'advance');
+            setType(initialData.type as 'reimbursement' | 'advance' | 'bill');
         }
     }, [initialData, isEdit]);
 
@@ -95,6 +107,25 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                             <div className="text-2xl">📋</div>
                         </div>
                     </button>
+
+                    {user?.position === 'finance' && (
+                    <button
+                        onClick={() => setType('bill')}
+                        className="group rounded-xl border-2 border-border p-6 text-left transition-all hover:border-primary hover:shadow-md"
+                    >
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+                                    Bill
+                                </h3>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Pengelolaan tagihan dan pembayaran vendor
+                                </p>
+                            </div>
+                            <div className="text-2xl">🧾</div>
+                        </div>
+                    </button>
+                )}
                 </div>
             </div>
         );
@@ -122,9 +153,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                         <h1 className="mb-2 text-3xl font-bold text-foreground">
                             {isEdit
                                 ? 'Edit Pengajuan'
-                                : type === 'reimbursement'
-                                  ? 'Reimbursement'
-                                  : 'Advance'}
+                                : titleMap[type]}
                         </h1>
                         <p className="text-muted-foreground">
                             {isEdit ? 'Perbarui detail pengajuan Anda' : 'Lengkapi semua detail pengajuan Anda'}

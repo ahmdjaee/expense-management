@@ -148,7 +148,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                         <p className="mb-3 text-sm font-semibold text-foreground">Export Data</p>
                         <button
                             onClick={exportToCSV}
-                            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+                            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
                         >
                             Export to CSV
                         </button>
@@ -314,7 +314,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     const percentage = ((data.count / stats.totalRequests) * 100).toFixed(1);
                                     return (
                                         <div key={status} className="flex items-center gap-3">
-                                            <div className="flex h-6 w-12 items-center justify-center rounded bg-linear-to-r from-primary to-primary/60 text-xs font-bold text-white">
+                                            <div className="flex h-6 w-12 items-center justify-center rounded bg-linear-to-r from-primary to-primary/60 text-xs font-bold text-primary-foreground">
                                                 {percentage}%
                                             </div>
                                             <p className="text-sm text-foreground">{status}</p>

@@ -5,8 +5,13 @@ import { ExpenseRequest } from '@/lib/types';
 import { Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
 
 export default function RequestsPage({ requests }: { requests: ExpenseRequest[] }) {
+
+    const { auth } = usePage<{ auth: { user: { role: string; position: string } } }>().props;
+    const uPosition = auth.user.position || null;
+
     const [filterType, setFilterType] = useState<'all' | 'reimbursement' | 'advance'>('all');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [showSuccess, setShowSuccess] = useState(false);
@@ -47,7 +52,7 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
 
                     {/* Filters */}
                     <div className="space-y-4 rounded-lg border border-border bg-card p-4">
-                        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-muted-foreground">Tipe</label>
                                 <select
@@ -88,12 +93,14 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                     Advance
                                 </Button>
                             </Link>
+                            {uPosition === 'finance' && (
                             <Link className="mt-auto" href="/expenses/request/new?type=bill">
                                 <Button className="w-full">
                                     <Plus />
                                     Bill
                                 </Button>
                             </Link>
+                            )}
                         </div>
                     </div>
 
@@ -118,13 +125,17 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                     >
                                         Buat Advance
                                     </Link>
+                                    {uPosition === 'finance' && (
                                     <span className="text-muted-foreground">atau</span>
+                                    )}
+                                    {uPosition === 'finance' && (
                                     <Link
                                         href="/expenses/request/new?type=bill"
                                         className="text-sm font-medium text-primary hover:underline"
                                     >
                                         Buat Bill
                                     </Link>
+                                    )}
                                 </div>
                             </div>
                         )}

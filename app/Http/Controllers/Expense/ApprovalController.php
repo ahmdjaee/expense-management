@@ -214,6 +214,7 @@ class ApprovalController extends Controller
 
         // Update request status
         $expenseRequest->status = 'rejected';
+        $expenseRequest->actual_amount = 0;
         $expenseRequest->rejected_reason = $request->input('notes');
         $expenseRequest->save();
 

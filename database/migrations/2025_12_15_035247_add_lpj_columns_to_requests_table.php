@@ -9,7 +9,6 @@ return new class extends Migration {
     {
         Schema::table('requests', function (Blueprint $table) {
             // LPJ fields
-            $table->double('actual_amount')->nullable()->after('amount');
             $table->string('lpj_attachment')->nullable()->after('attachment');
             $table->text('lpj_notes')->nullable()->after('lpj_attachment');
             $table->timestamp('lpj_submitted_at')->nullable()->after('lpj_notes');

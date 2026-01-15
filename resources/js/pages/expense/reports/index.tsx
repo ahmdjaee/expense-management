@@ -51,7 +51,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     // Calculate statistics
     const stats = {
         totalRequests: requests.length,
-        totalAmount: requests.reduce((sum, r) => sum + r.amount, 0),
+        totalActualAmount: requests.reduce((sum, r) => sum + r.actual_amount, 0),
         approved: requests.filter((r) => r.status.includes('approved') || r.status === 'paid' || r.status === 'closed')
             .length,
         pending: requests.filter((r) => r.status === 'submitted').length,
@@ -66,7 +66,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                 req.user?.divisions && req.user.divisions.length > 0 ? req.user.divisions[0].name : 'Unknown';
             if (!acc[division]) acc[division] = { count: 0, amount: 0 };
             acc[division].count += 1;
-            acc[division].amount += req.amount;
+            acc[division].amount += req.actual_amount;
             return acc;
         },
         {} as Record<string, { count: number; amount: number }>,
@@ -78,7 +78,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
             const type = req.type === 'reimbursement' ? 'Reimbursement' : 'Advance';
             if (!acc[type]) acc[type] = { count: 0, amount: 0 };
             acc[type].count += 1;
-            acc[type].amount += req.amount;
+            acc[type].amount += req.actual_amount;
             return acc;
         },
         {} as Record<string, { count: number; amount: number }>,
@@ -98,7 +98,12 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
             const status = statusMap[req.status] || req.status;
             if (!acc[status]) acc[status] = { count: 0, amount: 0 };
             acc[status].count += 1;
-            acc[status].amount += req.amount;
+            // Untuk transaksi dengan status rejected, buat agar mengambil nominalnya dari nominal non aktual 
+            if (req.status == "rejected"){
+                acc[status].amount += req.amount;
+            } else {
+                acc[status].amount += req.actual_amount;
+            }
             return acc;
         },
         {} as Record<string, { count: number; amount: number }>,
@@ -161,11 +166,11 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                             <p className="text-2xl font-bold text-foreground">{stats.totalRequests}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-card p-4">
-                            <p className="mb-1 text-xs text-muted-foreground">Total Nominal</p>
-                            <p className="text-lg font-bold text-primary">{formatCurrency(stats.totalAmount)}</p>
+                            <p className="mb-1 text-xs text-muted-foreground">Total Nominal Aktual</p>
+                            <p className="text-lg font-bold text-primary">{formatCurrency(stats.totalActualAmount)}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-card p-4">
-                            <p className="mb-1 text-xs text-muted-foreground">Disetujui</p>
+                            <p className="mb-1 text-xs text-muted-foreground">Pengajuan Disetujui</p>
                             <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-card p-4">

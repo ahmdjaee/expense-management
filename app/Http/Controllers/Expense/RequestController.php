@@ -61,6 +61,7 @@ class RequestController extends Controller
         $expenseRequest->user_id = auth()->id();
         $expenseRequest->title = $request->input('title');
         $expenseRequest->amount = $request->input('amount');
+        $expenseRequest->actual_amount = $request->input('amount');
         $expenseRequest->category = $request->input('category');
         $expenseRequest->description = $request->input('description');
         $expenseRequest->payment_method = $request->input('payment_method');

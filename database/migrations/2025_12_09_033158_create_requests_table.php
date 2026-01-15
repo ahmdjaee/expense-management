@@ -30,6 +30,7 @@ return new class extends Migration
                 'biaya lainya'
             ]);
             $table->double('amount');
+            $table->double('actual_amount');
             $table->string('title', 255);
             $table->text('description');
             $table->enum('status', ['draft', 'submitted', 'head_approved', 'director_approved', 'rejected', 'closed', 'paid'])->default('draft');

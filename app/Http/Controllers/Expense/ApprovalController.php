@@ -18,7 +18,7 @@ class ApprovalController extends Controller
         $user = auth()->user();
         $userPosition = $user->position;
 
-        if ($userPosition !== 'finance') {
+        if ($userPosition === 'karyawan') {
             flash()->error('Anda tidak memiliki akses ke halaman ini');
             return redirect()->route('expense.expenseDashboard');
         }

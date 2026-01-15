@@ -175,7 +175,9 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
                             <div>
                                 <p className="mb-1 text-xs text-muted-foreground">Tipe</p>
                                 <p className="text-sm font-medium">
-                                    {request.type === 'reimbursement' ? '📄 Reimbursement' : '💵 Advance/Kasbon'}
+                                    {request.type === 'reimbursement' ? '📄 Reimbursement' 
+                                    : request.type === 'advance' ? '💵 Advance/Kasbon' 
+                                    : '📋 Bill'}
                                 </p>
                             </div>
                         </div>

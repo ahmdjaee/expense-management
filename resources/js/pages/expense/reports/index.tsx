@@ -189,8 +189,9 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                                 >
                                     <option value="all">Semua</option>
-                                    <option value="reimbursement">Tagihan</option>
-                                    <option value="advance">Pengajuan</option>
+                                    <option value="reimbursement">Reimbursement</option>
+                                    <option value="advance">Advance</option>
+                                    <option value="bill">Bill</option>
                                 </select>
                             </div>
                             <div>
@@ -201,12 +202,14 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                                 >
                                     <option value="all">Semua</option>
+                                    <option value="draft">Draf</option>
                                     <option value="submitted">Pending</option>
                                     <option value="head_approved">Disetujui Head</option>
                                     <option value="director_approved">Disetujui Direktur</option>
                                     <option value="paid">Sudah Dibayar</option>
                                     <option value="rejected">Ditolak</option>
                                     <option value="closed">Selesai</option>
+                                    <option value="paid">Lunas</option>
                                 </select>
                             </div>
                             {/* Filter From Date */}
@@ -336,6 +339,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     <th className="p-2 text-left font-semibold text-foreground">Pemohon</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Tipe</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Nominal</th>
+                                    <th className="p-2 text-left font-semibold text-foreground">Nominal Aktual</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Status</th>
                                     <th className="p-2 text-left font-semibold text-foreground">Tanggal</th>
                                 </tr>
@@ -357,6 +361,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                             <td className="p-2 text-sm">{req.user?.name || 'Unknown'}</td>
                                             <td className="p-2 text-sm capitalize">{req.type}</td>
                                             <td className="p-2 font-bold text-primary">{formatCurrency(req.amount)}</td>
+                                            <td className="p-2 font-bold text-primary">{formatCurrency(req.actual_amount)}</td>
                                             <td className="p-2 text-sm">{statusMap[req.status] || req.status}</td>
                                             <td className="p-2 text-sm text-muted-foreground">
                                                 {formatDate(req.created_at)}

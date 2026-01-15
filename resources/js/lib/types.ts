@@ -26,6 +26,7 @@ export interface ExpenseRequest {
     title: string;
     description: string;
     amount: number;
+    actual_amount: number;
     status: string;
     type: string;
     category: string;

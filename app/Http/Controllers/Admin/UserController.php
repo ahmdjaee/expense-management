@@ -21,14 +21,36 @@ class UserController extends Controller
 
         // Superadmin -> lihat semua user
         // Admin -> lihat hanya user di divisinya
-        if ($authUser->role === 'superadmin') {
-            $users = User::with('divisions')->get();
-        } else {
+        // if ($authUser->role === 'superadmin') {
+        //     $users = User::with('divisions')->get();
+        // } else {
+        //     $divisionIds = $authUser->divisions->pluck('id');
+        //     $users = User::with('divisions')
+        //         ->whereHas('divisions', fn($q) => $q->whereIn('divisions.id', $divisionIds))
+        //         ->get();
+        // }
+        // return Inertia::render('user/index', [
+        //     'users' => $users,
+        // ]);
+
+        $authUser = auth()->user();
+
+        $query = User::with('divisions');
+
+        $query->where('location', $authUser->location);
+
+        // Superadmin -> lihat semua user
+        // Admin -> lihat hanya user di divisinya
+        if ($authUser->role !== 'superadmin') {
             $divisionIds = $authUser->divisions->pluck('id');
-            $users = User::with('divisions')
-                ->whereHas('divisions', fn($q) => $q->whereIn('divisions.id', $divisionIds))
-                ->get();
+            
+            $query->whereHas('divisions', fn($q) => 
+                $q->whereIn('divisions.id', $divisionIds)
+            );
         }
+
+        $users = $query->get();
+
         return Inertia::render('user/index', [
             'users' => $users,
         ]);
@@ -110,6 +132,7 @@ class UserController extends Controller
         $user->role = $validated['role'];
         $user->position = $validated['position'] ?? 'karyawan'; // Default karyawan
         $user->phone = $validated['phone'] ?? null;
+        $user->location = $authUser->location;
         $user->address = $validated['address'] ?? null;
         $user->rekening = $validated['rekening'] ?? null;
         $user->bank = $validated['bank'] ?? null;

@@ -20,6 +20,9 @@ class DashboardController extends Controller
         $userRequests = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
+            ->whereHas('user', function ($q) use ($user) {
+                $q->where('location', $user->location);
+            })
             ->get();
 
         // Calculate statistics

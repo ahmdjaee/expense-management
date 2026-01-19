@@ -19,7 +19,9 @@ class ApprovalController extends Controller
         $userPosition = $user->position;
 
         // Query requests yang perlu approval dari position user
-        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
+        // $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
+        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
+            ->whereHas('user', fn($q) => $q->where('location', $user->location));
 
         $requests = $query->get()->filter(function ($request) use ($user, $userPosition) {
             // Skip if already rejected or paid
@@ -65,8 +67,16 @@ class ApprovalController extends Controller
     public function show(string $id)
     {
         $user = auth()->user();
+
         $request = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->findOrFail($id);
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->find($id);
+
+        // LOGIKA BARU: Cek manual jika data null
+        if (!$request) {
+            flash()->error('Tidak Ditemukan');
+            return redirect()->route('expense.expenseDashboard');
+        }
 
         // Check if user can view this request
         $canView = false;
@@ -113,7 +123,15 @@ class ApprovalController extends Controller
     public function approve(Request $request, string $id)
     {
         $user = auth()->user();
-        $expenseRequest = ExpenseRequest::with('user')->findOrFail($id);
+        $expenseRequest = ExpenseRequest::with('user')
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->find($id);
+
+        // LOGIKA BARU: Redirect jika null
+        if (!$expenseRequest) {
+            flash()->error('Tidak ditemukan');
+            return redirect()->route('expense.expenseDashboard');
+        }
 
         $request->validate([
             'notes' => 'nullable|string|max:500',
@@ -177,7 +195,14 @@ class ApprovalController extends Controller
     public function reject(Request $request, string $id)
     {
         $user = auth()->user();
-        $expenseRequest = ExpenseRequest::with('user')->findOrFail($id);
+        $expenseRequest = ExpenseRequest::with('user')
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->find($id);
+
+        if (!$expenseRequest) {
+            flash()->error('Tidak ditemukan');
+            return redirect()->route('expense.expenseDashboard');
+        }
 
         $request->validate([
             'notes' => 'required|string|max:500',

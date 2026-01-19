@@ -17,22 +17,21 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
 
-        // Hanya finance yang bisa akses halaman ini
         if ($user->position !== 'finance') {
             flash()->error('Anda tidak memiliki akses ke halaman ini');
             return redirect()->route('expense.expenseDashboard');
         }
 
-        // Request yang siap dibayar (all approvals complete)
+        // Request yang sudah dibayar
         $readyForPayment = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
             ->get()
-            ->filter(function ($request) {
-                return $request->canBePaid();
-            })
+            ->filter(fn($request) => $request->canBePaid())
             ->values();
 
-        // Request yang sudah dibayar
+        // Request yang siap dibayar (all approvals complete)
         $paidRequests = ExpenseRequest::with(['user', 'payment'])
+            ->whereHas('user', fn($q) => $q->where('location', $user->location)) // Tambahkan ini
             ->whereIn('status', ['paid', 'closed'])
             ->orderBy('paid_at', 'desc')
             ->get();
@@ -53,16 +52,21 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
 
-        // Hanya finance yang bisa akses
         if ($user->position !== 'finance') {
             flash()->error('Anda tidak memiliki akses ke halaman ini');
             return redirect()->route('expense.expenseDashboard');
         }
 
         $request = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->findOrFail($id);
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->find($id);
 
-        // Cek apakah request bisa dibayar
+        // Access protection
+        if (!$request) {
+            flash()->error('Data tidak ditemukan atau Anda tidak memiliki akses (Beda Lokasi)');
+            return redirect()->route('expense.payments');
+        }
+
         if (!$request->canBePaid()) {
             flash()->error('Request ini belum bisa dibayar. Pastikan semua approval sudah lengkap.');
             return redirect()->route('expense.payments');
@@ -83,17 +87,23 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
 
-        // Hanya finance yang bisa proses payment
         if ($user->position !== 'finance') {
             flash()->error('Anda tidak memiliki wewenang untuk memproses pembayaran');
             return redirect()->back();
         }
 
-        $expenseRequest = ExpenseRequest::findOrFail($id);
+        $expenseRequest = ExpenseRequest::whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->find($id);
 
-        // Validasi
+        // Access protection
+        if (!$expenseRequest) {
+            flash()->error('Data tidak ditemukan atau Anda tidak memiliki akses');
+            return redirect()->route('expense.payments');
+        }
+
+        // Validasi Status
         if (!$expenseRequest->canBePaid()) {
-            flash()->error('Request ini belum bisa dibayar. Pastikan semua approval sudah lengkap.');
+            flash()->error('Request ini belum bisa dibayar.');
             return redirect()->route('expense.payments');
         }
 
@@ -104,7 +114,7 @@ class PaymentController extends Controller
         ]);
 
         // Create payment record
-        $payment = Payment::create([
+        Payment::create([
             'request_id' => $expenseRequest->id,
             'amount' => $expenseRequest->amount,
             'payment_method' => $request->input('payment_method'),
@@ -113,15 +123,13 @@ class PaymentController extends Controller
             'paid_at' => now(),
         ]);
 
-        // Update request status based on type
+        // Update request status
         if ($expenseRequest->type === 'reimbursement') {
-            // Reimbursement langsung closed setelah paid
             $expenseRequest->status = 'closed';
-            flash()->success('Pembayaran berhasil diproses. Request reimbursement telah ditutup.');
+            flash()->success('Pembayaran berhasil diproses. Request closed.');
         } else {
-            // Advance/Kasbon menunggu LPJ
             $expenseRequest->status = 'paid';
-            flash()->success('Pembayaran berhasil diproses. Menunggu LPJ dari pemohon.');
+            flash()->success('Pembayaran berhasil diproses. Menunggu LPJ.');
         }
 
         $expenseRequest->paid_by = $user->id;
@@ -138,13 +146,15 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
 
-        // Hanya finance yang bisa akses
         if ($user->position !== 'finance') {
             flash()->error('Anda tidak memiliki akses ke halaman ini');
             return redirect()->route('expense.expenseDashboard');
         }
 
         $payments = Payment::with(['request.user'])
+            ->whereHas('request.user', function ($q) use ($user) {
+                $q->where('location', $user->location);
+            })
             ->orderBy('paid_at', 'desc')
             ->paginate(20);
 

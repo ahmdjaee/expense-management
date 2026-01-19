@@ -98,6 +98,7 @@ class LPJController extends Controller
 
         // Get requests that need LPJ verification
         $requests = ExpenseRequest::with(['user', 'user.divisions'])
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
             ->where('type', 'advance')
             ->where('status', 'paid')
             ->whereNotNull('lpj_submitted_at')
@@ -126,8 +127,16 @@ class LPJController extends Controller
             return redirect()->route('expense.expenseDashboard');
         }
 
+        // TAMBAHAN: Gunakan 'find' dan filter 'whereHas' location
         $request = ExpenseRequest::with(['user', 'user.divisions', 'payment'])
-            ->findOrFail($id);
+            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->find($id);
+
+        // LOGIKA PENCEGAHAN: Redirect jika null (ID salah atau Lokasi beda)
+        if (!$request) {
+            flash()->error('Anda tidak memiliki akses ke halaman ini');
+            return redirect()->route('expense.expenseDashboard');
+        }
 
         // Check if can verify LPJ
         if (!$request->canVerifyLPJ()) {

@@ -18,6 +18,11 @@ class ApprovalController extends Controller
         $user = auth()->user();
         $userPosition = $user->position;
 
+        if ($userPosition === 'karyawan') {
+            flash()->error('Anda tidak memiliki akses ke halaman ini');
+            return redirect()->route('expense.expenseDashboard');
+        }
+
         // Query requests yang perlu approval dari position user
         // $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
         $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])

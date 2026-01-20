@@ -16,12 +16,16 @@ interface ReportsPageProps {
 export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [filterType, setFilterType] = useState<string>('all');
+    const [filterCategory, setFilterCategory] = useState<string>('all');
+    const [filterLocation, setFilterLocation] = useState<string>('all');
     const [filterStartDate, setFilterStartDate] = useState<string>('');
     const [filterEndDate, setFilterEndDate] = useState<string>('');
 
     const filtered = requests.filter((r) => {
         const statusMatch = filterStatus === 'all' || r.status === filterStatus;
         const typeMatch = filterType === 'all' || r.type === filterType;
+        const categoryMatch = filterCategory === 'all' || r.category === filterCategory;
+        const locationMatch = filterLocation === 'all' || r.user.location === filterLocation;
 
         // Logika Filter Tanggal
         const reqDate = new Date(r.created_at);
@@ -45,7 +49,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
             if (reqDate > end) periodMatch = false;
         }
 
-        return statusMatch && typeMatch && periodMatch;
+        return statusMatch && typeMatch && categoryMatch && locationMatch && periodMatch;
     });
 
     // Calculate statistics
@@ -185,7 +189,42 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
 
                     {/* Filters */}
                     <div className="space-y-4 rounded-lg border border-border bg-card p-4">
-                        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-muted-foreground">Cabang</label>
+                                <select
+                                    value={filterLocation}
+                                    onChange={(e) => setFilterLocation(e.target.value)}
+                                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                                >
+                                    <option value="all">Semua</option>
+                                    <option value="jkt">Jakarta</option>
+                                    <option value="jkt1">Jakarta 1</option>
+                                    <option value="sby">Surabaya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-muted-foreground">Kategori</label>
+                                <select
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                                >
+                                    <option value="all">Semua</option>
+                                    <option value="biaya allowance">Biaya Allowance</option>
+                                    <option value="biaya gaji">Biaya Gaji</option>
+                                    <option value="biaya komisi">Biaya Komisi</option>
+                                    <option value="biaya sewa">Biaya Sewa</option>
+                                    <option value="biaya utilitas">Biaya Utilitas</option>
+                                    <option value="biaya service charge">Biaya Service Charge</option>
+                                    <option value="biaya operasional">Biaya Operasional</option>
+                                    <option value="biaya promosi">Biaya Promosi</option>
+                                    <option value="biaya reward">Biaya Reward</option>
+                                    <option value="biaya pajak">Biaya Pajak</option>
+                                    <option value="biaya bpjs">Biaya BPJS</option>
+                                    <option value="biaya lainya">Biaya Lainya</option>
+                                </select>
+                            </div>
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-muted-foreground">Tipe</label>
                                 <select

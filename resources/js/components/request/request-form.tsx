@@ -119,7 +119,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                                     Bill
                                 </h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    Pengelolaan tagihan dan pembayaran vendor
+                                    Biaya tetap dan variabel perusahaan
                                 </p>
                             </div>
                             <div className="text-2xl">🧾</div>

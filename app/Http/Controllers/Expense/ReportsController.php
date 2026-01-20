@@ -16,12 +16,15 @@ class ReportsController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
 
         // Start building query with relationships
-        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->whereHas('user', function ($q) use ($user) {
-                $q->where('location', $user->location);
+        if ($user->position !== 'direktur') {
+            $query
+                ->whereHas('user', function ($q) use ($user) {
+                    $q->where('location', $user->location);
             });
+        }
 
         // Filter based on user position
         switch ($user->position) {
@@ -39,6 +42,7 @@ class ReportsController extends Controller
                 break;
 
             case 'direktur':
+                break;
             case 'finance':
                 // Director and finance can see all requests
                 // No filter needed

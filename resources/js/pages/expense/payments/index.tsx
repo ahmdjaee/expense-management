@@ -127,12 +127,12 @@ export default function PaymentsPage({ auth, readyForPayment, paidRequests }: Pa
                                         </div>
 
                                         {request.user.rekening && (
-                                            <div className="mb-4 rounded bg-blue-50 p-3 text-sm">
+                                            <div className="mb-4 rounded bg-secondary p-3 text-sm">
                                                 <p className="mb-1 text-muted-foreground">Rekening Penerima</p>
-                                                <p className="font-medium">
+                                                <p className="font-medium text-foreground">
                                                     {request.user.bank} - {request.user.rekening_name}
                                                 </p>
-                                                <p className="font-mono">
+                                                <p className="font-mono text-foreground">
                                                     *** *** *** {request.user.rekening.slice(-4)}
                                                 </p>
                                             </div>

@@ -21,6 +21,8 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     const [filterStartDate, setFilterStartDate] = useState<string>('');
     const [filterEndDate, setFilterEndDate] = useState<string>('');
 
+    const isDirektur = auth.user.position === 'direktur';
+
     const filtered = requests.filter((r) => {
         const statusMatch = filterStatus === 'all' || r.status === filterStatus;
         const typeMatch = filterType === 'all' || r.type === filterType;
@@ -83,6 +85,18 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
             if (!acc[type]) acc[type] = { count: 0, amount: 0 };
             acc[type].count += 1;
             acc[type].amount += req.actual_amount;
+            return acc;
+        },
+        {} as Record<string, { count: number; amount: number }>,
+    );
+
+    // By Location
+    const byLocation = requests.reduce(
+        (acc, req) => {
+            const location = req.user?.location === 'jkt' ? 'Jakarta' : req.user?.location === 'jkt1' ? 'Jakarta 1' : req.user?.location === 'sby' ? 'Surabaya' : 'Unknown';
+            if (!acc[location]) acc[location] = { count: 0, amount: 0 };
+            acc[location].count += 1;
+            acc[location].amount += req.actual_amount;
             return acc;
         },
         {} as Record<string, { count: number; amount: number }>,
@@ -281,7 +295,35 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
 
                     {/* Analytics Grid */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {/* By Division */}
+                        
+                        {isDirektur ? (
+                        /* By Location */
+                        <div className="rounded-lg border border-border bg-card p-6">
+                            <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Cabang</h3>
+                            <div className="space-y-3">
+                                {Object.entries(byLocation).map(([location, data]) => (
+                                    <div key={location}>
+                                        <div className="mb-1 flex justify-between">
+                                            <p className="text-sm font-medium text-foreground">{location}</p>
+                                            <p className="text-sm text-muted-foreground">{data.count} pengajuan</p>
+                                        </div>
+                                        <div className="h-2 w-full rounded-full bg-gray-200">
+                                            <div
+                                                className={`h-2 rounded-full ${location === 'Jakarta' ? 'bg-blue-500' : location === 'Jakarta 1' ? 'bg-green-500' : location === 'Surabaya' ? 'bg-yellow-500' : 'bg-gray-500'}`}
+                                                style={{ width: `${(data.count / stats.totalRequests) * 100}%` }}
+                                            ></div>
+                                        </div>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {formatCurrency(data.amount)}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        ) : (
+
+                        /* By Division */
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Divisi</h3>
                             <div className="space-y-3">
@@ -293,7 +335,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                         </div>
                                         <div className="h-2 w-full rounded-full bg-gray-200">
                                             <div
-                                                className="h-2 rounded-full bg-primary"
+                                                className="h-2 rounded-full bg-purple-500"
                                                 style={{ width: `${(data.count / stats.totalRequests) * 100}%` }}
                                             ></div>
                                         </div>
@@ -304,6 +346,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                 ))}
                             </div>
                         </div>
+                        )}
 
                         {/* By Type */}
                         <div className="rounded-lg border border-border bg-card p-6">

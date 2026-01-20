@@ -17,7 +17,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $authUser = auth()->user();
+        // $authUser = auth()->user();
 
         // Superadmin -> lihat semua user
         // Admin -> lihat hanya user di divisinya
@@ -34,14 +34,16 @@ class UserController extends Controller
         // ]);
 
         $authUser = auth()->user();
-
+        
         $query = User::with('divisions');
 
-        $query->where('location', $authUser->location);
+        if ($authUser->position !== 'direktur') {
+            $query->where('location', $authUser->location);
+        }
 
         // Superadmin -> lihat semua user
         // Admin -> lihat hanya user di divisinya
-        if ($authUser->role !== 'superadmin') {
+        if ($authUser->role !== 'superadmin' && $authUser->position !== 'direktur') {
             $divisionIds = $authUser->divisions->pluck('id');
             
             $query->whereHas('divisions', fn($q) => 

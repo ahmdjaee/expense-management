@@ -163,7 +163,7 @@ export function AppSidebar() {
                 <NavMain items={filteredNavItemsExpense} groupLabel="Expense Management" />
                 {userRole !== 'user' && (
                     <NavMain items={filteredNavItemsCrm} groupLabel="CRM" />
-                )};
+                )}
                 {/* Grup baru untuk menu User Management */}
                 <NavMain items={userNavItems} groupLabel="User Management" />
             </SidebarContent>

@@ -38,6 +38,8 @@ export interface User {
     name: string;
     email: string;
     email_verified_at: string;
+    position: string;
+    location: string;
     two_factor_confirmed_at: any;
     created_at: string;
     updated_at: string;

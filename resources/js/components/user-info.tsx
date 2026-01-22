@@ -10,23 +10,34 @@ export function UserInfo({
     showEmail?: boolean;
 }) {
     const getInitials = useInitials();
-
+    
+    const displayLocation = user.position?.toLowerCase() === 'direktur' 
+        ? 'All' 
+        : user.location;
+    
     return (
-        <>
+        <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8 overflow-hidden rounded-full">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+            <div className="flex-1 text-left">
+                <div className="truncate text-sm font-medium leading-tight">
+                    {user.name}
+                </div>
                 {showEmail && (
-                    <span className="truncate text-xs text-muted-foreground">
+                    <div className="truncate text-xs text-muted-foreground leading-tight">
                         {user.email}
-                    </span>
+                    </div>
+                )}
+                {displayLocation && (
+                    <div className="truncate text-xs text-muted-foreground leading-tight">
+                        Location: {displayLocation}
+                    </div>
                 )}
             </div>
-        </>
+        </div>
     );
 }

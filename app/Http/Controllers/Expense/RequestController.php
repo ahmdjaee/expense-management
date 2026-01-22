@@ -45,7 +45,7 @@ class RequestController extends Controller
             'description' => 'nullable|string',
             'payment_method' => 'required|in:cash,transfer',
             'type' => 'required|in:reimbursement,advance,bill',
-            'attachment' => 'required|file|max:10240',
+            'attachment' => 'nullable|file|max:10240',
         ]);
 
         // Handle file upload

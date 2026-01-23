@@ -65,12 +65,12 @@ export function PrintForm({ request }: PrintFormProps) {
                     </div>
                 </div>
 
-                <div className="mb-6 text-center">
+                <div className="mb-4 text-center">
                     <p className="text-[11px] font-semibold leading-tight">Nominal</p>
                     <p className="text-[14px] font-bold text-gray-900">{formatCurrency(request.amount)}</p>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-4">
                     <p className="mb-3 text-[11px] font-semibold">Riwayat Persetujuan</p>
                     <div className="space-y-2">
                         {request.approvals && request.approvals.length > 0 ? (

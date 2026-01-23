@@ -11,69 +11,71 @@ export function PrintForm({ request }: PrintFormProps) {
         <div className="mx-auto max-w-3xl">
             <div id="print-content" className="print-area rounded-lg bg-white p-8 text-black print:p-0">
                 <div className="mb-6 text-center">
-                    <h1 className="text-2xl font-bold">
+                    <h1 className="text-lg font-bold leading-tight">
                         Form Pengajuan {request.type === 'reimbursement' ? 'Reimbursement' : 'Advance'}
                     </h1>
-                    <p className="text-sm text-gray-600">Nomor: #{request.id}</p>
+                    <p className="text-xs text-gray-600">Nomor: #{request.id}</p>
                 </div>
 
-                <div className="mb-6 grid grid-cols-2 gap-4">
+                <div className="mb-4 grid grid-cols-3 gap-x-4 gap-y-2 print:grid-cols-3">
                     <div>
-                        <p className="mb-1 text-sm font-semibold">Nama Pemohon</p>
-                        <p className="text-sm">{request.user.name}</p>
+                        <p className="text-[11px] font-semibold leading-tight">Nama Pemohon</p>
+                        <p className="text-[11px] leading-tight">{request.user.name}</p>
                     </div>
                     <div>
-                        <p className="mb-1 text-sm font-semibold">Divisi</p>
-                        <p className="text-sm">
+                        <p className="text-[11px] font-semibold leading-tight">Divisi</p>
+                        <p className="text-[11px] leading-tight">
                             {request.user.divisions && request.user.divisions.length > 0
                                 ? request.user.divisions.map((d) => d.name).join(', ')
                                 : '-'}
                         </p>
                     </div>
                     <div>
-                        <p className="mb-1 text-sm font-semibold">Tanggal Pengajuan</p>
-                        <p className="text-sm">{formatDate(request.created_at)}</p>
-                    </div>
-                    <div>
-                        <p className="mb-1 text-sm font-semibold">Status</p>
-                        <p className="text-sm capitalize">{request.status.replace(/_/g, ' ')}</p>
+                        <p className="text-[11px] font-semibold leading-tight">Tanggal Pengajuan</p>
+                        <p className="text-[11px]">{formatDate(request.created_at)}</p>
                     </div>
                 </div>
 
-                <div className="mb-6">
-                    <p className="mb-1 text-sm font-semibold">Judul Pengajuan</p>
-                    <p className="text-sm">{request.title}</p>
-                </div>
-
-                <div className="mb-6">
-                    <p className="mb-1 text-sm font-semibold">Deskripsi</p>
-                    <p className="text-sm whitespace-pre-wrap">{request.description}</p>
-                </div>
-
-                <div className="mb-6 grid grid-cols-2 gap-4">
+                <div className='mb-4 grid grid-cols-3 gap-x-4 gap-y-2 print:grid-cols-3'>
                     <div>
-                        <p className="mb-1 text-sm font-semibold">Kategori</p>
-                        <p className="text-sm capitalize">{request.category}</p>
+                        <p className="text-[11px] font-semibold leading-tight">Status</p>
+                        <p className="text-[11px] capitalize">{request.status.replace(/_/g, ' ')}</p>
                     </div>
                     <div>
-                        <p className="mb-1 text-sm font-semibold">Metode Pembayaran</p>
-                        <p className="text-sm capitalize">
+                        <p className="text-[11px] font-semibold leading-tight">Judul Pengajuan</p>
+                        <p className="text-[11px]">{request.title}</p>
+                    </div>
+
+                    <div>
+                        <p className="text-[11px] font-semibold leading-tight">Deskripsi</p>
+                        <p className="text-[11px] whitespace-pre-wrap">{request.description}</p>
+                    </div>
+                </div>
+
+                <div className="mb-4 grid grid-cols-3 gap-x-4 gap-y-2 print:grid-cols-3">
+                    <div>
+                        <p className="text-[11px] font-semibold leading-tight">Kategori</p>
+                        <p className="text-[11px] capitalize">{request.category}</p>
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-semibold leading-tight">Metode Pembayaran</p>
+                        <p className="text-[11px] capitalize">
                             {request.payment_method === 'transfer' ? 'Transfer Bank' : 'Cash'}
                         </p>
                     </div>
                 </div>
 
-                <div className="mb-6">
-                    <p className="mb-1 text-sm font-semibold">Nominal</p>
-                    <p className="text-xl font-bold text-gray-900">{formatCurrency(request.amount)}</p>
+                <div className="mb-6 text-center">
+                    <p className="text-[11px] font-semibold leading-tight">Nominal</p>
+                    <p className="text-[14px] font-bold text-gray-900">{formatCurrency(request.amount)}</p>
                 </div>
 
                 <div className="mb-6">
-                    <p className="mb-3 text-sm font-semibold">Riwayat Persetujuan</p>
+                    <p className="mb-3 text-[11px] font-semibold">Riwayat Persetujuan</p>
                     <div className="space-y-2">
                         {request.approvals && request.approvals.length > 0 ? (
                             request.approvals.map((approval) => (
-                                <div key={approval.id} className="flex justify-between text-sm border-b border-gray-100 pb-2">
+                                <div key={approval.id} className="grid grid-cols-3 gap-2 border-b border-gray-200 pb-1 text-[10.5px]">
                                     <span className="font-medium">{approval.approver_position}</span>
                                     <span>
                                         {approval.status === 'approved' ? 'Disetujui' : 'Ditolak'} oleh{' '}
@@ -90,17 +92,17 @@ export function PrintForm({ request }: PrintFormProps) {
 
                 <div className="mt-8 grid grid-cols-3 gap-4 text-center">
                     <div className="flex flex-col items-center">
-                        <p className="mb-8 text-sm">Pemohon</p>
+                        <p className="mb-6 text-xs">Pemohon</p>
                         <p className="border-t border-black pt-2 text-sm font-semibold">{request.user.name}</p>
                     </div>
                     <div className="flex flex-col items-center">
-                        <p className="mb-8 text-sm">Disetujui oleh</p>
+                        <p className="mb-6 text-xs">Disetujui oleh</p>
                         <p className="border-t border-black pt-2 text-sm font-semibold">
                             {request.approvals?.find((a) => a.status === 'approved')?.approver?.name || '-'}
                         </p>
                     </div>
                     <div className="flex flex-col items-center">
-                        <p className="mb-8 text-sm">Dibayar oleh</p>
+                        <p className="mb-6 text-xs">Dibayar oleh</p>
                         <p className="border-t border-black pt-2 text-sm font-semibold">-</p>
                     </div>
                 </div>

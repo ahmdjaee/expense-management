@@ -269,8 +269,17 @@
 
 @media print {
     @page {
-        size: A5 portrait;
-        margin: 10mm;
+        size: A5 landscape;
+        margin: 8mm;
+    }
+
+    * {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .border-t {
+        padding: 0.25rem !important;
     }
 
     html, body {
@@ -279,15 +288,19 @@
     }
 
   .mb-6 {
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .mb-3 {
+    margin-bottom: 0.25rem !important;
   }
 
   .mt-8 {
-    margin-top: 1rem !important;
+    margin-top: 0.75rem !important;
   }
 
   .mt-12 {
-    margin-top: 1.25rem !important;
+    margin-top: 1rem !important;
   }
 
   body {
@@ -311,6 +324,8 @@
   /* Pastikan posisi sesuai */
   .print-area {
     position: relative !important;
+    font-size: 11px;
+    line-height: 1.35;
     height: fit-content;
     max-height: calc(100vh - 20mm) !important;
     overflow: hidden;

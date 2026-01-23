@@ -269,9 +269,30 @@
 
 @media print {
     @page {
-        size: auto;
+        size: A5 portrait;
         margin: 10mm;
     }
+
+    html, body {
+        height: auto !important;
+        overflow: hidden !important;
+    }
+
+  .mb-6 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .mt-8 {
+    margin-top: 1rem !important;
+  }
+
+  .mt-12 {
+    margin-top: 1.25rem !important;
+  }
+
+  body {
+    overflow: hidden ;
+  }
     
   /* Sembunyikan semua elemen */
   body * {
@@ -282,19 +303,38 @@
   .print-area,
   .print-area * {
     visibility: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
   }
 
   /* Pastikan posisi sesuai */
   .print-area {
+    position: relative !important;
+    height: fit-content;
+    max-height: calc(100vh - 20mm) !important;
+    overflow: hidden;
     margin: 0;
-    padding: 0;
     width: 100%;
-  }
-
-  /* Kill visual fluff */
-  .print-area {
+    box-sizing: border-box;
     box-shadow: none !important;
     border: none !important;
+
+    box-shadow: none !important;
+    border: none !important;
+
+    page-break-before: avoid;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+
+    break-before: avoid;
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  .print-area * {
+    flex: unset !important;
+    grid-auto-flow: auto !important;
   }
 
   /* Neutralize screen layout wrappers */

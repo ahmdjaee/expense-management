@@ -283,7 +283,10 @@
     }
 
     html, body {
+        width: 100%;
         height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: hidden !important;
     }
 
@@ -327,7 +330,7 @@
     font-size: 11px;
     line-height: 1.35;
     height: fit-content;
-    max-height: calc(100vh - 20mm) !important;
+    max-height: 132mm;
     overflow: hidden;
     margin: 0;
     width: 100%;
@@ -345,6 +348,8 @@
     break-before: avoid;
     break-after: avoid;
     break-inside: avoid;
+
+    overflow: hidden !important;
   }
 
   .print-area * {

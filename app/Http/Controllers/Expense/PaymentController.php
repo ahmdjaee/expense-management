@@ -124,14 +124,10 @@ class PaymentController extends Controller
         ]);
 
         // Update request status
-        if ($expenseRequest->type === 'reimbursement') {
-            $expenseRequest->status = 'closed';
-            flash()->success('Pembayaran berhasil diproses. Request closed.');
-        } else {
-            $expenseRequest->status = 'paid';
-            flash()->success('Pembayaran berhasil diproses. Menunggu LPJ.');
+        if ($expenseRequest->type !== 'advance') {
+            $expenseRequest->is_closed = true;
         }
-
+        $expenseRequest->status = 'paid';
         $expenseRequest->paid_by = $user->id;
         $expenseRequest->paid_at = now();
         $expenseRequest->save();

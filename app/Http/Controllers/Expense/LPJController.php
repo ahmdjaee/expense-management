@@ -181,7 +181,8 @@ class LPJController extends Controller
         $expenseRequest->lpj_verified_at = now();
         $expenseRequest->lpj_verified_by = $user->id;
         $expenseRequest->lpj_verification_notes = $request->input('verification_notes');
-        $expenseRequest->status = 'closed';
+        $expenseRequest->status = 'refunded';
+        $expenseRequest->is_closed = true;
         $expenseRequest->save();
 
         // Check if there's difference and create additional payment/refund if needed

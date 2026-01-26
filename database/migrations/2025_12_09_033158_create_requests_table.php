@@ -33,7 +33,8 @@ return new class extends Migration
             $table->double('actual_amount');
             $table->string('title', 255);
             $table->text('description');
-            $table->enum('status', ['draft', 'submitted', 'head_approved', 'director_approved', 'rejected', 'closed', 'paid'])->default('draft');
+            $table->enum('status', ['draft', 'submitted', 'head_approved', 'director_approved', 'rejected', 'paid', 'refunded'])->default('draft');
+            $table->boolean('is_closed')->default(false);
             $table->enum('payment_method', ['cash', 'transfer']);
             $table->string('attachment', 255)->nullable();
             $table->date('head_approved_at')->nullable();

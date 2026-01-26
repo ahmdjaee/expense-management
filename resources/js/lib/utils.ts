@@ -73,7 +73,7 @@ export const getStatusBadgeColor = (status: string): string => {
 export const getStatusLabel = (status: string): string => {
     const labels: Record<string, string> = {
         draft: 'Draft',
-        submitted: 'Menunggu Approval Head',
+        submitted: 'Menunggu Approval',
         head_approved: 'Disetujui Head',
         director_approved: 'Disetujui Direktur',
         paid: 'Sudah Dibayar',

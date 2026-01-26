@@ -12,6 +12,7 @@ interface ApprovalTimelineProps {
         approvals: Approval[];
         created_at: string;
         paid_at?: string;
+        type: string;
         status: string;
     };
 }
@@ -19,10 +20,10 @@ interface ApprovalTimelineProps {
 export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
     const flowSteps = getApprovalFlowSteps(request.user.position, request.approvals);
     const isRejected = request.status === 'rejected';
-    const isPaid = request.status === 'paid';
-
-    const rejectedApproval = request.approvals.find((a) => a.status === 'rejected');
-
+    const isAdvance = request.type === 'advance';
+    const isPaid = request.status === 'paid'; 
+    const isRefunded = request.status === 'refunded';
+    
     return (
         <div className="space-y-4">
             <p className="text-sm font-semibold text-foreground">Riwayat Persetujuan</p>
@@ -92,10 +93,14 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                 })}
 
                 {/* Payment */}
+              {/* Payment */}
                 {!isRejected && (
                     <div className="flex gap-4">
                         <div className="flex flex-col items-center">
                             <div className={`h-3 w-3 rounded-full ${isPaid ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            {isAdvance && (
+                                <div className="h-12 w-0.5 bg-gray-200"></div>
+                            )}
                         </div>
                         <div className="flex-1">
                             <p className="font-medium text-foreground">Pembayaran</p>
@@ -116,6 +121,33 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                         </div>
                     </div>
                 )}
+
+                {/* Refund (Only for reimbursement type) */}
+                {!isRejected && isAdvance && (
+                    <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                            <div className={`h-3 w-3 rounded-full ${isRefunded ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-medium text-foreground">Pengembalian Dana</p>
+                            {isPaid ? (
+                                <>
+                                    <p className="text-sm text-green-600">✓ Sudah dikembalikan</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {request.paid_at && formatDateTime(request.paid_at)}
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="text-sm text-yellow-600">
+                                    {flowSteps.every((s) => s.approved)
+                                        ? '⏳ Menunggu pengembalian dana'
+                                        : '- Menunggu pengembalian dana selesai'}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );

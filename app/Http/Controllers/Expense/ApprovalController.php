@@ -17,6 +17,7 @@ class ApprovalController extends Controller
     {
         $user = auth()->user();
         $userPosition = $user->position;
+        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
 
         if ($userPosition === 'karyawan') {
             flash()->error('Anda tidak memiliki akses ke halaman ini');
@@ -25,8 +26,9 @@ class ApprovalController extends Controller
 
         // Query requests yang perlu approval dari position user
         // $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
-        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->whereHas('user', fn($q) => $q->where('location', $user->location));
+        if ($userPosition !== 'direktur') {
+        $query->whereHas('user', fn($q) => $q->where('location', $user->location));
+        }
 
         $requests = $query->get()->filter(function ($request) use ($user, $userPosition) {
             // Skip if already rejected or paid
@@ -72,11 +74,15 @@ class ApprovalController extends Controller
     public function show(string $id)
     {
         $user = auth()->user();
+        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
 
-        $request = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->whereHas('user', fn($q) => $q->where('location', $user->location))
-            ->find($id);
+        if ($user->position !== 'direktur') {
+            $query
+                ->whereHas('user', fn($q) => $q->where('location', $user->location));
+            
+        }
 
+        $request = $query->find($id);
         // LOGIKA BARU: Cek manual jika data null
         if (!$request) {
             flash()->error('Tidak Ditemukan');
@@ -128,9 +134,14 @@ class ApprovalController extends Controller
     public function approve(Request $request, string $id)
     {
         $user = auth()->user();
-        $expenseRequest = ExpenseRequest::with('user')
-            ->whereHas('user', fn($q) => $q->where('location', $user->location))
-            ->find($id);
+        $query = ExpenseRequest::with('user');
+
+        if ($user->position !== 'direktur') {
+        $query
+            ->whereHas('user', fn($q) => $q->where('location', $user->location));
+        }
+
+        $expenseRequest = $query->find($id);
 
         // LOGIKA BARU: Redirect jika null
         if (!$expenseRequest) {
@@ -200,9 +211,14 @@ class ApprovalController extends Controller
     public function reject(Request $request, string $id)
     {
         $user = auth()->user();
-        $expenseRequest = ExpenseRequest::with('user')
-            ->whereHas('user', fn($q) => $q->where('location', $user->location))
-            ->find($id);
+        $query = ExpenseRequest::with('user');
+
+        if ($user->position !== 'direktur') {
+            $query
+                ->whereHas('user', fn($q) => $q->where('location', $user->location));
+        }
+
+        $expenseRequest = $query->find($id);
 
         if (!$expenseRequest) {
             flash()->error('Tidak ditemukan');

@@ -15,15 +15,19 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
 
         // Get user's requests with relationships
-        $userRequests = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->whereHas('user', function ($q) use ($user) {
-                $q->where('location', $user->location);
-            })
-            ->get();
+        if ($user->position !== 'direktur') {
+            $query
+                ->where('user_id', $user->id)
+                ->whereHas('user', function ($q) use ($user) {
+                    $q->where('location', $user->location);
+                });
+    }
+        $userRequests = $query
+                ->orderBy('created_at', 'desc')
+                ->get();
 
         // Calculate statistics
         $stats = [

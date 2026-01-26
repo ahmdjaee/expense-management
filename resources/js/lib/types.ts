@@ -1,5 +1,9 @@
 export type UserRole = 'user' | 'head' | 'director' | 'finance' | 'admin';
-export type RequestType = 'reimbursement' | 'advance';
+export type Location = 'jkt' | 'jkt1' | 'sby';
+export type RequestType = 'reimbursement' | 'advance' | 'bill';
+export type ReqCategory = 'biaya allowance' | 'biaya gaji' | 'biaya komisi' | 'biaya sewa' | 'biaya utilitas' |
+                             'biaya service charge' | 'biaya operasional' | 'biaya promosi' | 'biaya promosi' | 
+                             'biaya reward' | 'biaya pajak' | 'biaya bpjs' | 'biaya lainya';
 export type RequestStatus = 'draft' | 'submitted' | 'head_approved' | 'director_approved' | 'paid' | 'rejected';
 export type PaymentMethod = 'transfer' | 'cash';
 
@@ -7,6 +11,7 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    location: Location;
     phone?: string;
     role: UserRole;
     position: string;
@@ -29,7 +34,7 @@ export interface ExpenseRequest {
     actual_amount: number;
     status: string;
     type: string;
-    category: string;
+    category: ReqCategory;
     payment_method: string;
     created_at: string;
     updated_at: string; // Tambahkan properti yang hilang
@@ -41,6 +46,7 @@ export interface ExpenseRequest {
         id: number;
         name: string;
         email: string;
+        location: Location;
         position: string;
         divisions: Array<{ id: number; name: string }>;
     };

@@ -33,6 +33,7 @@ export interface ExpenseRequest {
     amount: number;
     actual_amount: number;
     status: string;
+    is_closed: boolean;
     type: string;
     category: ReqCategory;
     payment_method: string;

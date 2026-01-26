@@ -102,6 +102,28 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
         {} as Record<string, { count: number; amount: number }>,
     );
 
+    // By Closed
+    const byClosed = requests.reduce(
+        (acc, req) => {
+            const key = req.is_closed ? 'Selesai' : 'Belum Selesai';
+
+            if (!acc[key]) acc[key] = { count: 0, amount: 0 };
+
+            acc[key].count += 1;
+
+            // Keep your rejected logic consistent
+            if (req.status === 'rejected') {
+                acc[key].amount += req.amount;
+            } else {
+                acc[key].amount += req.actual_amount;
+            }
+
+            return acc;
+        },
+        {} as Record<string, { count: number; amount: number }>
+    );
+
+
     // By Status
     const byStatus = requests.reduce(
         (acc, req) => {
@@ -266,8 +288,8 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     <option value="director_approved">Disetujui Direktur</option>
                                     <option value="paid">Sudah Dibayar</option>
                                     <option value="rejected">Ditolak</option>
-                                    <option value="closed">Selesai</option>
                                     <option value="paid">Lunas</option>
+                                    <option value="refunded">Dikembalikan</option>
                                 </select>
                             </div>
                             {/* Filter From Date */}
@@ -408,6 +430,33 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                                 {percentage}%
                                             </div>
                                             <p className="text-sm text-foreground">{status}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* By Completion Status */}
+                        <div className="rounded-lg border border-border bg-card p-6">
+                            <h3 className="mb-4 text-lg font-bold text-foreground">
+                                Persentase Penyelesaian
+                            </h3>
+                            <div className="space-y-2">
+                                {Object.entries(byClosed).map(([key, data]) => {
+                                    const percentage = (
+                                        (data.count / stats.totalRequests) * 100
+                                    ).toFixed(1);
+
+                                    return (
+                                        <div key={key} className="flex items-center gap-3">
+                                            <div
+                                                className="flex h-6 w-12 items-center justify-center rounded
+                                                bg-linear-to-r from-primary to-primary/60
+                                                text-xs font-bold text-primary-foreground"
+                                            >
+                                                {percentage}%
+                                            </div>
+                                            <p className="text-sm text-foreground">{key}</p>
                                         </div>
                                     );
                                 })}

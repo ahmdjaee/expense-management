@@ -149,31 +149,67 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
         {} as Record<string, { count: number; amount: number }>,
     );
 
-    // Export function
+    // // Export function
+    // const exportToCSV = () => {
+    //     const headers = ['ID', 'Title', 'Requester', 'Type', 'Amount', 'Status', 'Date'];
+    //     const rows = filtered.map((req) => {
+    //         return [
+    //             req.id,
+    //             req.title,
+    //             req.user?.name || 'Unknown',
+    //             req.type,
+    //             req.amount.toString(),
+    //             req.status,
+    //             formatDate(req.created_at),
+    //         ];
+    //     });
+
+    //     const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+
+    //     const blob = new Blob([csvContent], { type: 'text/csv' });
+    //     const url = URL.createObjectURL(blob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.csv`;
+    //     a.click();
+    //     URL.revokeObjectURL(url);
+    // };
+
     const exportToCSV = () => {
-        const headers = ['ID', 'Title', 'Requester', 'Type', 'Amount', 'Status', 'Date'];
-        const rows = filtered.map((req) => {
-            return [
-                req.id,
-                req.title,
-                req.user?.name || 'Unknown',
-                req.type,
-                req.amount.toString(),
-                req.status,
-                formatDate(req.created_at),
-            ];
-        });
+    const headers = ['ID', 'Title', 'Requester', 'Type', 'Amount', 'Status', 'Date'];
 
-        const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+    const rows = filtered.map((req) => [
+        req.id,
+        req.title,
+        req.user?.name || 'Unknown',
+        req.type,
+        req.amount,
+        req.status,
+        formatDate(req.created_at),
+    ]);
 
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
+    const escapeCell = (cell: any) =>
+        `"${String(cell).replace(/"/g, '""')}"`;
+
+    const csvContent =
+        '\uFEFF' + // UTF-8 BOM (Excel loves this)
+        [
+            headers.map(escapeCell).join(';'),
+            ...rows.map(row => row.map(escapeCell).join(';')),
+        ].join('\r\n');
+
+    const blob = new Blob([csvContent], {
+        type: 'text/csv;charset=utf-8;',
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
 
     return (
         <AppLayout>

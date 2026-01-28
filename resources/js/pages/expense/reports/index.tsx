@@ -5,6 +5,7 @@ import { ExpenseRequest, User } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import ExcelJS from 'exceljs';
 
 interface ReportsPageProps {
     auth: {
@@ -149,66 +150,67 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
         {} as Record<string, { count: number; amount: number }>,
     );
 
-    // // Export function
-    // const exportToCSV = () => {
-    //     const headers = ['ID', 'Title', 'Requester', 'Type', 'Amount', 'Status', 'Date'];
-    //     const rows = filtered.map((req) => {
-    //         return [
-    //             req.id,
-    //             req.title,
-    //             req.user?.name || 'Unknown',
-    //             req.type,
-    //             req.amount.toString(),
-    //             req.status,
-    //             formatDate(req.created_at),
-    //         ];
-    //     });
+    // Export function
+    const exportToXLSX = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Expense Reports');
 
-    //     const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+        // Define columns
+        worksheet.columns = [
+            { header: 'ID', key: 'id', width: 10 },
+            { header: 'Title', key: 'title', width: 30 },
+            { header: 'Requester', key: 'requester', width: 25 },
+            { header: 'Type', key: 'type', width: 15 },
+            { header: 'Amount', key: 'amount', width: 18 },
+            { header: 'Status', key: 'status', width: 15 },
+            { header: 'Date', key: 'date', width: 18 },
+        ];
 
-    //     const blob = new Blob([csvContent], { type: 'text/csv' });
-    //     const url = URL.createObjectURL(blob);
-    //     const a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.csv`;
-    //     a.click();
-    //     URL.revokeObjectURL(url);
-    // };
+        // Header styling ✨
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
-    const exportToCSV = () => {
-    const headers = ['ID', 'Title', 'Requester', 'Type', 'Amount', 'Status', 'Date'];
+        // Add rows
+        filtered.forEach((req) => {
+            worksheet.addRow({
+                id: req.id,
+                title: req.title,
+                requester: req.user?.name || 'Unknown',
+                type: req.type,
+                amount: Number(req.amount),
+                status: req.status,
+                date: new Date(req.created_at),
+            });
+        });
 
-    const rows = filtered.map((req) => [
-        req.id,
-        req.title,
-        req.user?.name || 'Unknown',
-        req.type,
-        req.amount,
-        req.status,
-        formatDate(req.created_at),
-    ]);
+        // Format columns
+        worksheet.getColumn('amount').numFmt = '"Rp" #,##0';
+        worksheet.getColumn('date').numFmt = 'yyyy-mm-dd';
 
-    const escapeCell = (cell: any) =>
-        `"${String(cell).replace(/"/g, '""')}"`;
+        //format alignments
+        worksheet.getColumn('id').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn('type').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn('status').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn('date').alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const csvContent =
-        '\uFEFF' + // UTF-8 BOM (Excel loves this)
-        [
-            headers.map(escapeCell).join(';'),
-            ...rows.map(row => row.map(escapeCell).join(';')),
-        ].join('\r\n');
+        // Freeze header row (chef’s kiss)
+        worksheet.views = [{ state: 'frozen', ySplit: 1 }];
 
-    const blob = new Blob([csvContent], {
-        type: 'text/csv;charset=utf-8;',
-    });
+        // Generate file
+        const buffer = await workbook.xlsx.writeBuffer();
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-};
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `expense_reports_${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
 
 
     return (
@@ -228,10 +230,10 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                     <div className="rounded-lg border border-border bg-card p-4">
                         <p className="mb-3 text-sm font-semibold text-foreground">Export Data</p>
                         <button
-                            onClick={exportToCSV}
+                            onClick={exportToXLSX}
                             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
                         >
-                            Export to CSV
+                            Export to Excel
                         </button>
                     </div>
 

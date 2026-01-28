@@ -12,7 +12,7 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
     const { auth } = usePage<{ auth: { user: { role: string; position: string } } }>().props;
     const uPosition = auth.user.position || null;
 
-    const [filterType, setFilterType] = useState<'all' | 'reimbursement' | 'advance'>('all');
+    const [filterType, setFilterType] = useState<'all' | 'reimbursement' | 'advance' | 'bill'>('all');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -63,6 +63,7 @@ export default function RequestsPage({ requests }: { requests: ExpenseRequest[] 
                                     <option value="all">Semua</option>
                                     <option value="reimbursement">Reimbursement</option>
                                     <option value="advance">Advance</option>
+                                    <option value="bill">Bill</option>
                                 </select>
                             </div>
                             <div>

@@ -79,6 +79,17 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
         {} as Record<string, { count: number; amount: number }>,
     );
 
+    const byCategory = requests.reduce(
+        (acc, req) => {
+            const category = req.category || 'Uncategorized';
+            if (!acc[category]) acc[category] = { count: 0, amount: 0 };
+            acc[category].count += 1;
+            acc[category].amount += req.actual_amount;
+            return acc;
+        },
+        {} as Record<string, { count: number; amount: number }>,
+    );
+
     // By Type
     const byType = requests.reduce(
         (acc, req) => {
@@ -421,6 +432,30 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                         <div className="h-2 w-full rounded-full bg-gray-200">
                                             <div
                                                 className={`h-2 rounded-full ${type === 'Reimbursement' ? 'bg-blue-500' : 'bg-green-500'}`}
+                                                style={{ width: `${(data.count / stats.totalRequests) * 100}%` }}
+                                            ></div>
+                                        </div>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {formatCurrency(data.amount)}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* By Category */}
+                        <div className="rounded-lg border border-border bg-card p-6">
+                            <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Kategori</h3>
+                            <div className="space-y-3">
+                                {Object.entries(byCategory).map(([category, data]) => (
+                                    <div key={category}>
+                                        <div className="mb-1 flex justify-between">
+                                            <p className="text-sm font-medium text-foreground">{category}</p>
+                                            <p className="text-sm text-muted-foreground">{data.count} pengajuan</p>
+                                        </div>
+                                        <div className="h-2 w-full rounded-full bg-gray-200">
+                                            <div
+                                                className="h-2 rounded-full bg-purple-500"
                                                 style={{ width: `${(data.count / stats.totalRequests) * 100}%` }}
                                             ></div>
                                         </div>

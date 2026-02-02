@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DivisionSeeder::class);
 
         $user = User::firstOrCreate(
-            ['email' => 'admin.jkt@gmail.com'],
+            ['email' => 'admin.jkt@glori.com'],
             [
                 'name' => 'superadmin.jkt',
                 'password' => Hash::make('password'),
@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $user = User::firstOrCreate(
-            ['email' => 'admin.jkt1@gmail.com'],
+            ['email' => 'admin.jkt1@glori.com'],
             [
                 'name' => 'superadmin.jkt1',
                 'password' => Hash::make('password'),
@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $user = User::firstOrCreate(
-            ['email' => 'admin.sby@gmail.com'],
+            ['email' => 'admin.sby@glori.com'],
             [
                 'name' => 'superadmin.sby',
                 'password' => Hash::make('password'),
@@ -101,7 +101,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user2 = User::firstOrCreate(
-            ['email' => 'hrdjkt@gmail.com'],
+            ['email' => 'hrdjkt@glori.com'],
             [
                 'name' => 'HRD JKT',
                 'password' => Hash::make('password'),
@@ -112,7 +112,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user2 = User::firstOrCreate(
-            ['email' => 'hrdjkt1@gmail.com'],
+            ['email' => 'hrdjkt1@glori.com'],
             [
                 'name' => 'HRD JKT1',
                 'password' => Hash::make('password'),
@@ -123,7 +123,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user2 = User::firstOrCreate(
-            ['email' => 'hrdsby@gmail.com'],
+            ['email' => 'hrdsby@glori.com'],
             [
                 'name' => 'HRD SBY',
                 'password' => Hash::make('password'),
@@ -134,7 +134,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user3 = User::firstOrCreate(
-            ['email' => 'gajkt@gmail.com'],
+            ['email' => 'gajkt@glori.com'],
             [
                 'name' => 'GA JKT',
                 'password' => Hash::make('password'),
@@ -145,7 +145,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user3 = User::firstOrCreate(
-            ['email' => 'gajkt1@gmail.com'],
+            ['email' => 'gajkt1@glori.com'],
             [
                 'name' => 'GA JKT1',
                 'password' => Hash::make('password'),
@@ -156,7 +156,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user3 = User::firstOrCreate(
-            ['email' => 'gasby@gmail.com'],
+            ['email' => 'gasby@glori.com'],
             [
                 'name' => 'GA SBY',
                 'password' => Hash::make('password'),
@@ -167,7 +167,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user = User::firstOrCreate(
-            ['email' => 'adminjkt@gmail.com'],
+            ['email' => 'adminjkt@glori.com'],
             [
                 'name' => 'Admin JKT',
                 'password' => Hash::make('password'),
@@ -178,7 +178,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user = User::firstOrCreate(
-            ['email' => 'adminjkt1@gmail.com'],
+            ['email' => 'adminjkt1@glori.com'],
             [
                 'name' => 'Admin JKT1',
                 'password' => Hash::make('password'),
@@ -189,7 +189,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user = User::firstOrCreate(
-            ['email' => 'adminsby@gmail.com'],
+            ['email' => 'adminsby@glori.com'],
             [
                 'name' => 'Admin SBY',
                 'password' => Hash::make('password'),
@@ -200,7 +200,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user4 = User::firstOrCreate(
-            ['email' => 'wpjkt@gmail.com'],
+            ['email' => 'wpjkt@glori.com'],
             [
                 'name' => 'WP JKT',
                 'password' => Hash::make('password'),
@@ -211,7 +211,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user4 = User::firstOrCreate(
-            ['email' => 'wpjkt1@gmail.com'],
+            ['email' => 'wpjkt1@glori.com'],
             [
                 'name' => 'WP JKT1',
                 'password' => Hash::make('password'),
@@ -222,7 +222,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user4 = User::firstOrCreate(
-            ['email' => 'wpsby@gmail.com'],
+            ['email' => 'wpsby@glori.com'],
             [
                 'name' => 'WP SBY',
                 'password' => Hash::make('password'),
@@ -233,7 +233,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user5 = User::firstOrCreate(
-            ['email' => 'dealingkt@gmail.com'],
+            ['email' => 'dealingkt@glori.com'],
             [
                 'name' => 'Deal JKT',
                 'password' => Hash::make('password'),
@@ -244,7 +244,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user6 = User::firstOrCreate(
-            ['email' => 'itjkt@gmail.com'],
+            ['email' => 'itjkt@glori.com'],
             [
                 'name' => 'IT JKT',
                 'password' => Hash::make('password'),
@@ -256,33 +256,33 @@ class DatabaseSeeder extends Seeder
         );
 
         $users = User::whereIn('email', [
-        'admin.jkt@gmail.com',
-        'admin.jkt1@gmail.com',
-        'admin.sby@gmail.com',
+        'admin.jkt@glori.com',
+        'admin.jkt1@glori.com',
+        'admin.sby@glori.com',
         'finance@glori.com',
         'finjkt1@glori.com',
         'finsby@glori.com',
-        'adminjkt@gmail.com',
-        'adminjkt1@gmail.com',
-        'adminsby@gmail.com',
+        'adminjkt@glori.com',
+        'adminjkt1@glori.com',
+        'adminsby@glori.com',
         ])->get();
 
         $users2 = User::whereIn('email', [
-        'hrdjkt@gmail.com',
-        'hrdjkt1@gmail.com',
-        'hrdsby@gmail.com',
+        'hrdjkt@glori.com',
+        'hrdjkt1@glori.com',
+        'hrdsby@glori.com',
         ])->get();
 
         $users3 = User::whereIn('email', [
-        'gajkt@gmail.com',
-        'gajkt1@gmail.com',
-        'gasby@gmail.com',
+        'gajkt@glori.com',
+        'gajkt1@glori.com',
+        'gasby@glori.com',
         ])->get();
 
         $users4 = User::whereIn('email', [
-        'wpjkt@gmail.com',
-        'wpjkt1@gmail.com',
-        'wpsby@gmail.com',
+        'wpjkt@glori.com',
+        'wpjkt1@glori.com',
+        'wpsby@glori.com',
         ])->get();
 
         // Assign ke division (bisa banyak)

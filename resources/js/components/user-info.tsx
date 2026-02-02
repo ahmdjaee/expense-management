@@ -11,9 +11,7 @@ export function UserInfo({
 }) {
     const getInitials = useInitials();
     
-    const displayLocation = user.position?.toLowerCase() === 'direktur' 
-        ? 'All' 
-        : user.location;
+    const displayLocation = user.location;
     
     return (
         <div className="flex items-center gap-3">

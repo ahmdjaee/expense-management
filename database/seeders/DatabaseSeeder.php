@@ -16,8 +16,6 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-
-
         $this->call(DivisionSeeder::class);
 
         $user = User::firstOrCreate(
@@ -37,7 +35,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Direktur GIB',
                 'password' => Hash::make('password'),
-                'location' => 'all',
+                'location' => 'jkt',
                 'email_verified_at' => now(),
                 'role' => 'admin',
                 'position' => 'direktur',
@@ -48,7 +46,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Finance Pusat',
                 'password' => Hash::make('password'),
-                'location' => 'all',
+                'location' => 'jkt',
                 'email_verified_at' => now(),
                 'role' => 'admin',
                 'position' => 'finance',

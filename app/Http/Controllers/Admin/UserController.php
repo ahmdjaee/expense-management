@@ -17,27 +17,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        // $authUser = auth()->user();
-
-        // Superadmin -> lihat semua user
-        // Admin -> lihat hanya user di divisinya
-        // if ($authUser->role === 'superadmin') {
-        //     $users = User::with('divisions')->get();
-        // } else {
-        //     $divisionIds = $authUser->divisions->pluck('id');
-        //     $users = User::with('divisions')
-        //         ->whereHas('divisions', fn($q) => $q->whereIn('divisions.id', $divisionIds))
-        //         ->get();
-        // }
-        // return Inertia::render('user/index', [
-        //     'users' => $users,
-        // ]);
-
         $authUser = auth()->user();
         
         $query = User::with('divisions');
 
-        if ($authUser->position !== 'direktur') {
+        if ($authUser->location !== 'all') {
             $query->where('location', $authUser->location);
         }
 

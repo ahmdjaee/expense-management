@@ -21,7 +21,7 @@ class UserController extends Controller
         
         $query = User::with('divisions');
 
-        if ($authUser->location !== 'all') {
+        if ($authUser->position !== 'direktur') {
             $query->where('location', $authUser->location);
         }
 

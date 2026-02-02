@@ -21,35 +21,11 @@ class DatabaseSeeder extends Seeder
         $this->call(DivisionSeeder::class);
 
         $user = User::firstOrCreate(
-            ['email' => 'admin.jkt@glori.com'],
+            ['email' => 'superadmin@glori.com'],
             [
-                'name' => 'superadmin.jkt',
+                'name' => 'superadmin.glori',
                 'password' => Hash::make('password'),
                 'location' => 'jkt',
-                'email_verified_at' => now(),
-                'role' => 'superadmin',
-                'position' => 'head',
-            ]
-        );
-
-        $user = User::firstOrCreate(
-            ['email' => 'admin.jkt1@glori.com'],
-            [
-                'name' => 'superadmin.jkt1',
-                'password' => Hash::make('password'),
-                'location' => 'jkt1',
-                'email_verified_at' => now(),
-                'role' => 'superadmin',
-                'position' => 'head',
-            ]
-        );
-
-        $user = User::firstOrCreate(
-            ['email' => 'admin.sby@glori.com'],
-            [
-                'name' => 'superadmin.sby',
-                'password' => Hash::make('password'),
-                'location' => 'sby',
                 'email_verified_at' => now(),
                 'role' => 'superadmin',
                 'position' => 'head',

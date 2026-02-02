@@ -57,16 +57,16 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
 
     // Calculate statistics
     const stats = {
-        totalRequests: requests.length,
-        totalActualAmount: requests.reduce((sum, r) => sum + r.actual_amount, 0),
-        approved: requests.filter((r) => r.status.includes('approved') || r.status === 'paid' || r.status === 'closed')
+        totalRequests: filtered.length,
+        totalActualAmount: filtered.reduce((sum, r) => sum + r.actual_amount, 0),
+        approved: filtered.filter((r) => r.status.includes('approved') || r.status === 'paid' || r.status === 'closed')
             .length,
-        pending: requests.filter((r) => r.status === 'submitted').length,
-        rejected: requests.filter((r) => r.status === 'rejected').length,
+        pending: filtered.filter((r) => r.status === 'submitted').length,
+        rejected: filtered.filter((r) => r.status === 'rejected').length,
     };
 
     // By Division - get division name from user's divisions or fall back to Unknown
-    const byDivision = requests.reduce(
+    const byDivision = filtered.reduce(
         (acc, req) => {
             // Get division name from user's divisions array or use 'Unknown'
             const division =
@@ -79,7 +79,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
         {} as Record<string, { count: number; amount: number }>,
     );
 
-    const byCategory = requests.reduce(
+    const byCategory = filtered.reduce(
         (acc, req) => {
             const category = req.category || 'Uncategorized';
             if (!acc[category]) acc[category] = { count: 0, amount: 0 };
@@ -91,7 +91,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     );
 
     // By Type
-    const byType = requests.reduce(
+    const byType = filtered.reduce(
         (acc, req) => {
             const type = req.type === 'reimbursement' ? 'Reimbursement' : 'Advance';
             if (!acc[type]) acc[type] = { count: 0, amount: 0 };
@@ -103,7 +103,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     );
 
     // By Location
-    const byLocation = requests.reduce(
+    const byLocation = filtered.reduce(
         (acc, req) => {
             const location = req.user?.location === 'jkt' ? 'Jakarta' : req.user?.location === 'jkt1' ? 'Jakarta 1' : req.user?.location === 'sby' ? 'Surabaya' : 'Unknown';
             if (!acc[location]) acc[location] = { count: 0, amount: 0 };
@@ -115,7 +115,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     );
 
     // By Closed
-    const byClosed = requests.reduce(
+    const byClosed = filtered.reduce(
         (acc, req) => {
             const key = req.is_closed ? 'Selesai' : 'Belum Selesai';
 
@@ -137,7 +137,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
 
 
     // By Status
-    const byStatus = requests.reduce(
+    const byStatus = filtered.reduce(
         (acc, req) => {
             const statusMap: Record<string, string> = {
                 submitted: 'Pending',
@@ -371,6 +371,9 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                         /* By Location */
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Cabang</h3>
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
                             <div className="space-y-3">
                                 {Object.entries(byLocation).map(([location, data]) => (
                                     <div key={location}>
@@ -390,6 +393,8 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     </div>
                                 ))}
                             </div>
+                            )}
+                            
                         </div>
                         
                         ) : (
@@ -397,6 +402,9 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                         /* By Division */
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Divisi</h3>
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
                             <div className="space-y-3">
                                 {Object.entries(byDivision).map(([division, data]) => (
                                     <div key={division}>
@@ -416,12 +424,17 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     </div>
                                 ))}
                             </div>
+                            )}
+                            
                         </div>
                         )}
 
                         {/* By Type */}
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Tipe</h3>
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
                             <div className="space-y-3">
                                 {Object.entries(byType).map(([type, data]) => (
                                     <div key={type}>
@@ -441,11 +454,16 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     </div>
                                 ))}
                             </div>
+                            )}
+                            
                         </div>
 
                         {/* By Category */}
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Kategori</h3>
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
                             <div className="space-y-3">
                                 {Object.entries(byCategory).map(([category, data]) => (
                                     <div key={category}>
@@ -465,11 +483,16 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     </div>
                                 ))}
                             </div>
+                            )}
+                            
                         </div>
 
                         {/* By Status */}
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Status</h3>
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
                             <div className="space-y-3">
                                 {Object.entries(byStatus).map(([status, data]) => (
                                     <div key={status}>
@@ -489,24 +512,29 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     </div>
                                 ))}
                             </div>
+                            )}
                         </div>
 
                         {/* Pie Chart Alternative */}
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Persentase Status</h3>
-                            <div className="space-y-2">
-                                {Object.entries(byStatus).map(([status, data]) => {
-                                    const percentage = ((data.count / stats.totalRequests) * 100).toFixed(1);
-                                    return (
-                                        <div key={status} className="flex items-center gap-3">
-                                            <div className="flex h-6 w-12 items-center justify-center rounded bg-linear-to-r from-primary to-primary/60 text-xs font-bold text-primary-foreground">
-                                                {percentage}%
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {Object.entries(byStatus).map(([status, data]) => {
+                                        const percentage = ((data.count / stats.totalRequests) * 100).toFixed(1);
+                                        return (
+                                            <div key={status} className="flex items-center gap-3">
+                                                <div className="flex h-6 w-12 items-center justify-center rounded bg-linear-to-r from-primary to-primary/60 text-xs font-bold text-primary-foreground">
+                                                    {percentage}%
+                                                </div>
+                                                <p className="text-sm text-foreground">{status}</p>
                                             </div>
-                                            <p className="text-sm text-foreground">{status}</p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
 
                         {/* By Completion Status */}
@@ -514,6 +542,9 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                             <h3 className="mb-4 text-lg font-bold text-foreground">
                                 Persentase Penyelesaian
                             </h3>
+                            {filtered.length === 0 ? (
+                                <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                            ) : (
                             <div className="space-y-2">
                                 {Object.entries(byClosed).map(([key, data]) => {
                                     const percentage = (
@@ -534,12 +565,16 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     );
                                 })}
                             </div>
+                            )}
                         </div>
                     </div>
 
                     {/* Detailed Table */}
                     <div className="overflow-x-auto rounded-lg border border-border bg-card p-6">
                         <h3 className="mb-4 text-lg font-bold text-foreground">Detail Pengajuan</h3>
+                        {filtered.length === 0 ? (
+                            <p className="mb-4 text-muted-foreground">Tidak ada pengajuan sesuai filter</p>
+                        ) : (
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-border">
@@ -580,6 +615,8 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                 })}
                             </tbody>
                         </table>
+                        )}
+                       
                         {filtered.length > 10 && (
                             <p className="mt-3 text-xs text-muted-foreground">
                                 Menampilkan 10 dari {filtered.length} data

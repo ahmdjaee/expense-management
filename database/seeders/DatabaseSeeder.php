@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Direktur GIB',
                 'password' => Hash::make('password'),
-                'location' => 'jkt',
+                'location' => 'all',
                 'email_verified_at' => now(),
                 'role' => 'admin',
                 'position' => 'direktur',
@@ -72,7 +72,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Finance Pusat',
                 'password' => Hash::make('password'),
-                'location' => 'jkt',
+                'location' => 'all',
                 'email_verified_at' => now(),
                 'role' => 'admin',
                 'position' => 'finance',

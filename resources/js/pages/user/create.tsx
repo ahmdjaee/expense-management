@@ -28,8 +28,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
     // Ambil data auth user
-    const { auth } = usePage<{ auth: { user: { role: string } } }>().props;
+    const { auth } = usePage<{ auth: { user: { role: string; location?: string } } }>().props;
     const authRole = auth.user.role;
+    const authLocation = auth.user.location;
 
     // State for selected login codes
     const [selectedLoginCodes, setSelectedLoginCodes] = useState<LoginCodeOption[]>([]);
@@ -55,6 +56,14 @@ export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
         { value: 'head', label: 'Head' },
         { value: 'direktur', label: 'Direktur' },
         { value: 'finance', label: 'Finance' },
+    ];
+
+    // Location options
+    const locationOptions = [
+        { value: 'jkt', label: 'Jakarta' },
+        { value: 'jkt1', label: 'Jakarta 1' },
+        { value: 'sby', label: 'Surabaya' },
+        { value: 'all', label: 'All Locations' },
     ];
 
     return (
@@ -145,6 +154,26 @@ export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.position} />
+                                    </div>
+                                )}
+
+                                {/* Location - Hanya untuk superadmin */}
+                                {authLocation === 'all' && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="location">Location</Label>
+                                        <Select name="location" defaultValue={locationOptions[0].value}>
+                                            <SelectTrigger id="location" className="border-muted bg-muted/50">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {locationOptions.map((p) => (
+                                                    <SelectItem key={p.value} value={p.value}>
+                                                        {p.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.location} />
                                     </div>
                                 )}
 

@@ -84,6 +84,7 @@ class UserController extends Controller
             'role' => 'required|in:superadmin,admin,user,marketing',
             'position' => 'nullable|in:head,karyawan,direktur,finance',
             'phone' => 'nullable|string|max:20',
+            'location' => 'nullable|in:jkt,jkt1,sby,all',
             'address' => 'nullable|string|max:255',
             'rekening' => 'nullable|string|max:50',
             'bank' => 'nullable|string|max:50',
@@ -118,7 +119,7 @@ class UserController extends Controller
         $user->role = $validated['role'];
         $user->position = $validated['position'] ?? 'karyawan'; // Default karyawan
         $user->phone = $validated['phone'] ?? null;
-        $user->location = $authUser->location;
+        $user->location = $validated['location'] ?? 'jkt'; // Default jakarta
         $user->address = $validated['address'] ?? null;
         $user->rekening = $validated['rekening'] ?? null;
         $user->bank = $validated['bank'] ?? null;
@@ -211,6 +212,7 @@ class UserController extends Controller
             'role' => 'required|in:superadmin,admin,user,marketing',
             'position' => 'nullable|in:head,karyawan,direktur,finance',
             'phone' => 'nullable|string|max:20',
+            'location' => 'nullable|in:jkt,jkt1,sby,all',
             'address' => 'nullable|string|max:255',
             'rekening' => 'nullable|string|max:50',
             'bank' => 'nullable|string|max:50',
@@ -245,6 +247,7 @@ class UserController extends Controller
         $user->role = $validated['role'];
         $user->position = $validated['position'] ?? 'karyawan';
         $user->phone = $validated['phone'] ?? null;
+        $user->location = $validated['location'] ?? 'jkt';
         $user->address = $validated['address'] ?? null;
         $user->rekening = $validated['rekening'] ?? null;
         $user->bank = $validated['bank'] ?? null;

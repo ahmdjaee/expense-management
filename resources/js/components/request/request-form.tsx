@@ -32,6 +32,76 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
     bill: 'Bill',
 };
 
+    // Function to get available categories based on user divisions
+    const getAvailableCategories = () => {
+        const divisions = user?.divisions?.map(div => div.name) || [];
+
+        // All categories
+        const allCategories = [
+            { value: 'biaya allowance', label: 'Biaya Allowance' },
+            { value: 'biaya gaji', label: 'Biaya Gaji' },
+            { value: 'biaya komisi', label: 'Biaya Komisi' },
+            { value: 'biaya sewa', label: 'Biaya Sewa' },
+            { value: 'biaya utilitas', label: 'Biaya Utilitas' },
+            { value: 'biaya service charge', label: 'Biaya Service Charge' },
+            { value: 'biaya operasional', label: 'Biaya Operasional' },
+            { value: 'biaya promosi', label: 'Biaya Promosi' },
+            { value: 'biaya reward', label: 'Biaya Reward' },
+            { value: 'biaya pajak', label: 'Biaya Pajak' },
+            { value: 'biaya bpjs', label: 'Biaya BPJS' },
+        ];
+
+        // If user is DIRECTOR, return all categories
+        if (divisions.includes('DIRECTOR') || divisions.includes('OPERATIONAL DIRECTOR')
+            || divisions.includes('COMPLIANCE DIRECTOR')
+        ) {
+            return allCategories;
+        }
+
+        const availableCategories: typeof allCategories = [];
+
+        // HR and GA categories
+        if (divisions.includes('HR') || divisions.includes('GA')) {
+            availableCategories.push(
+                { value: 'biaya allowance', label: 'Biaya Allowance' },
+                { value: 'biaya gaji', label: 'Biaya Gaji' },
+                { value: 'biaya komisi', label: 'Biaya Komisi' },
+                { value: 'biaya promosi', label: 'Biaya Promosi' },
+                { value: 'biaya reward', label: 'Biaya Reward' },
+                { value: 'biaya pajak', label: 'Biaya Pajak' },
+                { value: 'biaya bpjs', label: 'Biaya BPJS' }
+            );
+        }
+
+        // ADMIN, IT, WAKIL PIALANG, DEALING categories
+        if (divisions.includes('ADMIN') || divisions.includes('IT') || 
+            divisions.includes('WAKIL PIALANG') || divisions.includes('DEALING')
+            || divisions.includes('MARKETING')
+        ) {
+            availableCategories.push(
+                { value: 'biaya operasional', label: 'Biaya Operasional' }
+            );
+        }
+
+        // FINANCE and ACCOUNTING categories
+        if (divisions.includes('FINANCE') || divisions.includes('ACCOUNTING')) {
+            availableCategories.push(
+                { value: 'biaya sewa', label: 'Biaya Sewa' },
+                { value: 'biaya utilitas', label: 'Biaya Utilitas' },
+                { value: 'biaya service charge', label: 'Biaya Service Charge' }
+            );
+        }
+
+        // Remove categories duplicates
+        const uniqueCategories = availableCategories.filter(
+            (category, index, self) => 
+                index === self.findIndex((c) => c.value === category.value)
+        );
+
+        return uniqueCategories;
+    };
+
+    const availableCategories = getAvailableCategories();
 
 
     const [type, setType] = useState<'reimbursement' | 'advance' | 'bill' | null>(
@@ -184,18 +254,17 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                                     <SelectValue placeholder="Pilih Kategori" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="biaya allowance">Biaya Allowance</SelectItem>
-                                    <SelectItem value="biaya gaji">Biaya Gaji</SelectItem>
-                                    <SelectItem value="biaya komisi">Biaya Komisi</SelectItem>
-                                    <SelectItem value="biaya sewa">Biaya Sewa</SelectItem>
-                                    <SelectItem value="biaya utilitas">Biaya Utilitas</SelectItem>
-                                    <SelectItem value="biaya service charge">Biaya Service Charge</SelectItem>
-                                    <SelectItem value="biaya operasional">Biaya Operasional</SelectItem>
-                                    <SelectItem value="biaya promosi">Biaya Promosi</SelectItem>
-                                    <SelectItem value="biaya reward">Biaya Reward</SelectItem>
-                                    <SelectItem value="biaya pajak">Biaya Pajak</SelectItem>
-                                    <SelectItem value="biaya bpjs">Biaya BPJS</SelectItem>
-                                    <SelectItem value="biaya lainya">Biaya Lainya</SelectItem>
+                                    {availableCategories.length > 0 ? (
+                                        availableCategories.map((category) => (
+                                            <SelectItem key={category.value} value={category.value}>
+                                                {category.label}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <SelectItem value="no-category" disabled>
+                                            Anda belum memiliki divisi, silahkan kontak admin untuk memasangkan anda divisi 
+                                        </SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                             <p className="mt-1 text-xs text-muted-foreground">

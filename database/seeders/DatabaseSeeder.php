@@ -230,9 +230,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $users = User::whereIn('email', [
-        'admin.jkt@glori.com',
-        'admin.jkt1@glori.com',
-        'admin.sby@glori.com',
+        'superadmin@glori.com',
         'finance@glori.com',
         'finjkt1@glori.com',
         'finsby@glori.com',

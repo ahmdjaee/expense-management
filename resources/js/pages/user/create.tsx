@@ -58,13 +58,12 @@ export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
         { value: 'finance', label: 'Finance' },
     ];
 
-    // Location options
-    const locationOptions = [
-        { value: 'jkt', label: 'Jakarta' },
-        { value: 'jkt1', label: 'Jakarta 1' },
-        { value: 'sby', label: 'Surabaya' },
-        { value: 'all', label: 'All Locations' },
-    ];
+    // // Location options
+    // const locationOptions = [
+    //     { value: 'jkt', label: 'Jakarta' },
+    //     { value: 'jkt1', label: 'Jakarta 1' },
+    //     { value: 'sby', label: 'Surabaya' },
+    // ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -154,26 +153,6 @@ export default function CreateUser({ divisions, loginCodes }: CreateUserProps) {
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.position} />
-                                    </div>
-                                )}
-
-                                {/* Location - Hanya untuk superadmin */}
-                                {authLocation === 'all' && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="location">Location</Label>
-                                        <Select name="location" defaultValue={locationOptions[0].value}>
-                                            <SelectTrigger id="location" className="border-muted bg-muted/50">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {locationOptions.map((p) => (
-                                                    <SelectItem key={p.value} value={p.value}>
-                                                        {p.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError message={errors.location} />
                                     </div>
                                 )}
 

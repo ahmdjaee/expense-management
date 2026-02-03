@@ -33,42 +33,57 @@ class RequestController extends Controller
         return Inertia::render('expense/request/new');
     }
 
-    /**
+    // ExpenseRequest model
+    public function items()
+    {
+        return $this->hasMany(RequestItem::class);
+    }
+
+        /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
             'category' => 'required',
-            'description' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string',
+            'items.*.amount' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,transfer',
             'type' => 'required|in:reimbursement,advance,bill',
-            'attachment' => 'nullable|file|max:10240',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|max:10240',
         ]);
 
         // Handle file upload
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $filePath = $file->store('attachments', 'public');
-        } else {
-            $filePath = null;
+        $paths = [];
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $paths[] = $file->store('attachments', 'public');
+            }
         }
 
-        // Create the request
-        $expenseRequest = new ExpenseRequest();
-        $expenseRequest->user_id = auth()->id();
-        $expenseRequest->title = $request->input('title');
-        $expenseRequest->amount = $request->input('amount');
-        $expenseRequest->actual_amount = $request->input('amount');
-        $expenseRequest->category = $request->input('category');
-        $expenseRequest->description = $request->input('description');
-        $expenseRequest->payment_method = $request->input('payment_method');
-        $expenseRequest->type = $request->input('type');
-        $expenseRequest->attachment = $filePath;
-        $expenseRequest->status = 'submitted';
-        $expenseRequest->save();
+        $totalAmount = collect($request->items)->sum('amount');
+
+        $expenseRequest = ExpenseRequest::create([
+            'user_id' => auth()->id(),
+            'title' => $request->title,
+            'category' => $request->category,
+            'amount' => $totalAmount,
+            'actual_amount' => $totalAmount,
+            'payment_method' => $request->payment_method,
+            'type' => $request->type,
+            'status' => 'submitted',
+        ]);
+
+        foreach ($request->items as $item) {
+            $expenseRequest->items()->create([
+                'description' => $item['description'],
+                'amount' => $item['amount'],
+            ]);
+        }
 
         flash()->success('Pengajuan berhasil dibuat.');
 
@@ -83,6 +98,7 @@ class RequestController extends Controller
         $request = ExpenseRequest::with([
             'user',
             'user.divisions',
+            'items',
             'approvals.approver',
             'headApprover',
             'directorApprover',
@@ -160,9 +176,10 @@ class RequestController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string',
+            'items.*.amount' => 'required|numeric|min:0',
             'category' => 'required',
-            'description' => 'nullable|string',
             'payment_method' => 'required|in:cash,transfer',
             'type' => 'required|in:reimbursement,advance,bill',
             'attachment' => 'nullable|file|max:10240',

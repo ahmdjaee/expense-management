@@ -53,11 +53,6 @@ export function PrintForm({ request }: PrintFormProps) {
                     </div>
                 </div>
 
-                <div className="mb-4 text-center">
-                    <p className="text-[11px] font-semibold leading-tight">Nominal</p>
-                    <p className="text-[14px] font-bold text-gray-900">{formatCurrency(request.amount)}</p>
-                </div>
-
                 <div className="mt-4 rounded-md border border-transparent p-3 print:p-2">
                     <h3 className="mb-2 text-sm font-semibold text-foreground print:mb-1">
                         Rincian
@@ -103,6 +98,11 @@ export function PrintForm({ request }: PrintFormProps) {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <div className="mb-4 text-end p-4 gap-4 print:mb-2">
+                    <p className="text-[14px] font-bold leading-tight">Total</p>
+                    <p className="text-[14px] font-bold text-gray-900">{formatCurrency(request.amount)}</p>
                 </div>
 
 

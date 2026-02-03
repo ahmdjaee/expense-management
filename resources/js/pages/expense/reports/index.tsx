@@ -22,7 +22,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
     const [filterStartDate, setFilterStartDate] = useState<string>('');
     const [filterEndDate, setFilterEndDate] = useState<string>('');
 
-    const isAllLocation = auth.user.location === 'all';
+    const isDirektur = auth.user.position === 'direktur';
 
     const filtered = requests.filter((r) => {
         const statusMatch = filterStatus === 'all' || r.status === filterStatus;
@@ -367,7 +367,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                     {/* Analytics Grid */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         
-                        {isAllLocation ? (
+                        {isDirektur ? (
                         /* By Location */
                         <div className="rounded-lg border border-border bg-card p-6">
                             <h3 className="mb-4 text-lg font-bold text-foreground">Pengajuan Per Cabang</h3>

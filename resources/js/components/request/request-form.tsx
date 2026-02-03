@@ -37,7 +37,8 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
     const [type, setType] = useState<'reimbursement' | 'advance' | 'bill' | null>(
         initialData ? (initialData.type as 'reimbursement' | 'advance' | 'bill') : null,
     );
-    const [amount, setAmount] = useState(initialData ? initialData.amount.toString() : '');
+    const [items, setItems] = useState<{ description: string; amount: string }[]>([{ description: '', amount: '' }]);
+
     const [method, setMethod] = useState<'transfer' | 'cash'>(
         initialData ? (initialData.payment_method as 'transfer' | 'cash') : 'transfer',
     );
@@ -48,7 +49,6 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
     useEffect(() => {
         if (initialData && isEdit) {
             // Set initial values
-            setAmount(initialData.amount.toString());
             setMethod(initialData.payment_method as 'transfer' | 'cash');
             setType(initialData.type as 'reimbursement' | 'advance' | 'bill');
         }
@@ -64,6 +64,9 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
     const handleRemoveAttachment = (index: number) => {
         setAttachments((prev) => prev.filter((_, i) => i !== index));
     };
+
+    const totalAmount = items.reduce(
+        (sum, item) => sum + (Number(item.amount) || 0),0);
 
     if (!type && !isEdit) {
         return (
@@ -205,43 +208,79 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-semibold text-foreground">Deskripsi</label>
-                            <Textarea
-                                name="description"
-                                placeholder="Jelaskan secara detail tentang pengajuan Anda, apa yang dibeli, kapan, dan untuk apa..."
-                                rows={4}
-                                defaultValue={initialData?.description}
-                                required
-                            />
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Semakin detail, semakin cepat proses approval
-                            </p>
-                            <InputError message={errors.description} />
-                        </div>
-
-                        <div>
-                            <label className="mb-2 block text-sm font-semibold text-foreground">
-                                Nominal Pengajuan
+                            <label className="mb-3 block text-sm font-semibold text-foreground">
+                                Rincian Pengajuan
                             </label>
-                            <div className="flex items-center gap-2">
-                                <span className="min-w-fit font-medium text-muted-foreground">Rp</span>
-                                <Input
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    name="amount"
-                                    placeholder="0"
-                                    required
-                                    min="1"
-                                />
-                                <InputError message={errors.amount} />
+
+                            <div className="space-y-4">
+                                {items.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="rounded-lg border border-border p-4 space-y-3"
+                                >
+                                    <Textarea
+                                    placeholder="Deskripsi pengeluaran"
+                                    value={item.description}
+                                    rows={3}
+                                    name={`items[${index}][description]`}
+                                    onChange={(e) => {
+                                        const next = [...items];
+                                        next[index].description = e.target.value;
+                                        setItems(next);
+                                    }}
+                                    />
+
+                                    <div className="flex items-center gap-2">
+                                    <span className="font-medium text-muted-foreground">Rp</span>
+
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        placeholder="0"
+                                        value={item.amount}
+                                        name={`items[${index}][amount]`}
+                                        onChange={(e) => {
+                                        const next = [...items];
+                                        next[index].amount = e.target.value;
+                                        setItems(next);
+                                        }}
+                                    />
+
+                                    {items.length > 1 && (
+                                        <button
+                                        type="button"
+                                        onClick={() =>
+                                            setItems(items.filter((_, i) => i !== index))
+                                        }
+                                        className="text-sm text-red-500 hover:underline"
+                                        >
+                                        Hapus
+                                        </button>
+                                    )}
+                                    </div>
+                                </div>
+                                ))}
                             </div>
-                            {amount && Number.parseInt(amount) > 0 && (
-                                <p className="mt-2 text-sm font-semibold text-primary">
-                                    Total: {formatCurrency(Number.parseInt(amount))}
-                                </p>
-                            )}
-                        </div>
+
+                            <button
+                                type="button"
+                                className="mt-3 text-sm font-medium text-primary hover:underline"
+                                onClick={() =>
+                                setItems([...items, { description: '', amount: '' }])
+                                }
+                            >
+                                + Tambah Rincian
+                            </button>
+                            </div>
+
+                            <div>
+                                {totalAmount > 0 && (
+                                    <p className="mt-2 text-sm font-semibold text-primary">
+                                        Total: {formatCurrency(totalAmount)}
+                                    </p>
+                                    )}
+                            </div>
+
 
                         <div>
                             <label className="mb-3 block text-sm font-semibold text-foreground">

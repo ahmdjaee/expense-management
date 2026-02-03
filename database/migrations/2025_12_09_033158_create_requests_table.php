@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->enum('type', ['reimbursement', 'advance', 'bill']);
             $table->enum('category', [
                 'biaya allowance',
@@ -29,11 +29,18 @@ return new class extends Migration
                 'biaya bpjs',
                 'biaya lainya'
             ]);
-            $table->double('amount');
-            $table->double('actual_amount');
             $table->string('title', 255);
-            $table->text('description');
-            $table->enum('status', ['draft', 'submitted', 'head_approved', 'director_approved', 'rejected', 'paid', 'refunded'])->default('draft');
+
+            $table->double('amount')->default(0);
+            $table->double('actual_amount')->default(0);
+
+            $table->enum('status', ['draft', 
+            'submitted', 
+            'head_approved', 
+            'director_approved', 
+            'rejected', 'paid', 
+            'refunded'])->default('draft');
+
             $table->boolean('is_closed')->default(false);
             $table->enum('payment_method', ['cash', 'transfer']);
             $table->string('attachment', 255)->nullable();
@@ -46,6 +53,15 @@ return new class extends Migration
             $table->string('rejected_reason')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('request_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('request_id')->constrained()->cascadeOnDelete();
+            $table->text('description');
+            $table->double('amount');
+            $table->double('actual_amount')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -54,5 +70,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('requests');
+        Schema::dropIfExists('request_items');
     }
 };

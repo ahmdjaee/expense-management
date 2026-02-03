@@ -374,6 +374,14 @@
     height: auto !important;
   }
 
+  table {
+        font-size: 10px;
+    }
+
+    th, td {
+        padding: 2px 4px;
+    }
+
    button {
     display: none !important;
   }

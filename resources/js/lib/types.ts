@@ -1,5 +1,5 @@
 export type UserRole = 'user' | 'head' | 'director' | 'finance' | 'admin';
-export type Location = 'jkt' | 'jkt1' | 'sby' | 'all';
+export type Location = 'jkt' | 'jkt1' | 'sby';
 export type RequestType = 'reimbursement' | 'advance' | 'bill';
 export type ReqCategory = 'biaya allowance' | 'biaya gaji' | 'biaya komisi' | 'biaya sewa' | 'biaya utilitas' |
                              'biaya service charge' | 'biaya operasional' | 'biaya promosi' | 'biaya promosi' | 
@@ -25,6 +25,13 @@ export interface User {
     createdAt: Date;
 }
 
+export interface RequestItem {
+    id: number;
+    description: string;
+    amount: number;
+    actual_amount?: number | null;
+}
+
 export interface ExpenseRequest {
     id: number;
     user_id: number; // Tambahkan properti yang hilang
@@ -43,6 +50,7 @@ export interface ExpenseRequest {
     paid_at?: string;
     head_approved_at?: string;
     director_approved_at?: string;
+    items: RequestItem[];
     user: {
         id: number;
         name: string;

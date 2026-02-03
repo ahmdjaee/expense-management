@@ -70,13 +70,12 @@ export default function EditUserPage({ user, divisions, loginCodes, userLoginCod
         { value: 'finance', label: 'Finance' },
     ];
 
-    // Location options
-    const locationOptions = [
-        { value: 'jkt', label: 'Jakarta' },
-        { value: 'jkt1', label: 'Jakarta 1' },
-        { value: 'sby', label: 'Surabaya' },
-        { value: 'all', label: 'All Locations' },
-    ];
+    // // Location options
+    // const locationOptions = [
+    //     { value: 'jkt', label: 'Jakarta' },
+    //     { value: 'jkt1', label: 'Jakarta 1' },
+    //     { value: 'sby', label: 'Surabaya' },
+    // ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -183,29 +182,6 @@ export default function EditUserPage({ user, divisions, loginCodes, userLoginCod
                                             <InputError message={errors.position} />
                                             <p className="text-xs text-muted-foreground">
                                                 Only superadmin can change user position
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Location - Hanya untuk superadmin */}
-                                    {authLocation === 'all' && (
-                                        <div className="space-y-2">
-                                            <Label htmlFor="location">Location</Label>
-                                            <Select name="location" defaultValue={user.location || 'jkt'}>
-                                                <SelectTrigger id="location" className="border-muted bg-muted/50">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {locationOptions.map((p) => (
-                                                        <SelectItem key={p.value} value={p.value}>
-                                                            {p.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={errors.location} />
-                                            <p className="text-xs text-muted-foreground">
-                                                Only superadmin can change user location
                                             </p>
                                         </div>
                                     )}

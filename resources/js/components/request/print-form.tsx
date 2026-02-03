@@ -41,19 +41,7 @@ export function PrintForm({ request }: PrintFormProps) {
                         <p className="text-[11px] font-semibold leading-tight">Status</p>
                         <p className="text-[11px] capitalize">{request.status.replace(/_/g, ' ')}</p>
                     </div>
-                    <div>
-                        <p className="text-[11px] font-semibold leading-tight">Judul Pengajuan</p>
-                        <p className="text-[11px]">{request.title}</p>
-                    </div>
-
-                    <div>
-                        <p className="text-[11px] font-semibold leading-tight">Deskripsi</p>
-                        <p className="text-[11px] whitespace-pre-wrap">{request.description}</p>
-                    </div>
-                </div>
-
-                <div className="mb-4 grid grid-cols-3 gap-x-4 gap-y-2 print:grid-cols-3">
-                    <div>
+                     <div>
                         <p className="text-[11px] font-semibold leading-tight">Kategori</p>
                         <p className="text-[11px] capitalize">{request.category}</p>
                     </div>
@@ -70,42 +58,71 @@ export function PrintForm({ request }: PrintFormProps) {
                     <p className="text-[14px] font-bold text-gray-900">{formatCurrency(request.amount)}</p>
                 </div>
 
-                <div className="mb-4">
-                    <p className="mb-3 text-[11px] font-semibold">Riwayat Persetujuan</p>
-                    <div className="space-y-2">
-                        {request.approvals && request.approvals.length > 0 ? (
-                            request.approvals.map((approval) => (
-                                <div key={approval.id} className="grid grid-cols-3 gap-2 border-b border-gray-200 pb-1 text-[10.5px]">
-                                    <span className="font-medium">{approval.approver_position}</span>
-                                    <span>
-                                        {approval.status === 'approved' ? 'Disetujui' : 'Ditolak'} oleh{' '}
-                                        <span className="font-medium">{approval.approver?.name}</span>
-                                    </span>
-                                    <span className="text-gray-500">{approval.approved_at && formatDate(approval.approved_at)}</span>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-sm text-gray-400 italic">Belum ada riwayat persetujuan</p>
-                        )}
+                <div className="mt-4 rounded-md border border-transparent p-3 print:p-2">
+                    <h3 className="mb-2 text-sm font-semibold text-foreground print:mb-1">
+                        Rincian
+                    </h3>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-[11px] table-fixed">
+                            <thead>
+                                <tr className="border-b border-border text-muted-foreground">
+                                    <th className="w-8 px-2 py-1 text-left align-top tracking-tight font-medium">
+                                        No
+                                    </th>
+
+                                    <th className="px-2 py-1 text-left align-top leading-tight tracking-tight font-medium">
+                                        Deskripsi
+                                    </th>
+
+                                    <th className="w-24 px-2 py-1 text-right align-top tracking-tight font-medium">
+                                        Nominal
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {request.items.map((item, index) => (
+                                    <tr
+                                        key={item.id}
+                                        className="border-b border-border last:border-b-0"
+                                    >
+                                        <td className="px-2 py-1 text-left align-top tracking-tight">
+                                            {index + 1}
+                                        </td>
+
+                                        <td className="px-2 py-1 text-left align-top leading-tight tracking-tight">
+                                            {item.description}
+                                        </td>
+
+                                        <td className="px-2 py-1 text-right align-top whitespace-nowrap tracking-tight">
+                                            {formatCurrency(item.amount)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+
+                <div className="mt-8 grid grid-cols-3 gap-4 text-center text-xs">
                     <div className="flex flex-col items-center">
-                        <p className="mb-6 text-xs">Pemohon</p>
-                        <p className="border-t border-black pt-2 text-sm font-semibold">{request.user.name}</p>
+                        <p className="mb-6">Pemohon</p>
+                        <div className="w-full border-t border-black pt-2">&nbsp;</div>
                     </div>
+
                     <div className="flex flex-col items-center">
-                        <p className="mb-6 text-xs">Disetujui oleh</p>
-                        <p className="border-t border-black pt-2 text-sm font-semibold">
-                            {request.approvals?.find((a) => a.status === 'approved')?.approver?.name || '-'}
-                        </p>
+                        <p className="mb-6">Disetujui oleh</p>
+                        <div className="w-full border-t border-black pt-2">&nbsp;</div>
                     </div>
+
                     <div className="flex flex-col items-center">
-                        <p className="mb-6 text-xs">Dibayar oleh</p>
-                        <p className="border-t border-black pt-2 text-sm font-semibold">-</p>
+                        <p className="mb-6">Dibayar oleh</p>
+                        <div className="w-full border-t border-black pt-2">&nbsp;</div>
                     </div>
                 </div>
+
 
                 <div className="mt-12 text-center text-xs text-gray-400">
                     <p>Dokumen ini dicetak pada {formatDate(new Date().toISOString())}</p>

@@ -130,7 +130,7 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                         </div>
                         <div className="flex-1">
                             <p className="font-medium text-foreground">Pengembalian Dana</p>
-                            {isPaid ? (
+                            {isRefunded ? (
                                 <>
                                     <p className="text-sm text-green-600">✓ Sudah dikembalikan</p>
                                     <p className="text-sm text-muted-foreground">

@@ -125,14 +125,34 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
     }, [initialData, isEdit]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const newFiles = Array.from(e.target.files);
-            setAttachments((prev) => [...prev, ...newFiles]);
-        }
+        if (!e.target.files || !fileInputRef.current) return;
+
+        const dt = new DataTransfer();
+
+        // keep existing files
+        attachments.forEach(file => dt.items.add(file));
+
+        // add newly selected files
+        Array.from(e.target.files).forEach(file => dt.items.add(file));
+
+        // update input's FileList
+        fileInputRef.current.files = dt.files;
+
+        // sync React state
+        setAttachments(Array.from(dt.files));
     };
 
     const handleRemoveAttachment = (index: number) => {
-        setAttachments((prev) => prev.filter((_, i) => i !== index));
+        if (!fileInputRef.current) return;
+
+        const dt = new DataTransfer();
+
+        attachments
+            .filter((_, i) => i !== index)
+            .forEach(file => dt.items.add(file));
+
+        fileInputRef.current.files = dt.files;
+        setAttachments(Array.from(dt.files));
     };
 
     const totalAmount = items.reduce(
@@ -403,7 +423,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                                     type="file"
                                     multiple
                                     onChange={handleFileSelect}
-                                    name="attachment"
+                                    name="attachments[]"
                                     className="hidden"
                                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                                 />
@@ -412,7 +432,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
                                 Format: PDF, JPG, PNG, DOC, DOCX (Max 10MB per file)
                             </p>
 
-                            <InputError message={errors.attachment} />
+                            <InputError message={errors.attachments} />
 
                             {attachments.length > 0 && (
                                 <div className="mt-4 space-y-2">

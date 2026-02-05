@@ -113,7 +113,7 @@ export default function LPJCreatePage({ request, auth }: LPJCreatePageProps) {
                                         <p
                                             className={`text-sm font-semibold ${difference > 0 ? 'text-red-600' : 'text-green-600'}`}
                                         >
-                                            {difference > 0 ? 'Kelebihan' : 'Kekurangan'}:{' '}
+                                            {difference > 0 ? 'Kekurangan' : 'Kelebihan'}:{' '}
                                             {formatCurrency(Math.abs(difference))}
                                         </p>
                                     )}

@@ -19,7 +19,7 @@ class Request extends Model
         'description',
         'status',
         'payment_method',
-        'attachment',
+        'attachments',
         'lpj_attachment',
         'lpj_notes',
         'lpj_submitted_at',
@@ -41,6 +41,7 @@ class Request extends Model
         'paid_at' => 'datetime',
         'lpj_submitted_at' => 'datetime',
         'lpj_verified_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     /**

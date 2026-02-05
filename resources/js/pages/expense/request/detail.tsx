@@ -41,11 +41,13 @@ interface ExpenseRequest {
     type: string;
     category: string;
     payment_method: string;
+    attachments?: string[];
     created_at: string;
     updated_at: string;
     paid_at?: string;
     head_approved_at?: string;
     director_approved_at?: string;
+    lpj_attachment?: string;
     lpj_submitted_at?: string;
     lpj_verified_at?: string;
     user: User;
@@ -310,6 +312,35 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
                                         ⏳ Menunggu Verifikasi LPJ
                                     </span>
                                 )}
+
+                                {/* {Open LPJ Attachment} */}
+                                    {request.lpj_attachment && (
+                                    <a
+                                        href={`/storage/${request.lpj_attachment}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center rounded-lg border border-border bg-secondary/30 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary/50"
+                                    >
+                                        📎 Lampiran LPJ
+                                    </a>
+                                    )}
+                                
+                                {/* {Open Attachment if exist} */}
+                                    {request.attachments?.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {request.attachments.map((path, index) => (
+                                            <a
+                                                key={index}
+                                                href={`/storage/${path}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center rounded-lg border border-border bg-secondary/30 px-4 py-2 text-sm font-medium hover:bg-secondary/50"
+                                            >
+                                                📎 Lampiran {index + 1}
+                                            </a>
+                                            ))}
+                                        </div>
+                                        )}
 
                                 {request.status === 'closed' && (
                                     <span className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-800">

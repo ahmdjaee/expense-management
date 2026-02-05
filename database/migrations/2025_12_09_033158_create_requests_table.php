@@ -26,8 +26,7 @@ return new class extends Migration
                 'biaya promosi',
                 'biaya reward',
                 'biaya pajak',
-                'biaya bpjs',
-                'biaya lainya'
+                'biaya bpjs'
             ]);
             $table->string('title', 255);
 
@@ -39,7 +38,9 @@ return new class extends Migration
             'head_approved', 
             'director_approved', 
             'rejected', 'paid', 
-            'refunded'])->default('draft');
+            'lpj_made',
+            'lpj_verified'
+            ])->default('draft');
 
             $table->boolean('is_closed')->default(false);
             $table->enum('payment_method', ['cash', 'transfer']);

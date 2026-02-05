@@ -22,7 +22,8 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
     const isRejected = request.status === 'rejected';
     const isAdvance = request.type === 'advance';
     const isPaid = request.status === 'paid'; 
-    const isRefunded = request.status === 'refunded';
+    const isLPJMade = request.status === 'lpj_made';
+    const isLPJVerified = request.status === 'lpj_verified';
     
     return (
         <div className="space-y-4">
@@ -93,18 +94,17 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                 })}
 
                 {/* Payment */}
-              {/* Payment */}
                 {!isRejected && (
                     <div className="flex gap-4">
                         <div className="flex flex-col items-center">
-                            <div className={`h-3 w-3 rounded-full ${isPaid ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            <div className={`h-3 w-3 rounded-full ${isPaid || isLPJMade || isLPJVerified ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                             {isAdvance && (
                                 <div className="h-12 w-0.5 bg-gray-200"></div>
                             )}
                         </div>
                         <div className="flex-1">
-                            <p className="font-medium text-foreground">Pembayaran</p>
-                            {isPaid ? (
+                            <p className="font-medium text-foreground">Pembayaran Finance</p>
+                            {isPaid || isLPJMade || isLPJVerified ? (
                                 <>
                                     <p className="text-sm text-green-600">✓ Sudah dibayar</p>
                                     <p className="text-sm text-muted-foreground">
@@ -126,13 +126,14 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                 {!isRejected && isAdvance && (
                     <div className="flex gap-4">
                         <div className="flex flex-col items-center">
-                            <div className={`h-3 w-3 rounded-full ${isRefunded ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            <div className={`h-3 w-3 rounded-full ${isLPJMade || isLPJVerified ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            <div className="h-12 w-0.5 bg-gray-200"></div>
                         </div>
                         <div className="flex-1">
-                            <p className="font-medium text-foreground">Pengembalian Dana</p>
-                            {isRefunded ? (
+                            <p className="font-medium text-foreground">Pembuatan LPJ</p>
+                            {isLPJMade || isLPJVerified ? (
                                 <>
-                                    <p className="text-sm text-green-600">✓ Sudah dikembalikan</p>
+                                    <p className="text-sm text-green-600">✓ Sudah dibuat</p>
                                     <p className="text-sm text-muted-foreground">
                                         {request.paid_at && formatDateTime(request.paid_at)}
                                     </p>
@@ -140,8 +141,34 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                             ) : (
                                 <p className="text-sm text-yellow-600">
                                     {flowSteps.every((s) => s.approved)
-                                        ? '⏳ Menunggu pengembalian dana'
-                                        : '- Menunggu pengembalian dana selesai'}
+                                        ? '⏳ Menunggu pembuatan LPJ'
+                                        : '- Menunggu pembuatan LPJ selesai'}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* LPJ Verification */}
+                {!isRejected && isAdvance && (
+                    <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                            <div className={`h-3 w-3 rounded-full ${isLPJVerified ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-medium text-foreground">Verifikasi LPJ</p>
+                            {isLPJVerified ? (
+                                <>
+                                    <p className="text-sm text-green-600">✓ Sudah diverifikasi</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {request.paid_at && formatDateTime(request.paid_at)}
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="text-sm text-yellow-600">
+                                    {flowSteps.every((s) => s.approved)
+                                        ? '⏳ Menunggu verifikasi LPJ'
+                                        : '- Menunggu verifikasi LPJ selesai'}
                                 </p>
                             )}
                         </div>

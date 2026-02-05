@@ -193,7 +193,7 @@ class Request extends Model
      */
     public function canVerifyLPJ(): bool
     {
-        return $this->type === 'advance' && $this->status === 'paid' && $this->lpj_submitted_at && !$this->lpj_verified_at;
+        return $this->type === 'advance' && $this->status === 'lpj_made' && $this->lpj_submitted_at && !$this->lpj_verified_at;
     }
 
     /**

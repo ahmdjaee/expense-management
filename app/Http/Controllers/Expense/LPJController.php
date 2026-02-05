@@ -76,6 +76,7 @@ class LPJController extends Controller
         $expenseRequest->actual_amount = $request->input('actual_amount');
         $expenseRequest->lpj_notes = $request->input('lpj_notes');
         $expenseRequest->lpj_submitted_at = now();
+        $expenseRequest->status = 'lpj_made';
         $expenseRequest->save();
 
         flash()->success('LPJ berhasil disubmit. Menunggu verifikasi dari Finance.');
@@ -100,7 +101,7 @@ class LPJController extends Controller
         $requests = ExpenseRequest::with(['user', 'user.divisions'])
             ->whereHas('user', fn($q) => $q->where('location', $user->location))
             ->where('type', 'advance')
-            ->where('status', 'paid')
+            ->where('status', 'lpj_made')
             ->whereNotNull('lpj_submitted_at')
             ->whereNull('lpj_verified_at')
             ->orderBy('lpj_submitted_at', 'desc')
@@ -181,7 +182,7 @@ class LPJController extends Controller
         $expenseRequest->lpj_verified_at = now();
         $expenseRequest->lpj_verified_by = $user->id;
         $expenseRequest->lpj_verification_notes = $request->input('verification_notes');
-        $expenseRequest->status = 'refunded';
+        $expenseRequest->status = 'lpj_verified';
         $expenseRequest->is_closed = true;
         $expenseRequest->save();
 

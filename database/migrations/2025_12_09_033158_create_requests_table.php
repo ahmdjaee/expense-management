@@ -43,7 +43,7 @@ return new class extends Migration
 
             $table->boolean('is_closed')->default(false);
             $table->enum('payment_method', ['cash', 'transfer']);
-            $table->string('attachment', 255)->nullable();
+            $table->json('attachments')->nullable();
             $table->date('head_approved_at')->nullable();
             $table->date('head_approved_by')->nullable();
             $table->date('director_approved_at')->nullable();

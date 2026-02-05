@@ -76,6 +76,7 @@ class RequestController extends Controller
             'payment_method' => $request->payment_method,
             'type' => $request->type,
             'status' => 'submitted',
+            'attachments' => $paths
         ]);
 
         foreach ($request->items as $item) {
@@ -182,15 +183,22 @@ class RequestController extends Controller
             'category' => 'required',
             'payment_method' => 'required|in:cash,transfer',
             'type' => 'required|in:reimbursement,advance,bill',
-            'attachment' => 'nullable|file|max:10240',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|max:10240',
         ]);
 
         // Handle file upload
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $filePath = $file->store('attachments', 'public');
-            $expenseRequest->attachment = $filePath;
+        $paths = $expenseRequest->attachments ?? [];
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $paths[] = $file->store('attachments', 'public');
+            }
         }
+
+        $expenseRequest->attachments = $paths;
+        $expenseRequest->save();
+
 
         // Update the request
         $expenseRequest->title = $request->input('title');
@@ -229,8 +237,10 @@ class RequestController extends Controller
         }
 
         // Hapus file attachment jika ada
-        if ($request->attachment) {
-            Storage::disk('public')->delete($request->attachment);
+        if ($request->attachments) {
+            foreach ($request->attachments as $path) {
+                Storage::disk('public')->delete($path);
+            }
         }
 
         $request->delete();

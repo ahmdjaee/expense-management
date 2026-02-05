@@ -3,9 +3,16 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 
 interface PrintFormProps {
     request: ExpenseRequest;
+    actual_amount?: number | null;
 }
 
-export function PrintForm({ request }: PrintFormProps) {
+export function PrintForm({ request, actual_amount }: PrintFormProps) {
+
+    const difference =
+    actual_amount !== undefined
+        ? actual_amount - request.amount
+        : 0;
+
 
     return (
         <div className="mx-auto max-w-3xl">
@@ -61,16 +68,16 @@ export function PrintForm({ request }: PrintFormProps) {
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-[11px] table-fixed">
                             <thead>
-                                <tr className="border-b border-border text-muted-foreground">
-                                    <th className="w-8 px-2 py-1 text-left align-top tracking-tight font-medium">
+                                <tr className="border-b border-border text-black font-bold">
+                                    <th className="w-8 px-2 py-1 text-left align-top tracking-tight ">
                                         No
                                     </th>
 
-                                    <th className="px-2 py-1 text-left align-top leading-tight tracking-tight font-medium">
+                                    <th className="px-2 py-1 text-left align-top leading-tight tracking-tight">
                                         Deskripsi
                                     </th>
 
-                                    <th className="w-24 px-2 py-1 text-right align-top tracking-tight font-medium">
+                                    <th className="w-24 px-2 py-1 text-right align-top tracking-tight">
                                         Nominal
                                     </th>
                                 </tr>
@@ -100,10 +107,40 @@ export function PrintForm({ request }: PrintFormProps) {
                     </div>
                 </div>
 
-                <div className="mb-4 text-end p-4 gap-4 print:mb-2">
-                    <p className="text-[14px] font-bold leading-tight">Total</p>
-                    <p className="text-[14px] font-bold text-gray-900">{formatCurrency(request.amount)}</p>
+                <div className="mb-4 text-end p-4 gap-2 print:mb-2 text-[11px]">
+                    <div className="flex justify-between">
+                        <span>Total</span>
+                        <span className="font-normal">
+                            {formatCurrency(request.amount)}
+                        </span>
+                    </div>
+
+                    {request.actual_amount !== null && (
+                        <div className="flex justify-between">
+                            <span>
+                                {request.actual_amount > request.amount
+                                    ? 'Kekurangan'
+                                    : 'Kelebihan'}
+                            </span>
+                            <span>
+                                {formatCurrency(
+                                    Math.abs(request.actual_amount - request.amount)
+                                )}
+                            </span>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between font-semibold">
+                        <span>Pengeluaran Aktual</span>
+                        <span className="font-semibold underline">
+                            {request.actual_amount
+                                ? formatCurrency(request.actual_amount)
+                                : '-'}
+                        </span>
+                    </div>
                 </div>
+
+
 
 
                 <div className="mt-8 grid grid-cols-3 gap-4 text-center text-xs">

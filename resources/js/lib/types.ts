@@ -38,7 +38,7 @@ export interface ExpenseRequest {
     title: string;
     description: string;
     amount: number;
-    actual_amount: number;
+    actual_amount?: number;
     status: string;
     is_closed: boolean;
     type: string;

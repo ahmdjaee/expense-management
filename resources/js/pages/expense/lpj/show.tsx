@@ -35,7 +35,7 @@ export default function LPJShowPage({ request, auth }: LPJShowPageProps) {
     const [verificationNotes, setVerificationNotes] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const difference = request.actual_amount - request.amount;
+    const difference = request.amount - request.actual_amount;
 
     const handleVerify = () => {
         setIsProcessing(true);

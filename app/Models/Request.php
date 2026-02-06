@@ -114,11 +114,11 @@ class Request extends Model
 
         switch ($requesterPosition) {
             case 'karyawan':
-                return ['head', 'finance', 'direktur'];
+                return ['head', 'direktur'];
             case 'head':
-                return ['finance', 'direktur'];
+                return ['direktur'];
             case 'direktur':
-                return ['finance'];
+                return [];
             case 'finance':
                 return ['direktur'];
             default:

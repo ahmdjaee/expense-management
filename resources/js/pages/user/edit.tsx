@@ -70,12 +70,12 @@ export default function EditUserPage({ user, divisions, loginCodes, userLoginCod
         { value: 'finance', label: 'Finance' },
     ];
 
-    // // Location options
-    // const locationOptions = [
-    //     { value: 'jkt', label: 'Jakarta' },
-    //     { value: 'jkt1', label: 'Jakarta 1' },
-    //     { value: 'sby', label: 'Surabaya' },
-    // ];
+    // Location options
+    const locationOptions = [
+        { value: 'jkt', label: 'Jakarta' },
+        { value: 'jkt1', label: 'Jakarta 1' },
+        { value: 'sby', label: 'Surabaya' },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -161,6 +161,24 @@ export default function EditUserPage({ user, divisions, loginCodes, userLoginCod
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.role} />
+                                    </div>
+
+                                    {/* Location */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="location">Location</Label>
+                                        <Select name="location" defaultValue={user.location || 'jkt'}>
+                                            <SelectTrigger id="location" className="border-muted bg-muted/50">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {locationOptions.map((r) => (
+                                                    <SelectItem key={r.value} value={r.value}>
+                                                        {r.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.location} />
                                     </div>
 
                                     {/* Position - Hanya untuk superadmin */}

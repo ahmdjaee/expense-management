@@ -20,10 +20,11 @@ function InputError({ message }: { message?: string }) {
 
 interface RequestFormProps {
     initialData?: ExpenseRequest;
+    initialType?: string;
     isEdit?: boolean;
 }
 
-export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
+export function RequestForm({ initialData, initialType, isEdit = false }: RequestFormProps) {
     const { props } = usePage<SharedData>();
     const user = props.auth.user || null;
     const titleMap = {
@@ -105,7 +106,9 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
 
 
     const [type, setType] = useState<'reimbursement' | 'advance' | 'bill' | null>(
-        initialData ? (initialData.type as 'reimbursement' | 'advance' | 'bill') : null,
+        initialData 
+            ? (initialData.type as 'reimbursement' | 'advance' | 'bill') 
+            : (initialType as 'reimbursement' | 'advance' | 'bill') || null
     );
     const [items, setItems] = useState<{ description: string; amount: string }[]>([{ description: '', amount: '' }]);
 

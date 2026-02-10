@@ -28,9 +28,14 @@ class RequestController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('expense/request/new');
+        // Type in parameter
+        $type = $request->query('type', 'reimbursement'); 
+
+        return Inertia::render('expense/request/new', [
+            'initialType' => $type, 
+        ]);
     }
 
     // ExpenseRequest model

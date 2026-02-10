@@ -154,7 +154,7 @@ export default function LPJShowPage({ request, auth }: LPJShowPageProps) {
                             onClick={() => setShowVerifyModal(true)}
                             className="w-full rounded-lg bg-green-600 px-4 py-3 font-medium text-white transition hover:opacity-90"
                         >
-                            ✓ Verifikasi & Tutup Request
+                            ✓ Verifikasi Request
                         </button>
                     </div>
                 </div>
@@ -218,7 +218,7 @@ export default function LPJShowPage({ request, auth }: LPJShowPageProps) {
                                     disabled={isProcessing}
                                     className="w-full rounded-lg bg-green-600 px-4 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                                 >
-                                    {isProcessing ? 'Memproses...' : '✓ Verifikasi & Tutup'}
+                                    {isProcessing ? 'Memproses...' : '✓ Verifikasi'}
                                 </button>
 
                                 <button

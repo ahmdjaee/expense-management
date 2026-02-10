@@ -61,7 +61,7 @@ export function RequestForm({ initialData, isEdit = false }: RequestFormProps) {
         const availableCategories: typeof allCategories = [];
 
         // HR and GA categories
-        if (divisions.includes('HR') || divisions.includes('GA')) {
+        if (divisions.includes('HRD') || divisions.includes('GA')) {
             availableCategories.push(
                 { value: 'biaya allowance', label: 'Biaya Allowance' },
                 { value: 'biaya gaji', label: 'Biaya Gaji' },

@@ -39,7 +39,8 @@ return new class extends Migration
             'director_approved', 
             'rejected', 'paid', 
             'lpj_made',
-            'lpj_verified'
+            'lpj_verified',
+            'lpj_paid'
             ])->default('draft');
 
             $table->boolean('is_closed')->default(false);

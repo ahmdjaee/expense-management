@@ -183,7 +183,6 @@ class LPJController extends Controller
         $expenseRequest->lpj_verified_by = $user->id;
         $expenseRequest->lpj_verification_notes = $request->input('verification_notes');
         $expenseRequest->status = 'lpj_verified';
-        $expenseRequest->is_closed = true;
         $expenseRequest->save();
 
         // Check if there's difference and create additional payment/refund if needed
@@ -198,7 +197,7 @@ class LPJController extends Controller
                     "Kekurangan: Rp " . number_format(abs($difference), 0, ',', '.'))
             );
         } else {
-            flash()->success('LPJ berhasil diverifikasi. Request telah ditutup.');
+            flash()->success('LPJ berhasil diverifikasi');
         }
 
         return redirect()->route('expense.lpj.index');

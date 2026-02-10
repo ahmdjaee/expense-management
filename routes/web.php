@@ -90,28 +90,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/request/{id}', [RequestController::class, 'destroy'])->name('requestDestroy');
 
         // Approval routes
-            Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals');
-            Route::get('/approvals/{id}', [ApprovalController::class, 'show'])->name('approvals.show');
-            Route::post('/approvals/{id}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
-            Route::post('/approvals/{id}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
-                
-            // Payment routes
-            Route::get('/payments', [PaymentController::class, 'index'])->name('payments');
-            Route::get('/payments/{id}', [PaymentController::class, 'show'])->name('payments.show');
-            Route::post('/payments/{id}/process', [PaymentController::class, 'process'])->name('payments.process');
-            Route::get('/payments-history', [PaymentController::class, 'history'])->name('payments.history');
+        Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals');
+        Route::get('/approvals/{id}', [ApprovalController::class, 'show'])->name('approvals.show');
+        Route::post('/approvals/{id}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
+        Route::post('/approvals/{id}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
+            
+        // Payment routes
+        Route::get('/payments', [PaymentController::class, 'index'])->name('payments');
+        Route::get('/payments/{id}', [PaymentController::class, 'show'])->name('payments.show');
+        Route::post('/payments/{id}/process', [PaymentController::class, 'process'])->name('payments.process');
+        Route::get('/payments-history', [PaymentController::class, 'history'])->name('payments.history');
 
-            // LPJ routes
-            Route::prefix('lpj')
-            ->name('lpj.')
-            ->controller(LPJController::class)
-            ->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::get('{lpj}', 'show')->name('show');
-                Route::get('{lpj}/create', 'create')->name('create');
-                Route::post('{lpj}/submit', 'store')->name('store');
-                Route::post('{lpj}/verify', 'verify')->name('verify');
-            });
+        // LPJ routes
+        Route::prefix('lpj')
+        ->name('lpj.')
+        ->controller(LPJController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('{lpj}', 'show')->name('show');
+            Route::get('{lpj}/create', 'create')->name('create');
+            Route::post('{lpj}/submit', 'store')->name('store');
+            Route::post('{lpj}/verify', 'verify')->name('verify');
+        });
 
         // Reports - Updated to use controller instead of closure
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports');

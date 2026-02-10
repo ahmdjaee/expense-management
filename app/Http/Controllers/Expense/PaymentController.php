@@ -124,10 +124,19 @@ class PaymentController extends Controller
         ]);
 
         // Update request status
-        if ($expenseRequest->type !== 'advance') {
-            $expenseRequest->is_closed = true;
+        if ($expenseRequest->type === 'advance' && $expenseRequest->status === 'lpj_verified') {
+            $expenseRequest->status = 'lpj_paid';
+            
+            $expenseRequest->is_closed = true; 
+        } else {
+            $expenseRequest->status = 'paid';
+
+            // Logic asli: Jika bukan advance, tutup request setelah dibayar
+            if ($expenseRequest->type !== 'advance') {
+                $expenseRequest->is_closed = true;
+            }
         }
-        $expenseRequest->status = 'paid';
+
         $expenseRequest->paid_by = $user->id;
         $expenseRequest->paid_at = now();
         $expenseRequest->save();

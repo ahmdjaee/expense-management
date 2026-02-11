@@ -120,7 +120,7 @@ class PaymentController extends Controller
         }
 
         // Create payment record
-        Payment::firstOrCreate([
+        Payment::updateOrCreate([
             'request_id' => $expenseRequest->id,
         ], [
             'amount' => $expenseRequest->actual_amount,

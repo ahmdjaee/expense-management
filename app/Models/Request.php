@@ -170,6 +170,9 @@ class Request extends Model
      */
     public function canBePaid(): bool
     {
+        if (!in_array($this->status, ['director_approved', 'lpj_verified' ])) {
+            return false;
+        }
         $nextPosition = $this->getNextApproverPosition();
         return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'lpj_paid' && $this->status !== 'rejected';
     }

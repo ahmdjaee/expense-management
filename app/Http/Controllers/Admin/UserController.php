@@ -212,7 +212,7 @@ class UserController extends Controller
             'role' => 'required|in:superadmin,admin,user,marketing',
             'position' => 'nullable|in:head,karyawan,direktur,finance',
             'phone' => 'nullable|string|max:20',
-            'location' => 'nullable|in:jkt,jkt1,sby,all',
+            'location' => 'nullable|in:jkt,jkt1,sby',
             'address' => 'nullable|string|max:255',
             'rekening' => 'nullable|string|max:50',
             'bank' => 'nullable|string|max:50',

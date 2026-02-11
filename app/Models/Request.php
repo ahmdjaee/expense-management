@@ -169,7 +169,7 @@ class Request extends Model
     public function canBePaid(): bool
     {
         $nextPosition = $this->getNextApproverPosition();
-        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'rejected' && $this->status !== 'closed';
+        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'lpj_paid' && $this->status !== 'rejected' && $this->status !== 'closed';
     }
 
     /**

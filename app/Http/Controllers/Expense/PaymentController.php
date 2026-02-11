@@ -32,7 +32,7 @@ class PaymentController extends Controller
         // Request yang siap dibayar (all approvals complete)
         $paidRequests = ExpenseRequest::with(['user', 'payment'])
             ->whereHas('user', fn($q) => $q->where('location', $user->location)) // Tambahkan ini
-            ->whereIn('status', ['paid', 'closed'])
+            ->whereIn('status', ['paid', 'lpj_paid', 'closed'])
             ->orderBy('paid_at', 'desc')
             ->get();
 
@@ -113,9 +113,16 @@ class PaymentController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
+        // Prevent double payment
+        if (in_array($expenseRequest->status, ['paid', 'lpj_paid'])) {
+            flash()->error('Request ini sudah dibayar.');
+            return redirect()->route('expense.payments');
+        }
+
         // Create payment record
-        Payment::create([
+        Payment::firstOrCreate([
             'request_id' => $expenseRequest->id,
+        ], [
             'amount' => $expenseRequest->amount,
             'payment_method' => $request->input('payment_method'),
             'status' => 'completed',
@@ -127,15 +134,16 @@ class PaymentController extends Controller
         if ($expenseRequest->type === 'advance' && $expenseRequest->status === 'lpj_verified') {
             $expenseRequest->status = 'lpj_paid';
             
-            $expenseRequest->is_closed = true; 
         } else {
             $expenseRequest->status = 'paid';
 
             // Logic asli: Jika bukan advance, tutup request setelah dibayar
             if ($expenseRequest->type !== 'advance') {
-                $expenseRequest->is_closed = true;
+
             }
         }
+
+        $expenseRequest->is_closed = true; 
 
         $expenseRequest->paid_by = $user->id;
         $expenseRequest->paid_at = now();
@@ -157,11 +165,15 @@ class PaymentController extends Controller
         }
 
         $payments = Payment::with(['request.user'])
-            ->whereHas('request.user', function ($q) use ($user) {
-                $q->where('location', $user->location);
+            ->whereHas('request', function ($q) use ($user) {
+                $q->whereIn('status', ['closed', 'lpj_paid'])
+                ->whereHas('user', function ($q2) use ($user) {
+                    $q2->where('location', $user->location);
+                });
             })
-            ->orderBy('paid_at', 'desc')
+            ->orderByDesc('paid_at')
             ->paginate(20);
+
 
         return Inertia::render('expense/payments/history', [
             'payments' => $payments,

@@ -123,7 +123,7 @@ class PaymentController extends Controller
         Payment::firstOrCreate([
             'request_id' => $expenseRequest->id,
         ], [
-            'amount' => $expenseRequest->amount,
+            'amount' => $expenseRequest->actual_amount,
             'payment_method' => $request->input('payment_method'),
             'status' => 'completed',
             'reference_number' => $request->input('reference_number'),

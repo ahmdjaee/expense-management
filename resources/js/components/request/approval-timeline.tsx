@@ -150,7 +150,7 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                     </div>
                 )}
 
-                {/* LPJ Verification (Only for reimbursement type) */}
+                {/* LPJ Verification (Only for advance type) */}
                 {isAdvance && (
                     <div className="flex gap-4">
                         <div className="flex flex-col items-center">
@@ -177,7 +177,7 @@ export function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                     </div>
                 )}
 
-                {/* LPJ Payment (Only for reimbursement type) */}
+                {/* LPJ Payment (Only for advance type) */}
                 {isAdvance && (
                     <div className="flex gap-4">
                         <div className="flex flex-col items-center">

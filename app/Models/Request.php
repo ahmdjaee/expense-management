@@ -15,6 +15,7 @@ class Request extends Model
         'category',
         'amount',
         'actual_amount',
+        'is_closed',
         'title',
         'description',
         'status',
@@ -36,6 +37,7 @@ class Request extends Model
     ];
 
     protected $casts = [
+        'is_closed' => 'boolean',
         'head_approved_at' => 'datetime',
         'director_approved_at' => 'datetime',
         'paid_at' => 'datetime',
@@ -155,7 +157,7 @@ class Request extends Model
             return false;
         }
 
-        if (in_array($this->status, ['rejected', 'paid', 'closed'])) {
+        if (in_array($this->status, ['rejected', 'paid'])) {
             return false;
         }
 
@@ -169,7 +171,7 @@ class Request extends Model
     public function canBePaid(): bool
     {
         $nextPosition = $this->getNextApproverPosition();
-        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'lpj_paid' && $this->status !== 'rejected' && $this->status !== 'closed';
+        return $nextPosition === null && $this->status !== 'paid' && $this->status !== 'lpj_paid' && $this->status !== 'rejected';
     }
 
     /**
@@ -214,10 +216,6 @@ class Request extends Model
     {
         if ($this->status === 'rejected') {
             return 'rejected';
-        }
-
-        if ($this->status === 'closed') {
-            return 'closed';
         }
 
         if ($this->status === 'paid') {

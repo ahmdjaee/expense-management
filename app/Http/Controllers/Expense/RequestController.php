@@ -72,6 +72,12 @@ class RequestController extends Controller
 
         $totalAmount = collect($request->items)->sum('amount');
 
+        $user = auth()->user();
+
+        $status = $user->position === 'direktur'
+            ? 'director_approved'
+            : 'submitted';
+
         $expenseRequest = ExpenseRequest::create([
             'user_id' => auth()->id(),
             'title' => $request->title,
@@ -80,7 +86,7 @@ class RequestController extends Controller
             'actual_amount' => $totalAmount,
             'payment_method' => $request->payment_method,
             'type' => $request->type,
-            'status' => 'submitted',
+            'status' => $status,
             'attachments' => $paths
         ]);
 

@@ -144,6 +144,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                 head_approved: 'Disetujui Head',
                 director_approved: 'Disetujui Direktur',
                 paid: 'Sudah Dibayar',
+                lpj_paid: 'LPJ Dibayar',
                 rejected: 'Ditolak',
                 closed: 'Selesai',
             };
@@ -315,6 +316,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                     <option value="rejected">Ditolak</option>
                                     <option value="paid">Lunas</option>
                                     <option value="refunded">Dikembalikan</option>
+                                    <option value="lpj_paid">LPJ Dibayar</option>
                                 </select>
                             </div>
                             {/* Filter From Date */}
@@ -595,6 +597,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                         head_approved: 'Disetujui Head',
                                         director_approved: 'Disetujui Direktur',
                                         paid: 'Sudah Dibayar',
+                                        lpj_paid: 'LPJ Dibayar',
                                         rejected: 'Ditolak',
                                         closed: 'Selesai',
                                     };

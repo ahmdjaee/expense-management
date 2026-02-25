@@ -120,7 +120,7 @@ class PaymentController extends Controller
         }
 
         // Create payment record
-        Payment::firstOrCreate([
+        Payment::updateOrCreate([
             'request_id' => $expenseRequest->id,
         ], [
             'amount' => $expenseRequest->actual_amount,
@@ -166,12 +166,12 @@ class PaymentController extends Controller
 
         $payments = Payment::with(['request.user'])
             ->whereHas('request', function ($q) use ($user) {
-                $q->whereIn('status', ['closed', 'lpj_paid'])
+                $q->whereIn('status', ['paid', 'closed', 'lpj_paid'])
                 ->whereHas('user', function ($q2) use ($user) {
                     $q2->where('location', $user->location);
                 });
             })
-            ->orderByDesc('paid_at')
+            ->orderByDesc('id')
             ->paginate(20);
 
 

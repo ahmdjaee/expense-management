@@ -24,14 +24,14 @@ class PaymentController extends Controller
 
         // Request yang sudah dibayar
         $readyForPayment = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->whereHas('user', fn($q) => $q->with(['user', 'user.divisions', 'approvals.approver']))
             ->get()
             ->filter(fn($request) => $request->canBePaid())
             ->values();
 
         // Request yang siap dibayar (all approvals complete)
         $paidRequests = ExpenseRequest::with(['user', 'payment'])
-            ->whereHas('user', fn($q) => $q->where('location', $user->location)) // Tambahkan ini
+            ->whereHas('user', fn($q) => $q->with(['user', 'user.divisions', 'approvals.approver'])) // Tambahkan ini
             ->whereIn('status', ['paid', 'lpj_paid', 'closed'])
             ->orderBy('paid_at', 'desc')
             ->get();
@@ -58,7 +58,7 @@ class PaymentController extends Controller
         }
 
         $request = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver'])
-            ->whereHas('user', fn($q) => $q->where('location', $user->location))
+            ->whereHas('user', fn($q) => $q->with(['user', 'user.divisions', 'approvals.approver']))
             ->find($id);
 
         // Access protection
@@ -92,7 +92,7 @@ class PaymentController extends Controller
             return redirect()->back();
         }
 
-        $expenseRequest = ExpenseRequest::whereHas('user', fn($q) => $q->where('location', $user->location))
+        $expenseRequest = ExpenseRequest::whereHas('user', fn($q) => $q->with(['user', 'user.divisions', 'approvals.approver']))
             ->find($id);
 
         // Access protection
@@ -114,6 +114,11 @@ class PaymentController extends Controller
         ]);
 
         // Prevent double payment
+        if (!$expenseRequest->canBePaid()) {
+            flash()->error('Request ini belum bisa dibayar.');
+            return redirect()->route('expense.payments');
+        }
+        
         if (in_array($expenseRequest->status, ['paid', 'lpj_paid'])) {
             flash()->error('Request ini sudah dibayar.');
             return redirect()->route('expense.payments');
@@ -168,7 +173,7 @@ class PaymentController extends Controller
             ->whereHas('request', function ($q) use ($user) {
                 $q->whereIn('status', ['paid', 'closed', 'lpj_paid'])
                 ->whereHas('user', function ($q2) use ($user) {
-                    $q2->where('location', $user->location);
+                    $q2->with(['user', 'user.divisions', 'approvals.approver']);
                 });
             })
             ->orderByDesc('id')

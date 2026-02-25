@@ -110,14 +110,14 @@ export default function Welcome({ canRegister = true, auth }) {
                                 )}
 
                                 {/* Menu Commision */}
-                                <Link href="/commissions/deals">
+                                {/* <Link href="/commissions/deals">
                                     <div className="group flex flex-col items-center gap-3 rounded-2xl bg-zinc-800/30 p-6 transition-all hover:scale-105 hover:bg-zinc-800/50 hover:shadow-xl">
                                         <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-green-500 shadow-lg group-hover:shadow-green-500/50">
                                             <DollarSign className="h-8 w-8 text-white" />
                                         </div>
                                         <span className="text-sm font-medium text-zinc-300">Commission</span>
                                     </div>
-                                </Link>
+                                </Link> */}
 
                                 {/* Placeholder for future apps */}
                                 <div className="flex flex-col items-center gap-3 rounded-2xl p-6 opacity-50">

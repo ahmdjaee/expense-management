@@ -19,12 +19,12 @@ class ReportsController extends Controller
         $query = ExpenseRequest::with(['user', 'user.divisions', 'approvals.approver']);
 
         // Start building query with relationships
-        if ($user->position !== 'direktur') {
-            $query
-                ->whereHas('user', function ($q) use ($user) {
-                    $q->where('location', $user->location);
-            });
-        }
+        // if ($user->position !== 'direktur') {
+        //     $query
+        //         ->whereHas('user', function ($q) use ($user) {
+        //             $q->where('location', $user->location);
+        //     });
+        // }
 
         // Filter based on user position
         switch ($user->position) {

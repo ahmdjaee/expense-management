@@ -591,7 +591,7 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.slice(0, 10).map((req) => {
+                                {filtered.map((req) => {
                                     const statusMap: Record<string, string> = {
                                         submitted: 'Pending',
                                         head_approved: 'Disetujui Head',
@@ -618,12 +618,6 @@ export default function ReportsPage({ auth, requests }: ReportsPageProps) {
                                 })}
                             </tbody>
                         </table>
-                        )}
-                       
-                        {filtered.length > 10 && (
-                            <p className="mt-3 text-xs text-muted-foreground">
-                                Menampilkan 10 dari {filtered.length} data
-                            </p>
                         )}
                     </div>
                 </div>

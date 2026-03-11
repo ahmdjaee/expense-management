@@ -342,6 +342,16 @@ export default function RequestDetailPage({ request, canApprove, canPay, auth }:
                                         </div>
                                         )}
 
+                                    {/* {Edit Request Button} */}
+                                        {isOwner && request.status === 'rejected' && (
+                                            <Link
+                                                href={`/expenses/request/${request.id}/edit`}
+                                                className="rounded-lg bg-yellow-500 px-4 py-2 font-medium text-white transition hover:opacity-90"
+                                            >
+                                                ✏️ Edit Pengajuan
+                                            </Link>
+                                        )}
+
                                 {request.status === 'closed' && (
                                     <span className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-800">
                                         ✓ Request Ditutup

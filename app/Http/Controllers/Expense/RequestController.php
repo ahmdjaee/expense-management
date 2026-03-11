@@ -166,7 +166,7 @@ class RequestController extends Controller
             return redirect()->route('expense.requestDetail', $id);
         }
 
-        return Inertia::render('expense/request/edit', [
+        return Inertia::render('expense/request/RequestEdit', [
             'request' => $request,
         ]);
     }
@@ -186,7 +186,7 @@ class RequestController extends Controller
             return redirect()->route('expense.requestDetail', $id);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string',
@@ -212,12 +212,23 @@ class RequestController extends Controller
 
 
         // Update the request
-        $expenseRequest->title = $request->input('title');
-        $expenseRequest->amount = $request->input('amount');
-        $expenseRequest->category = $request->input('category');
-        $expenseRequest->description = $request->input('description');
-        $expenseRequest->payment_method = $request->input('payment_method');
-        $expenseRequest->type = $request->input('type');
+        $expenseRequest->title = $validated['title'];
+        $expenseRequest->amount = collect($validated['items'])->sum(fn($item) => $item['amount']);
+        $expenseRequest->actual_amount = collect($validated['items'])->sum(fn($item) => $item['amount']);
+        $expenseRequest->category = $validated['category'];
+        // $expenseRequest->description = $validated['description'];
+        $expenseRequest->payment_method = $validated['payment_method'];
+        $expenseRequest->type = $validated['type'];
+
+        // Replace items
+        $expenseRequest->items()->delete();
+
+        foreach ($validated['items'] as $item) {
+            $expenseRequest->items()->create([
+                'description' => $item['description'],
+                'amount' => $item['amount'],
+            ]);
+        }
 
         // Jika status rejected, reset ke submitted
         if ($expenseRequest->status === 'rejected') {

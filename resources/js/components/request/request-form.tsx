@@ -115,6 +115,7 @@ export function RequestForm({ initialData, initialType, isEdit = false }: Reques
     const [method, setMethod] = useState<'transfer' | 'cash'>(
         initialData ? (initialData.payment_method as 'transfer' | 'cash') : 'transfer',
     );
+    const [existingAttachments, setExistingAttachments] = useState<string[]>(initialData?.attachments || []);
     const [attachments, setAttachments] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -145,7 +146,11 @@ export function RequestForm({ initialData, initialType, isEdit = false }: Reques
         setAttachments(Array.from(dt.files));
     };
 
-    const handleRemoveAttachment = (index: number) => {
+    const handleRemoveExisting = (index: number) => {
+        setExistingAttachments(existingAttachments.filter((_, i) => i !== index));
+    };
+
+    const handleRemoveNew = (index: number) => {
         if (!fileInputRef.current) return;
 
         const dt = new DataTransfer();
@@ -153,7 +158,7 @@ export function RequestForm({ initialData, initialType, isEdit = false }: Reques
         attachments
             .filter((_, i) => i !== index)
             .forEach(file => dt.items.add(file));
-
+            
         fileInputRef.current.files = dt.files;
         setAttachments(Array.from(dt.files));
     };
@@ -443,6 +448,36 @@ export function RequestForm({ initialData, initialType, isEdit = false }: Reques
                                         Lampiran yang sudah diupload ({attachments.length}):
                                     </p>
                                     <div className="space-y-2">
+                                        {/* hidden inputs for existing attachments */}
+                                        {existingAttachments.map((file, index) => (
+                                            <input
+                                                key={index}
+                                                type="hidden"
+                                                name="existing_attachments[]"
+                                                value={file}
+                                            />
+                                        ))}
+
+                                        {existingAttachments.map((file, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between rounded-lg border border-border bg-secondary p-3"
+                                            >
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    <File className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                    <span className="truncate text-sm font-medium text-foreground">
+                                                        {file}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveExisting(index)}
+                                                    className="rounded p-1 transition-colors hover:bg-background"
+                                                >
+                                                    <X className="h-4 w-4 text-muted-foreground" />
+                                                </button>
+                                            </div>
+                                        ))}
                                         {attachments.map((file, index) => (
                                             <div
                                                 key={index}
@@ -459,7 +494,7 @@ export function RequestForm({ initialData, initialType, isEdit = false }: Reques
                                                 </div>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleRemoveAttachment(index)}
+                                                    onClick={() => handleRemoveNew(index)}
                                                     className="rounded p-1 transition-colors hover:bg-background"
                                                 >
                                                     <X className="h-4 w-4 text-muted-foreground" />

@@ -44,8 +44,9 @@ export interface ExpenseRequest {
     type: string;
     category: ReqCategory;
     payment_method: string;
+    attachments: string[];
     created_at: string;
-    updated_at: string; // Tambahkan properti yang hilang
+    updated_at: string;
     currency?: string;
     paid_at?: string;
     head_approved_at?: string;

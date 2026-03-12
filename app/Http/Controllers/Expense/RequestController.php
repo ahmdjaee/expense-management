@@ -199,9 +199,17 @@ class RequestController extends Controller
         ]);
 
         // Handle file upload
-        $paths = $expenseRequest->attachments ?? [];
+        $paths = $request->existing_attachments ?? [];
 
         if ($request->hasFile('attachments')) {
+
+            // delete old attachments
+            if ($expenseRequest->attachments) {
+                foreach ($expenseRequest->attachments as $oldFile) {
+                    Storage::disk('public')->delete($oldFile);
+                }
+            }
+
             foreach ($request->file('attachments') as $file) {
                 $paths[] = $file->store('attachments', 'public');
             }
@@ -216,7 +224,6 @@ class RequestController extends Controller
         $expenseRequest->amount = collect($validated['items'])->sum(fn($item) => $item['amount']);
         $expenseRequest->actual_amount = collect($validated['items'])->sum(fn($item) => $item['amount']);
         $expenseRequest->category = $validated['category'];
-        // $expenseRequest->description = $validated['description'];
         $expenseRequest->payment_method = $validated['payment_method'];
         $expenseRequest->type = $validated['type'];
 
